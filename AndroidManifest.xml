@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="ca.ilanguage.aublog"
+      android:versionName="1.4" 
+      android:versionCode="14"
+      android:installLocation="preferExternal">
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="11"/>
+    
+    <application android:icon="@drawable/ic_aublog" 
+    	android:label="@string/app_name"
+    	android:debuggable="true"
+    	android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
+        <activity android:name="ca.ilanguage.aublog.ui.AuBlogHomeActivity"
+                  android:label="@string/app_name">
+            
+        </activity>
+		<activity android:name="ca.ilanguage.aublog.ui.RecordVoiceActivity"
+                  android:label="@string/app_name">
+        </activity>
+    	<activity android:name="ca.ilanguage.aublog.ui.MainMenuActivity"
+                  android:label="@string/app_name" 
+                  
+                  >
+        	<intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity android:name="ca.ilanguage.aublog.util.AndouKun" android:label="@string/app_name" 
+   				  android:screenOrientation="landscape" 
+     			  android:configChanges="keyboardHidden|orientation" 
+     			  android:launchMode="singleTask"/>
+            
+        <activity android:name="ca.ilanguage.aublog.util.LevelSelectActivity"
+	              android:screenOrientation="landscape" 
+	              android:configChanges="keyboardHidden|orientation" />
+                  
+	    <activity android:theme="@style/Theme.ConversationDialog"
+	              android:screenOrientation="landscape" 
+                  android:configChanges="keyboardHidden|orientation" 
+	    		  android:name="ca.ilanguage.aublog.util.ConversationDialogActivity"/>
+	    
+	    <activity android:name="ca.ilanguage.aublog.util.DiaryActivity"
+				  android:screenOrientation="landscape" 
+	   			  android:configChanges="keyboardHidden|orientation"/>
+		     					
+		     					
+		<activity android:name="ca.ilanguage.aublog.util.SetPreferencesActivity"
+				  android:screenOrientation="landscape" 
+     			  android:configChanges="keyboardHidden|orientation" />
+		     					
+    	<activity android:name="ca.ilanguage.aublog.util.AnimationPlayerActivity"
+             	  android:screenOrientation="landscape" 
+               	  android:configChanges="keyboardHidden|orientation" />
+             
+        <activity android:name="ca.ilanguage.aublog.util.ExtrasMenuActivity"
+	              android:screenOrientation="landscape" 
+	              android:configChanges="keyboardHidden|orientation" />
+	              
+		<activity android:name="ca.ilanguage.aublog.util.DifficultyMenuActivity"
+	              android:screenOrientation="landscape" 
+	              android:configChanges="keyboardHidden|orientation" />
+	              
+		<activity android:name="ca.ilanguage.aublog.util.GameOverActivity"
+				  android:screenOrientation="landscape" 
+	   			  android:configChanges="keyboardHidden|orientation"/>
+	   			 
+	   			 
+	   			 
+	    <activity android:name="ca.ilanguage.aublog.ui.CreateBlogEntry" android:label="Create new post">
+		</activity>
+		<activity android:name="ca.ilanguage.aublog.ui.PreviewAndPublish" android:label="Preview and publish post">
+		</activity>
+		<activity android:name="ca.ilanguage.aublog.ui.Settings" android:label="Settings (login/password)">
+		</activity>
+		
+	</application>
+	<uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission xmlns:android="http://schemas.android.com/apk/res/android" 
+		android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<receiver android:name="com.google.android.apps.analytics.AnalyticsReceiver" android:exported="true">
+    	<intent-filter>
+			<action android:name="com.android.vending.INSTALL_REFERRER" />
+    	</intent-filter>
+  	</receiver>
+  	
+    <supports-screens android:largeScreens="true"
+		android:smallScreens="true" 
+		android:anyDensity="true"
+		android:normalScreens="true"/>
+</manifest>

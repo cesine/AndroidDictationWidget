@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<LinearLayout android:id="@+id/MainLayout"
+		android:orientation="vertical" android:layout_height="fill_parent"
+		android:layout_width="fill_parent">
+		<TableLayout android:id="@+id/ConfigureLayout"
+			android:layout_height="wrap_content" android:background="@android:drawable/alert_dark_frame"
+			android:padding="15px" android:layout_width="fill_parent">
+			<TextView android:id="@+id/TextUsername"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:textColor="#FFFFFF" android:text="Blog username (email):">
+			</TextView>
+			<EditText android:id="@+id/Username" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:width="300px">
+			</EditText>
+			<TextView android:id="@+id/TextPassword"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:layout_marginTop="10px" android:text="Blog password:"
+				android:textColor="#FFFFFF">
+			</TextView>
+			<EditText android:id="@+id/Password" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:width="300px"
+				android:password="true">
+			</EditText>
+
+
+		</TableLayout>
+		<LinearLayout android:id="@+id/LayoutForButtons01"
+			android:layout_height="wrap_content" android:orientation="horizontal"
+			android:layout_gravity="center" android:gravity="center"
+			android:layout_width="fill_parent" android:layout_marginLeft="6px"
+			android:layout_marginRight="6px">
+			<Button android:id="@+id/BackToMainActivity"
+				android:layout_height="wrap_content" android:text="Back"
+				android:layout_width="wrap_content" >
+			</Button>
+			<Button android:id="@+id/Verify" android:layout_height="wrap_content"
+				android:text="Verify" android:layout_column="1"
+				android:layout_width="wrap_content" >
+			</Button>
+			<Button android:id="@+id/Save" android:layout_height="wrap_content"
+				android:text="Save" android:layout_width="wrap_content"
+				>
+			</Button>
+		</LinearLayout>
+	</LinearLayout>
+</ScrollView>
+

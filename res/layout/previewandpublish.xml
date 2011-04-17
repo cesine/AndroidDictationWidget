@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<LinearLayout android:id="@+id/MainLayout"
+		android:orientation="vertical" android:layout_height="fill_parent"
+		android:layout_width="fill_parent">
+		<LinearLayout android:id="@+id/LinearLayout01"
+			android:layout_height="wrap_content" android:background="@android:drawable/alert_dark_frame"
+			android:orientation="vertical" android:padding="15px"
+			android:layout_width="fill_parent">
+			<TextView android:id="@+id/Title" android:layout_width="fill_parent"
+				android:layout_height="wrap_content" android:text="Title:"
+				android:textColor="#FFFFFF" />
+			<EditText android:id="@+id/PreviewTitle"
+				android:layout_height="wrap_content" android:width="300px"
+				android:maxLines="1" android:layout_width="fill_parent">
+			</EditText>
+			<TextView android:id="@+id/Content" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:text="Content:"
+				android:textColor="#FFFFFF">
+			</TextView>
+			<LinearLayout android:id="@+id/LayoutForWebWiew"
+				android:orientation="vertical" android:layout_width="fill_parent"
+				android:layout_height="300px" android:padding="5px" android:paddingBottom="10px">
+				<WebView android:id="@+id/PreviewContent"
+					android:layout_width="fill_parent"
+					android:layout_height="fill_parent">
+				</WebView>
+			</LinearLayout>	
+		</LinearLayout>
+		<LinearLayout android:id="@+id/LayoutForButtons"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:layout_gravity="center">
+			<Button android:id="@+id/BackToCreateBlogEntry"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:text="Back" >
+			</Button>
+			<Button android:id="@+id/Publish" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:text="Publish"
+				>
+			</Button>
+		</LinearLayout>
+	</LinearLayout>
+</ScrollView>
