@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 //import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import ca.ilanguage.aublog.db.DBTextAdapter;
@@ -49,6 +50,7 @@ public class CreateBlogEntry extends Activity {
 			mDbTextHelper.open();
 		} catch (SQLException e) {
 			// Log.e(TAG, "Database has not opened");
+			Toast.makeText(CreateBlogEntry.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
 		}
 		post = mDbTextHelper.fetchPostdById(1);
 		startManagingCursor(post);

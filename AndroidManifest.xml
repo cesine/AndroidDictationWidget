@@ -67,6 +67,8 @@
 	   			  android:configChanges="keyboardHidden|orientation"/>
 	   			 
 	   			 
+	    <activity android:name="ca.ilanguage.aublog.ui.CreateBlogEntryActivity" android:label="Create new post">
+		</activity>
 	   			 
 	    <activity android:name="ca.ilanguage.aublog.ui.CreateBlogEntry" android:label="Create new post">
 		</activity>

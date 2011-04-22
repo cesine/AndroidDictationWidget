@@ -43,6 +43,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.Toast;
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.util.AndouKun;
 import ca.ilanguage.aublog.util.DebugLog;
@@ -119,7 +120,8 @@ public class MainMenuActivity extends Activity {
     private View.OnClickListener sExtrasButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
             if (!mPaused) {
-            	Intent i = new Intent(getBaseContext(), Settings.class);
+            	//Intent i = new Intent(getBaseContext(), Settings.class);
+            	Intent i = new Intent(getBaseContext(), CreateBlogEntryActivity.class);
 
                 v.startAnimation(mButtonFlickerAnimation);
                 mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
@@ -149,6 +151,7 @@ public class MainMenuActivity extends Activity {
 					// Log.e(TAG, "Database has not opened");
 				}
 				setting = mDbHelper.fetchSettindById(1);
+				Toast.makeText(MainMenuActivity.this, "setting "+setting.toString(), Toast.LENGTH_LONG).show();
 				startManagingCursor(setting);
 				if (setting.getCount() != 0) {
 					if ((setting
@@ -160,7 +163,8 @@ public class MainMenuActivity extends Activity {
 									.getString(
 											setting
 													.getColumnIndexOrThrow(DBAdapter.KEY_PASSWORD))
-									.length() == 0)) {
+									.length() == 0)) 
+					{
 						mDbHelper.close();
 						setting.close();
 						Alert
@@ -168,17 +172,16 @@ public class MainMenuActivity extends Activity {
 										"Profile is not created",
 										"Please, input 'login/password' in settings");
 					} else {
-						Intent i = new Intent(MainMenuActivity.this,
-								CreateBlogEntry.class);
+						Intent i = new Intent(MainMenuActivity.this, CreateBlogEntry.class);
 						
 						
 						mDbHelper.close();
 						setting.close();
-						v.startAnimation(mButtonFlickerAnimation);
-		                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
+//						v.startAnimation(mButtonFlickerAnimation);
+//		                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
 
-//						startActivity(i);
-						finish();
+						startActivity(i);
+						
 					}
 				} else {
 					mDbHelper.close();

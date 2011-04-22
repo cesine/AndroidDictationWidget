@@ -1,0 +1,15 @@
+/* Copyright 2007 Google Inc.  All rights reserved. */
+
+/* CSS for background images.
+
+*/
+
+/* AddWidget.gxp */
+.hidden .zippy {
+  background-image:url(triangle_ltr.gif);
+}
+
+/* CommentModerateFormHtml.gxp, Posts.gxp */
+table.posts tr.unselected .flippy { 
+  background-image:url(triangle_ltr.gif);
+}
