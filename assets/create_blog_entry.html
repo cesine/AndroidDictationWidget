@@ -40,21 +40,13 @@ function autoSize() {
     $("#textCopy").html(text);
 }
 </script>
-	<script language="javascript">
-	    /* This function is invoked by the activity */
-		var jtext = document.getElementById('markItUp').value;
-	    
-	    function wave() {
-		    alert("1");
-			document.getElementById("droid").src="android_waving.png";
-			alert("2");
-		}
-	</script>
+
 </head>
 <body>
 <script type="text/javascript">
 <!--
 $(document).ready(function()	{
+	fillFromAndroidActivity();
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
 	$('#markItUp').markItUp(mySettings);
@@ -89,14 +81,30 @@ $(document).ready(function()	{
 <a href="#" class="toggle">this one to <span>remove markItUp!</span></a></p>-->
 <p>
 
-<input type="button" value="Say hello" onClick="showAndroidToast(document.getElementById('markItUp').value)" />
+<input type="button" value="Save and Publish" onClick="publishPostToDB()" />
 
 <script type="text/javascript">
-	var jtext = document.getElementById('markItUp').value;
 
     function showAndroidToast(toast) {
         //Android.showToast(toast);
     	Android.showToast(toast);
+    }
+    function savePostToDB(){
+    	var content ="";
+    	var title = "";
+    	var labels ="";
+    	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    }
+    function publishPostToDB(){
+    	var content ="";
+    	var title = "";
+    	var labels ="";
+    	Android.publishPost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    }
+    function fillFromAndroidActivity(){
+    	document.getElementById('f-title').value= Android.fetchPostTitle();
+    	document.getElementById('markItUp').value= Android.fetchPostContent();
+    	document.getElementById('post-labels').value= Android.fetchPostLabels();
     }
 </script>
 
