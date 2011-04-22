@@ -64,18 +64,27 @@ public class AuBlogHistoryDatabase {
      * The history entries have the Columns defined in the interface above, as well as the BASE columns from android
      */
     public static class AuBlogHistory implements AuBlogHistoryColumns, BaseColumns{
+    	//This class cannot be instantiated
+    	private AuBlogHistory(){}
+    	
     	//leads to the database file on the data directory of the device
     	public static final Uri CONTENT_URI =
     		BASE_CONTENT_URI.buildUpon().appendPath(AUBLOG_HISTORY_TABLE_NAME).build();
     	public static final Uri CONTENT_EXPORT_URI =
     		CONTENT_URI.buildUpon().appendPath(PATH_EXPORT).build();
     	
+    	/**
+         * The MIME type of {@link #CONTENT_URI} providing a directory of aublog histories.
+         */
     	public static final String CONTENT_TYPE = 
         	"vnd.android.cursor.dir/vnd.ilanguage.aubloghistory";
-    	public static final String CONTENT_ITEM_TYPE =
+    	/**
+         * The MIME type of a {@link #CONTENT_URI} sub-directory of a single aublog history.
+         */
+        public static final String CONTENT_ITEM_TYPE =
     		"vnd.android.cursor.item/vnd.openlanguage.ilanguage.aubloghistory";
     	
-    	/** Default "ORDER BY" clause is by date modified */
+    	/** Default "ORDER BY" clause in SQL is by date modified */
         public static final String DEFAULT_SORT_ORDER = AuBlogHistoryColumns.LAST_MODIFIED+ " DESC";
         //for alphabetical by title
         //public static final String DEFAULT_SORT = VendorsColumns.NAME + " COLLATE NOCASE ASC";
@@ -137,7 +146,7 @@ public class AuBlogHistoryDatabase {
     	}
     	return sSanitizePattern.matcher(input.toLowerCase()).replaceAll("");
     }
-    //null constructor
+    //null constructor, This class cannot be instantiated
     private AuBlogHistoryDatabase(){}
     
 }

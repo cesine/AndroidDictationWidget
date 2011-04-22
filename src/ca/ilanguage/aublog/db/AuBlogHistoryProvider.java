@@ -22,7 +22,12 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 
 
 public class AuBlogHistoryProvider extends ContentProvider {
-
+	//procedure from DBTextAdapter
+	public final Context mCtx;
+//	private DatabaseHelper mDbHelper;
+//	private SQLiteDatabase mDb;
+//	private AuBlogHistoryDatabase ???;  //the database has a null constructor so its essentially just a definition of constants.. with no fucntions anyway. 
+	
     private static final String TAG = "AuBlogHistoryProvider";
 
     private static final String DATABASE_NAME = "aubloghistory.db";
@@ -39,18 +44,102 @@ public class AuBlogHistoryProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher;
     
+   
+    
+    private DatabaseHelper mOpenHelper;
+
+    /*
+     * from DBTextAdapter, probably not best practices...
+     * 
+     * to improve them use the providers own methods (which wrap the sql database methods) rather than the methods from the sql database...
+     */
+    public AuBlogHistoryProvider(Context context){
+    	this.mCtx=context;
+    }
+    public AuBlogHistoryProvider open() throws SQLException{
+//    	mDbHelper = new DatabaseHelper(mCtx);
+//		mDb = mDbHelper.getWritableDatabase();
+		return this;
+    }
+    public Uri createPost(String title, String content) throws SQLException {
+		
+    	//TODO change so args come in rather being made here
+    	ContentValues initialValues = new ContentValues();
+		initialValues.put(AuBlogHistory.ENTRY_TITLE, title);
+		initialValues.put(AuBlogHistory.ENTRY_CONTENT, content);
+		// Log.i(TAG, "Title: '" + title + "', content: '" + content+
+		// "' successfully inserted");
+//		return mDb.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, null, initialValues);
+		return insert(AuBlogHistory.CONTENT_URI, initialValues);
+	}
+    /*
+     * probably broken
+     */
+    public Cursor fetchPostdById(long rowId) throws SQLException {
+//		Cursor mCursor = mDb.query(true, AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, new String[]{
+//				AuBlogHistory._ID, AuBlogHistory.ENTRY_TITLE, AuBlogHistory.ENTRY_CONTENT}, AuBlogHistory._ID + "=" + rowId,
+//				null, null, null, null, null);
+    	Cursor cursor = query(AuBlogHistory.CONTENT_URI, new String[]{
+				AuBlogHistory._ID, AuBlogHistory.ENTRY_TITLE, AuBlogHistory.ENTRY_CONTENT}, null,null, AuBlogHistory.DEFAULT_SORT_ORDER);
+		if (cursor != null) {
+			cursor.moveToFirst();
+		}
+		return cursor;
+	}
+    public Cursor fetchPostByUri( Uri uri) throws SQLException {
+    	return query(uri, null, null, null, null);
+    }
+    public boolean updatePostById(Long rowId, String title, String content) throws SQLException {
+		//TODO: put the args into what it takes, rather than constructing them here
+    	ContentValues args = new ContentValues();
+		args.put(AuBlogHistory.ENTRY_TITLE, title);
+		args.put(AuBlogHistory.ENTRY_CONTENT, content);
+//		return mDb.update(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, args, AuBlogHistory._ID + "=" + rowId, null) > 0;
+		return update(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(rowId.toString()).build(), args, null, null) > 0;
+    }
+	public boolean deletePost(Long rowId) {
+		//TODO might be broken, just included for compatability wiht existing code
+		return delete(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(rowId.toString()).build(), null, null) > 0;
+	}
+	public boolean deletePostByUri(Uri uri) {
+		return delete(uri, null, null) > 0;
+	}
+	public Cursor fetchAllPosts() {
+		return query(AuBlogHistory.CONTENT_URI, null, null, null, null);
+	}
+	/*
+	 * add a where clause where publised=1 not published=0
+	 */
+	public Cursor fetchAllPublishedPosts() {
+		//TODO
+		return null;
+	}
+	/* 
+	 * select all posts where this id is mentioned in the parent or daughter, and their parent and daughters...
+	 */
+	public Cursor fetchPostTree(long rowId) {
+		//TODO
+		return  null;
+	}
+    
+    
+    
+    /**
+     * From Google IO 2010 app best practices
+     */
+    
     /**
      * This class helps open, create, and upgrade the database file.
      */
     private static class DatabaseHelper extends SQLiteOpenHelper {
 
         DatabaseHelper(Context context) {
-            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        	super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE " + AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME + " ("
-            		+ AuBlogHistory._ID+ " INTEGER PRIMARY KEY,"
+            		+ AuBlogHistory._ID+ " INTEGER PRIMARY KEY AUTOINCREMENT,"
             		+ AuBlogHistory.PUBLISHED + " INTEGER,"
             		+ AuBlogHistory.ENTRY_CONTENT + " TEXT,"
             		+ AuBlogHistory.ENTRY_LABELS + " TEXT,"
@@ -72,8 +161,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
         	onCreate(db);
         }
     }//end databasehelper
-    private DatabaseHelper mOpenHelper;
-
+    
 	@Override
 	public int delete(Uri uri, String where, String[] whereArgs) {
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
