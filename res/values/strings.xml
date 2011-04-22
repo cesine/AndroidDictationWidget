@@ -12,6 +12,9 @@
 <string name = "thanks_for_playing">THANKS FOR PLAYING!</string>
 <string name = "please_wait">PLEASE WAIT</string>
 
+<!-- Aublog -->
+<string name = "untitled_blog_title">Untitled</string>
+
 
 <!-- UI -->
 <string name="preference_save_game">AuBlog Data</string>

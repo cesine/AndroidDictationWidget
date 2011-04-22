@@ -79,6 +79,11 @@
 		<activity android:name="ca.ilanguage.aublog.ui.Settings" android:label="Settings (login/password)">
 		</activity>
 		
+		
+        <provider android:name="ca.ilanguage.aublog.db.AuBlogHistoryProvider"
+                  android:authorities="ca.ilanguage.aublog.provider.AuBlogHistory" />
+		
+		
 	</application>
 	<uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission xmlns:android="http://schemas.android.com/apk/res/android" 
