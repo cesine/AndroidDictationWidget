@@ -145,7 +145,7 @@ new On-Screen Controls instead, or stick with Tilt?
 \n<small>You can change this setting at any time by choosing Configure Controls under Options.</small>
 </string>
 
-<string name="whats_new_ticker">New in this version: Voice dictation for rough drafts, Blogger accounts supported, lots of minor (and not so minor) bugs fixed.</string>
+<string name="whats_new_ticker">In this version: HTML markup blog editing, Blogger accounts supported.</string>
 
 <string name="baby_description">No challenge at all.</string>
 <string name="kids_description">A comfortable ride to the end.</string>

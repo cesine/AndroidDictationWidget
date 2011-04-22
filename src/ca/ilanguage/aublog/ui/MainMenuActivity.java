@@ -121,7 +121,7 @@ public class MainMenuActivity extends Activity {
         public void onClick(View v) {
             if (!mPaused) {
             	//Intent i = new Intent(getBaseContext(), Settings.class);
-            	Intent i = new Intent(getBaseContext(), CreateBlogEntryActivity.class);
+            	Intent i = new Intent(getBaseContext(), AboutActivity.class);
 
                 v.startAnimation(mButtonFlickerAnimation);
                 mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
@@ -151,7 +151,7 @@ public class MainMenuActivity extends Activity {
 					// Log.e(TAG, "Database has not opened");
 				}
 				setting = mDbHelper.fetchSettindById(1);
-				Toast.makeText(MainMenuActivity.this, "setting "+setting.toString(), Toast.LENGTH_LONG).show();
+//				Toast.makeText(MainMenuActivity.this, "setting "+setting.toString(), Toast.LENGTH_LONG).show();
 				startManagingCursor(setting);
 				if (setting.getCount() != 0) {
 					if ((setting
@@ -167,29 +167,50 @@ public class MainMenuActivity extends Activity {
 					{
 						mDbHelper.close();
 						setting.close();
-						Alert
-								.showAlert(MainMenuActivity.this,
-										"Profile is not created",
-										"Please, input 'login/password' in settings");
+//						Alert
+//								.showAlert(MainMenuActivity.this,
+//										"Profile is not created",
+//										"Please, input 'login/password' in settings");
+						Toast.makeText(MainMenuActivity.this, "Please input your Blogger username and password in the Settings. ", Toast.LENGTH_LONG).show();
+
+						
+						Intent i = new Intent(getBaseContext(), Settings.class);
+
+		                v.startAnimation(mButtonFlickerAnimation);
+		                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
+		                mPaused = true;
 					} else {
-						Intent i = new Intent(MainMenuActivity.this, CreateBlogEntry.class);
-						
-						
+//						Intent i = new Intent(MainMenuActivity.this, CreateBlogEntry.class);
+//						
+//						
 						mDbHelper.close();
 						setting.close();
-//						v.startAnimation(mButtonFlickerAnimation);
-//		                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
+////						v.startAnimation(mButtonFlickerAnimation);
+////		                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
+//
+//						startActivity(i);
+						Intent i = new Intent(getBaseContext(), CreateBlogEntryActivity.class);
 
-						startActivity(i);
+		                v.startAnimation(mButtonFlickerAnimation);
+		                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
+		                mPaused = true;
 						
 					}
 				} else {
 					mDbHelper.close();
 					setting.close();
-					Alert
-							.showAlert(MainMenuActivity.this,
-									"Profile is not created",
-									"Please, input 'login/password' in settings");
+//					Alert
+//							.showAlert(MainMenuActivity.this,
+//									"Profile is not created",
+//									"Please, input 'login/password' in settings");
+					Toast.makeText(MainMenuActivity.this, "Please input your Blogger username and password in the Settings. ", Toast.LENGTH_LONG).show();
+
+					
+					Intent i = new Intent(getBaseContext(), Settings.class);
+
+	                v.startAnimation(mButtonFlickerAnimation);
+	                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
+	                mPaused = true;
 				}
             	
             	

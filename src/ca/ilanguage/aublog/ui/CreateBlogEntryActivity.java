@@ -261,8 +261,8 @@ public class CreateBlogEntryActivity extends Activity {
 
 					}
 				}
-//				mDbTextHelper.close();
-//				post.close();
+				mDbTextHelper.close();
+				post.close();
 				startActivity(i);
 				finish();
 			}
