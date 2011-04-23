@@ -65,7 +65,10 @@ public class AuBlogHistoryDatabase {
      */
     public static class AuBlogHistory implements AuBlogHistoryColumns, BaseColumns{
     	//This class cannot be instantiated
-    	private AuBlogHistory(){}
+    	private AuBlogHistory(){
+    		
+    		
+    	}
     	
     	//leads to the database file on the data directory of the device
     	public static final Uri CONTENT_URI =
@@ -147,6 +150,10 @@ public class AuBlogHistoryDatabase {
     	return sSanitizePattern.matcher(input.toLowerCase()).replaceAll("");
     }
     //null constructor, This class cannot be instantiated
-    private AuBlogHistoryDatabase(){}
+    private AuBlogHistoryDatabase(){
+    	
+    	
+    	
+    }
     
 }
