@@ -1,11 +1,13 @@
 package ca.ilanguage.aublog.ui;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -20,7 +22,9 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.db.DBTextAdapter;
+import ca.ilanguage.aublog.db.AuBlogHistoryProvider;
 import ca.ilanguage.aublog.util.Alert;
 /**
  * Demonstrates how to embed a WebView in your activity. Also demonstrates how
@@ -39,9 +43,13 @@ import ca.ilanguage.aublog.util.Alert;
  */
 public class CreateBlogEntryActivity extends Activity {
 
-    private static final String LOG_TAG = "WebViewDemo";
-	private DBTextAdapter mDbTextHelper;
-	private static Cursor post = null;
+    private static final String TAG = "CreateBlogEntryActivity";
+
+	//uri of the entry being edited.
+	private Uri mUri;
+	private static Uri dataUriToTriggerNewBlogEntry=AuBlogHistory.CONTENT_URI;
+	//savedInstanceState
+	
 	private static final int GROUP_BASIC = 0;
 	private static final int GROUP_FORMAT = 1;
 	int selectionStart;
@@ -64,73 +72,25 @@ public class CreateBlogEntryActivity extends Activity {
         webSettings.setSaveFormData(false);
         webSettings.setJavaScriptEnabled(true);
         
-        mDbTextHelper = new DBTextAdapter(this);
-		try {
-			mDbTextHelper.open();
-		} catch (SQLException e) {
-			// Log.e(TAG, "Database has not opened");
-			Toast.makeText(CreateBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
-		}
+        mUri = getContentResolver().insert(dataUriToTriggerNewBlogEntry, null);
+		// If we were unable to create a new blog entry, then just finish
+        // this activity.  A RESULT_CANCELED will be sent back to the
+        // original activity if they requested a result.
+        if (mUri == null) {
+            Log.e(TAG, "Failed to insert new audiobook into " + getIntent().getData());
+            Toast.makeText(CreateBlogEntryActivity.this, "Failed to insert new audiobook into "+ getIntent().getData()+" with this uri"+dataUriToTriggerNewBlogEntry, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+		
 		/*
 		 * if there are unpublished posts in the database put them into the fields
 		 */
-		post = mDbTextHelper.fetchPostdById(1);
-		startManagingCursor(post);
-		if (post.getCount() != 0) {
-			try {
-				mPostTitle = (post.getString(post
-						.getColumnIndexOrThrow(DBTextAdapter.KEY_TITLE)));
-				mPostContent = (post.getString(post
-						.getColumnIndexOrThrow(DBTextAdapter.KEY_CONTENT)));
-			} catch (IllegalArgumentException e) {
-				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
-				Toast.makeText(CreateBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
-			} catch (Exception e) {
-				// Log.e(TAG, "Exception (DataBase failed)");
-				Toast.makeText(CreateBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
-			}
-		}
+		mPostContent="";
+		mPostLabels="";
+		mPostTitle="";
 		
 		mWebView.loadUrl("file:///android_asset/create_blog_entry.html");
-		/*
-		 * Dont know what this does, gests the intent, and the bundle, and looks at subselections, or it puts the text into the content edit text..?
-		 */
-		Intent i = getIntent();
-		if (i != null)
-		{
-			Bundle b = i.getExtras();
-			if (b != null)
-			{
-				boolean isTextColor = b.getBoolean("isTextColor");
-			    selectionStart = b.getInt("selStart");
-				selectionEnd = b.getInt("selEnd");
-				String startTag = "<span style='";
-				startTag += (isTextColor) ? "color: " : "background: ";
-				int color = b.getInt("color");
-				startTag += "rgb(" + Color.red(color) + ", " + Color.green(color) + ", " + Color.blue(color) + ");'>";
-				String endTag = "</span>";
-				if (selectionStart >= 0 && selectionEnd >= 0) {
-					String currentText = mPostContent;
-					String selectedText = currentText.substring(selectionStart,
-							selectionEnd);
-					currentText = currentText.substring(0, selectionStart)
-							+ startTag
-							+ selectedText
-							+ endTag
-							+ currentText.substring(selectionEnd, currentText
-									.length());
-					mPostContent = currentText;
-					Toast.makeText(CreateBlogEntryActivity.this, "Post content: "+mPostContent, Toast.LENGTH_LONG).show();
-					int selPosition = selectionStart + startTag.length()
-							+ selectedText.length();
-//					postContent.requestFocus();
-//					postContent.setSelection(selPosition);
-				}
-			}
-		}
-		
-		
-        
     }
     public class JavaScriptInterface {
         Context mContext;
@@ -170,111 +130,32 @@ public class CreateBlogEntryActivity extends Activity {
         }
         
         public void savePost(String strTitle, String strContent, String strLabels){
-        	
-			if (post.getCount() == 0) {
-				try {
-//					strTitle = mPostTitle;
-//					strContent = mPostContent;
-					mPostContent= strContent;
-					mPostTitle=strTitle;
-					mPostLabels=strLabels;
-					mDbTextHelper.createPost(strTitle, strContent);
-					mDbTextHelper.close();
-					post.close();
-					// Log.d(TAG, "Post saved to database.");
-					Toast.makeText(CreateBlogEntryActivity.this, "Post saved to database\n\nTitle: "+strTitle+"\nLabels: "+strLabels+"\n\nPost: "+strContent, Toast.LENGTH_LONG).show();
-				} catch (SQLException e) {
-					// Log.e(TAG,"SQLException (createPost(title, content))");
-					Toast.makeText(CreateBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
-				} catch (Exception e) {
-					// Log.e(TAG, "Exception: " + e.getMessage());
-					Toast.makeText(CreateBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
-				}
-			} else {
-				try {
-					mPostContent= strContent;
-					mPostTitle=strTitle;
-					mPostLabels=strLabels;
-					mDbTextHelper.updatePostById((long) 1,
-							strTitle, strContent);
-					mDbTextHelper.close();
-					post.close();
-					// Log.d(TAG, "Post updated in database.");
-					Toast.makeText(CreateBlogEntryActivity.this, "Post updated to database\n\nTitle: "+strTitle+"\nLabels: "+strLabels+"\n\nPost: "+strContent, Toast.LENGTH_LONG).show();
-				} catch (SQLException e) {
-					// Log.e(TAG,"SQLException (updatePostById(rowId, title, content))");
-					Toast.makeText(CreateBlogEntryActivity.this, "Database connection problem SQLException (updatePostById(rowId, title, content)) "+e, Toast.LENGTH_LONG).show();
-				}
-			}
-//			Intent i = new Intent(CreateBlogEntryActivity.this,
-//					MainMenuActivity.class);
-//			startActivity(i);
-			finish();
-			//finishActivity(0);
+        	mPostContent= strContent;
+        	mPostTitle=strTitle;
+        	mPostLabels=strLabels;
+        	saveOrUpdateToDB();
         }
         public void publishPost(String strTitle, String strContent, String strLabels){
-			mPostContent= strContent;
-			mPostTitle=strTitle;
-			mPostLabels=strLabels;
+        	savePost(strTitle, strContent, strLabels);
         	if ((mPostTitle.length() == 0)
-					|| (mPostTitle == null)
-					|| (mPostContent.length() == 0)
-					|| (mPostContent == null)) {
-				Alert.showAlert(CreateBlogEntryActivity.this,
-						"Empty title or content",
-						"Please fill all fields");
-			} else {
-				Intent i = new Intent(CreateBlogEntryActivity.this,
-						PreviewAndPublish.class);
-				
-				if (post.getCount() == 0) {
-					try {
-						mPostContent= strContent;
-						mPostTitle=strTitle;
-						mPostLabels=strLabels;
-						mDbTextHelper.createPost(strTitle,
-								strContent);
-						// Log.d(TAG, "Post saved to database.");
-						Toast.makeText(CreateBlogEntryActivity.this, "Post saved to database\n\nTitle: "+strTitle+"\nLabels: "+strLabels+"\n\nPost: "+strContent, Toast.LENGTH_LONG).show();
-					} catch (SQLException e) {
-						// Log.e(TAG,"SQLException (createPost(title, content))");
-						Toast.makeText(CreateBlogEntryActivity.this, "Database connection problem SQLException (updatePostById(rowId, title, content)) "+e, Toast.LENGTH_LONG).show();
-
-					} catch (Exception e) {
-						// Log.e(TAG, "Exception: " +
-						// e.getMessage());
-						Toast.makeText(CreateBlogEntryActivity.this, "Exception "+e, Toast.LENGTH_LONG).show();
-
-					}
-				} else {
-					try {
-						mPostContent= strContent;
-						mPostTitle=strTitle;
-						mPostLabels=strLabels;
-						mDbTextHelper.updatePostById((long) 1,
-								strTitle, strContent);
-						// Log.d(TAG, "Post updated in database.");
-						Toast.makeText(CreateBlogEntryActivity.this, "Post updated to database\n\nTitle: "+strTitle+"\nLabels: "+strLabels+"\n\nPost: "+strContent, Toast.LENGTH_LONG).show();
-					} catch (SQLException e) {
-						// Log.e(TAG,"SQLException (updatePostById(rowId, title, content))");
-						Toast.makeText(CreateBlogEntryActivity.this, "Database connection problem SQLException (updatePostById(rowId, title, content)) "+e, Toast.LENGTH_LONG).show();
-
-					}
-				}
-				mDbTextHelper.close();
-				post.close();
-				startActivity(i);
-				finish();
-			}
+        			|| (mPostTitle == null)
+        			|| (mPostContent.length() == 0)
+        			|| (mPostContent == null)) {
+        		Toast.makeText(CreateBlogEntryActivity.this, R.string.title_or_content_empty_error, Toast.LENGTH_LONG).show();
+        	} else {
+        		Intent i = new Intent(CreateBlogEntryActivity.this, PublishActivity.class);
+        		//tell the i the mUri that is supposed to be published
+        		i.setData(mUri);
+        		startActivity(i);
+        		finish();
+        	}
         }
     }
     @Override
 	protected void onPause() {
 		super.onPause();
-		// Log.i(TAG, "Method 'onPause()' launched");
-		
-		//saveOrUpdateToDB();
-		mWebView.loadUrl("javascript:savePostToDB()");
+//		saveOrUpdateToDB();
+//		mWebView.loadUrl("javascript:savePostToDB()");
 	}
 	@Override
 	protected void onDestroy() {
@@ -282,54 +163,30 @@ public class CreateBlogEntryActivity extends Activity {
 		// Log.i(TAG, "Method 'onDestroy()' launched");
 //		tracker.stop();
 		//saveOrUpdateToDB();
-		mWebView.loadUrl("javascript:savePostToDB()");
+//		mWebView.loadUrl("javascript:savePostToDB()");
 
 	}
 	private void saveOrUpdateToDB(){
-		mDbTextHelper = new DBTextAdapter(this);
-		try {
-			mDbTextHelper.open();
-		} catch (SQLException e) {
-			// Log.e(TAG, "Database has not opened");
-		}
-		post = mDbTextHelper.fetchPostdById(1);
-		startManagingCursor(post);
-
-		String strTitle = "";
-		String strContent = "";
-		if (post.getCount() == 0) {
-			try {
-				strTitle = mPostTitle;
-				strContent = mPostContent;
-				mDbTextHelper.createPost(strTitle, strContent);
-				mDbTextHelper.close();
-				post.close();
-				// Log.d(TAG, "Post saved to database.");
-			} catch (SQLException e) {
-				// Log.e(TAG, "SQLException (createPost(title, content))");
-			} catch (Exception e) {
-				// Log.e(TAG, "Exception: " + e.getMessage());
-			}
-		} else {
-			try {
-				strTitle = mPostTitle;
-				strContent = mPostContent;
-				mDbTextHelper.updatePostById((long) 1, strTitle, strContent);
-				mDbTextHelper.close();
-				post.close();
-				// Log.d(TAG, "Post updated in database.");
-			} catch (SQLException e) {
-				// Log.e(TAG,"SQLException (updatePostById(rowId, title, content))");
-			}
-		}
+    	ContentValues values = new ContentValues();
+    	values.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
+    	values.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
+    	values.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
+    	try{
+    		getContentResolver().update(mUri, values,null, null);
+    		Log.d(TAG, "Post saved to database.");
+    		Toast.makeText(CreateBlogEntryActivity.this, "Post saved to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
+    	} catch (SQLException e) {
+    		// Log.e(TAG,"SQLException (createPost(title, content))");
+    		Toast.makeText(CreateBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
+    	} catch (Exception e) {
+    		// Log.e(TAG, "Exception: " + e.getMessage());
+    		Toast.makeText(CreateBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
+    	}
+		
 	}
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			mWebView.loadUrl("javascript:savePostToDB()");
-//			saveOrUpdateToDB();
-//			Intent i = new Intent(CreateBlogEntryActivity.this, MainMenuActivity.class);
-//			startActivity(i);
-			finish();
+//			mWebView.loadUrl("javascript:savePostToDB()");
 		}
 //		if (keyCode == KeyEvent.KEYCODE_MENU) {
 //			int tmp1 = 0, tmp2 = 0;
@@ -348,7 +205,7 @@ public class CreateBlogEntryActivity extends Activity {
     final class MyWebChromeClient extends WebChromeClient {
         @Override
         public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-            Log.d(LOG_TAG, message);
+            Log.d(TAG, message);
             result.confirm();
             return true;
         }

@@ -76,6 +76,8 @@
 		</activity>
 		<activity android:name="ca.ilanguage.aublog.ui.PreviewAndPublish" android:label="Preview and publish post">
 		</activity>
+		<activity android:name="ca.ilanguage.aublog.ui.PublishActivity" android:label="Preview post">
+		</activity>
 		<activity android:name="ca.ilanguage.aublog.ui.Settings" android:label="Settings (login/password)">
 		</activity>
 		

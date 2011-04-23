@@ -45,7 +45,34 @@ public class AuBlogHistoryProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher;
     
    
-    
+    public Uri createPost(ContentValues initialValues) throws SQLException {
+		return insert(AuBlogHistory.CONTENT_URI, initialValues);
+	}
+    public Cursor fetchPostByUri( Uri uri) throws SQLException {
+    	return query(uri, null, null, null, null);
+    }
+	public boolean deletePostByUri(Uri uri) {
+		return delete(uri, null, null) > 0;
+	}
+	public Cursor fetchAllPosts() {
+		return query(AuBlogHistory.CONTENT_URI, null, null, null, null);
+	}
+//	/*
+//	 * add a where clause where publised=1 not published=0
+//	 */
+//	public Cursor fetchAllPublishedPosts() {
+//		//TODO
+//		return null;
+//	}
+//	/* 
+//	 * select all posts where this id is mentioned in the parent or daughter, and their parent and daughters...
+//	 */
+//	public Cursor fetchPostTree(long rowId) {
+//		//TODO
+//		return  null;
+//	}
+//    
+
     private DatabaseHelper mOpenHelper;
 //
 //    /*
@@ -62,17 +89,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 ////		mDb = mDbHelper.getWritableDatabase();
 //		return this;
 //    }
-//    public Uri createPost(String title, String content) throws SQLException {
-//		
-//    	//TODO change so args come in rather being made here
-//    	ContentValues initialValues = new ContentValues();
-//		initialValues.put(AuBlogHistory.ENTRY_TITLE, title);
-//		initialValues.put(AuBlogHistory.ENTRY_CONTENT, content);
-//		// Log.i(TAG, "Title: '" + title + "', content: '" + content+
-//		// "' successfully inserted");
-////		return mDb.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, null, initialValues);
-//		return insert(AuBlogHistory.CONTENT_URI, initialValues);
-//	}
+
 //    /*
 //     * probably broken
 //     */
@@ -87,9 +104,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 //		}
 //		return cursor;
 //	}
-//    public Cursor fetchPostByUri( Uri uri) throws SQLException {
-//    	return query(uri, null, null, null, null);
-//    }
+
 //    public boolean updatePostById(Long rowId, String title, String content) throws SQLException {
 //		//TODO: put the args into what it takes, rather than constructing them here
 //    	ContentValues args = new ContentValues();
@@ -102,67 +117,8 @@ public class AuBlogHistoryProvider extends ContentProvider {
 //		//TODO might be broken, just included for compatability wiht existing code
 //		return delete(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(rowId.toString()).build(), null, null) > 0;
 //	}
-//	public boolean deletePostByUri(Uri uri) {
-//		return delete(uri, null, null) > 0;
-//	}
-//	public Cursor fetchAllPosts() {
-//		return query(AuBlogHistory.CONTENT_URI, null, null, null, null);
-//	}
-//	/*
-//	 * add a where clause where publised=1 not published=0
-//	 */
-//	public Cursor fetchAllPublishedPosts() {
-//		//TODO
-//		return null;
-//	}
-//	/* 
-//	 * select all posts where this id is mentioned in the parent or daughter, and their parent and daughters...
-//	 */
-//	public Cursor fetchPostTree(long rowId) {
-//		//TODO
-//		return  null;
-//	}
-//    
     
-    
-    /**
-     * From Google IO 2010 app best practices
-     */
-    
-    /**
-     * This class helps open, create, and upgrade the database file.
-     */
-    private static class DatabaseHelper extends SQLiteOpenHelper {
-
-        DatabaseHelper(Context context) {
-        	super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        }
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME + " ("
-            		+ AuBlogHistory._ID+ " INTEGER PRIMARY KEY AUTOINCREMENT,"
-            		+ AuBlogHistory.PUBLISHED + " INTEGER,"
-            		+ AuBlogHistory.ENTRY_CONTENT + " TEXT,"
-            		+ AuBlogHistory.ENTRY_LABELS + " TEXT,"
-            		+ AuBlogHistory.ENTRY_TITLE + " TEXT,"
-            		+ AuBlogHistory.PARENT_ENTRY + " INTEGER,"
-            		+ AuBlogHistory.DAUGHTER_ENTRY   + " INTEGER,"
-            		+ AuBlogHistory.PUBLISHED_IN + " TEXT,"
-            		+ AuBlogHistory.AUDIO_FILES + " TEXT,"
-            		+ AuBlogHistory.LAST_MODIFIED + " INTEGER,"
-            		+ AuBlogHistory.TIME_CREATED + " INTEGER,"
-            		+ AuBlogHistory.TIME_EDITED + " INTEGER"
-            		+ ");");
-        }
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        	Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-        			+ newVersion + ", which will destroy all old data");
-        	db.execSQL("DROP TABLE IF EXISTS "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
-        	onCreate(db);
-        }
-    }//end databasehelper
-    
+     
 	@Override
 	public int delete(Uri uri, String where, String[] whereArgs) {
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -266,9 +222,9 @@ public class AuBlogHistoryProvider extends ContentProvider {
         
         long rowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
         if (rowId > 0) {
-            Uri audiobookUri = ContentUris.withAppendedId(AuBlogHistory.CONTENT_URI, rowId);
-            getContext().getContentResolver().notifyChange(audiobookUri, null);
-            return audiobookUri;
+            Uri resultUri = ContentUris.withAppendedId(AuBlogHistory.CONTENT_URI, rowId);
+            getContext().getContentResolver().notifyChange(resultUri, null);
+            return resultUri;
         }
 
         throw new SQLException("Failed to insert row into " + uri);
@@ -281,8 +237,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 	}
 
 	@Override
-	public Cursor query(Uri uri, String[] projection, String selection,
-			String[] selectionArgs, String sortOrder) {
+	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         qb.setTables(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
 
@@ -383,4 +338,43 @@ public class AuBlogHistoryProvider extends ContentProvider {
 	        
 	        // Add more columns here for more robust Live Folders.
 	    }
+	   
+    /**
+     * From Google IO 2010 app best practices
+     */
+    
+    /**
+     * This class helps open, create, and upgrade the database file.
+     */
+    private static class DatabaseHelper extends SQLiteOpenHelper {
+
+        DatabaseHelper(Context context) {
+        	super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL("CREATE TABLE " + AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME + " ("
+            		+ AuBlogHistory._ID+ " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            		+ AuBlogHistory.PUBLISHED + " INTEGER,"
+            		+ AuBlogHistory.ENTRY_CONTENT + " TEXT,"
+            		+ AuBlogHistory.ENTRY_LABELS + " TEXT,"
+            		+ AuBlogHistory.ENTRY_TITLE + " TEXT,"
+            		+ AuBlogHistory.PARENT_ENTRY + " INTEGER,"
+            		+ AuBlogHistory.DAUGHTER_ENTRY   + " INTEGER,"
+            		+ AuBlogHistory.PUBLISHED_IN + " TEXT,"
+            		+ AuBlogHistory.AUDIO_FILES + " TEXT,"
+            		+ AuBlogHistory.LAST_MODIFIED + " INTEGER,"
+            		+ AuBlogHistory.TIME_CREATED + " INTEGER,"
+            		+ AuBlogHistory.TIME_EDITED + " INTEGER"
+            		+ ");");
+        }
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        	Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
+        			+ newVersion + ", which will destroy all old data");
+        	db.execSQL("DROP TABLE IF EXISTS "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
+        	onCreate(db);
+        }
+    }//end databasehelper
+
 }
