@@ -67,16 +67,19 @@
 	   			  android:configChanges="keyboardHidden|orientation"/>
 	   			 
 	   			 
-	    <activity android:name="ca.ilanguage.aublog.ui.CreateBlogEntryActivity" android:label="Create new post">
+	    <activity android:name="ca.ilanguage.aublog.ui.EditBlogEntryActivity" android:label="Create new post">
 		</activity>
-	    <activity android:name="ca.ilanguage.aublog.ui.AboutActivity" android:label="Create new post">
+	    <activity android:name="ca.ilanguage.aublog.ui.ViewDraftTreeActivity" android:label="View drafts">
+		</activity>
+	    <activity android:name="ca.ilanguage.aublog.ui.AboutActivity" android:label="About AuBlog">
 		</activity>
 	   			   			 
 	    <activity android:name="ca.ilanguage.aublog.ui.CreateBlogEntry" android:label="Create new post">
 		</activity>
 		<activity android:name="ca.ilanguage.aublog.ui.PreviewAndPublish" android:label="Preview and publish post">
 		</activity>
-		<activity android:name="ca.ilanguage.aublog.ui.PublishActivity" android:label="Preview post">
+		<activity android:name="ca.ilanguage.aublog.ui.PublishActivity" android:label="Publish post"
+				android:theme="@style/Theme.Transparent">
 		</activity>
 		<activity android:name="ca.ilanguage.aublog.ui.Settings" android:label="Settings (login/password)">
 		</activity>

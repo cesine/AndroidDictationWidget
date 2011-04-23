@@ -30,10 +30,19 @@
 	     	android:gravity="bottom"
 	     	android:id="@+id/mainSectionMenu">
 	    
+	    	        	
+	    <ImageView 
+	        android:id="@+id/draftsButton"
+	        android:src="@drawable/ui_button_resume"
+	        android:layout_width="wrap_content" 
+	        android:layout_height="wrap_content" 
+	        android:layout_gravity="center_horizontal"
+	       	android:paddingTop="10dp"
+			android:clickable="true" />
 	    
 	    <ImageView 
 	        android:id="@+id/startButton"
-	        android:src="@drawable/ui_button_start"
+	        android:src="@drawable/ui_button_new_entry"
 	        android:layout_width="wrap_content" 
 	        android:layout_height="wrap_content" 
 	        android:layout_gravity="center_horizontal"
@@ -41,18 +50,19 @@
 	
 	    <ImageView 
 	        android:id="@+id/extrasButton"
-	        android:src="@drawable/ui_button_extras"
+	        android:src="@drawable/ui_button_about"
 	        android:layout_width="wrap_content" 
 	        android:layout_height="wrap_content" 
 	        android:layout_gravity="center_horizontal"
 	       	android:paddingTop="10dp"
 			android:clickable="true" />
 	        
+
 	        
 	        
 		<ImageView 
 		    android:id="@+id/optionButton"
-		    android:src="@drawable/ui_button_options"
+		    android:src="@drawable/ui_button_settings"
 		    android:layout_width="wrap_content" 
 		    android:layout_height="wrap_content" 
 		    android:layout_gravity="center_horizontal"

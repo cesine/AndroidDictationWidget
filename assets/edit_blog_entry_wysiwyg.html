@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>markItUp! Universal markup editor</title>
+<link rel="stylesheet" type="text/css" href="markitup/images/style.css" />
+<!-- jQuery -->
+<script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
+<!-- markItUp! -->
+<script type="text/javascript" src="markitup/markitup/jquery.markitup.js"></script>
+<!-- markItUp! toolbar settings -->
+<script type="text/javascript" src="markitup/markitup/sets/default/set.js"></script>
+<!-- markItUp! skin -->
+<link rel="stylesheet" type="text/css" href="markitup/markitup/skins/markitup/style.css" />
+<!--  markItUp! toolbar skin -->
+<link rel="stylesheet" type="text/css" href="markitup/markitup/sets/default/style.css" />
+
+<style>
+#container {
+    position: relative;
+}
+
+
+
+
+</style>
+<script>
+$(function() {
+    $(this.textBox)
+        .change(autoSize)
+        .keydown(autoSize)
+        .keyup(autoSize);
+ autoSize();
+});
+
+function autoSize() {
+    // Copy textarea contents; browser will calculate correct height of copy,
+    // which will make overall container taller, which will make textarea taller.
+ var text = $("#markItUp").val().replace(/\n/g, '<br/>');
+    $("#textCopy").html(text);
+}
+</script>
+
+</head>
+<body>
+<script type="text/javascript">
+<!--
+$(document).ready(function()	{
+	fillFromAndroidActivity();
+	// Add markItUp! to your textarea in one line
+	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
+	$('#markItUp').markItUp(mySettings);
+	
+	// You can add content from anywhere in your page
+	// $.markItUp( { Settings } );	
+	$('.add').click(function() {
+ 		$.markItUp( { 	openWith:'<opening tag>',
+						closeWith:'<\/closing tag>',
+						placeHolder:"New content"
+					}
+				);
+ 		return false;
+	});
+	
+	// And you can add/remove markItUp! whenever you want
+	// $(textarea).markItUpRemove();
+	$('.toggle').click(function() {
+		if ($("#markItUp.markItUpEditor").length === 1) {
+ 			$("#markItUp").markItUpRemove();
+			$("span", this).text("get markItUp! back");
+		} else {
+			$('#markItUp').markItUp(mySettings);
+			$("span", this).text("remove markItUp!");
+		}
+ 		return false;
+	});
+});
+-->
+</script>
+<!-- <p>Click <a href="#" class="add">this link to insert content</a> from anywhere in the page or 
+<a href="#" class="toggle">this one to <span>remove markItUp!</span></a></p>-->
+<p>
+
+<input type="button" value="Preview" onClick="savePostToDB()" />
+<input type="button" value="Save" onClick="savePostToDB()" />
+<input type="button" value="Save and Publish" onClick="publishPostToDB()" />
+<script type="text/javascript">
+
+    function showAndroidToast(toast) {
+        //Android.showToast(toast);
+    	Android.showToast(toast);
+    }
+    function savePostToDB(){
+    	var content ="";
+    	var title = "";
+    	var labels ="";
+    	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    }
+    function savePostToState(){
+    	var content ="";
+    	var title = "";
+    	var labels ="";
+    	Android.saveState(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    }
+    function publishPostToDB(){
+    	var content ="";
+    	var title = "";
+    	var labels ="";
+    	Android.publishPost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    }
+    function fillFromAndroidActivity(){
+    	document.getElementById('f-title').value= Android.fetchPostTitle();
+    	document.getElementById('markItUp').value= Android.fetchPostContent();
+    	document.getElementById('post-labels').value= Android.fetchPostLabels();
+    }
+</script>
+
+<div id="container">
+
+<table  id="titles"  ">
+<tbody><tr><td><label for="f-title">Title:</label></td>
+<td>
+	<div class="errorbox-good"><input type="text" name="title" value="" id="f-title" tabindex="1" class="text" onkeyup="setPreviewTitle(getTitle());" maxlength="150" dir="ltr" size="48"></div></td></tr>
+<tr><td>
+	<div id="label-directions"><b>Labels for this post:</b><br>
+<span style="color: #555">e.g. <b>scooters, vacation, fall</b></span></div>
+</td><td width="1%" style="white-space: nowrap"><input type="text" name="postLabels" value="" autocomplete="off" id="post-labels" tabindex="6" dir="ltr"></td></tr>
+</tbody></table>
+
+	<textarea id="markItUp" >
+Type your text here. You can select text and then hit the button you want, or you can hit the button type and then hit the button to turn it off. You can use new paragraphs:
+
+&lt;p&gt;&lt;strong&gt;bold&lt;/strong&gt;
+
+&lt;h3&gt;and headings&lt;/h3&gt;
+
+ &lt;p&gt;We are using Jay Salvart's Markitup to give you some approximation of wysiwyg editing. Normal wysiwyg editors don't work in embedded Android webview at the moment. With Jay's Markitup you to turn any textarea into a markup editor. Html, Textile, Wiki Syntax, Markdown, BBcode or even your own markup system can be easily implemented. So you can design your own markup system that makes blogging easier for you.&lt;/p&gt;
+</textarea>
+
+
+
+</p>
+</body>
+</html>

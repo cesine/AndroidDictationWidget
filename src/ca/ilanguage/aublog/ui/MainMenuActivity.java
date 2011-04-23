@@ -21,9 +21,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import com.google.gdata.data.Feed;
-import ca.ilanguage.aublog.ui.CreateBlogEntry;
 import ca.ilanguage.aublog.db.DBAdapter;
-import ca.ilanguage.aublog.util.Alert;
+import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -36,9 +35,11 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -62,6 +63,7 @@ public class MainMenuActivity extends Activity {
     private View mStartButton;
     private View mOptionsButton;
     private View mExtrasButton;
+    private View mDraftsButton;
     private View mBackground;
     private View mTicker;
     private Animation mButtonFlickerAnimation;
@@ -84,6 +86,7 @@ public class MainMenuActivity extends Activity {
     private final static int WHATS_NEW_DIALOG = 0;
     private final static int TILT_TO_SCREEN_CONTROLS_DIALOG = 1;
     private final static int CONTROL_SETUP_DIALOG = 2;
+	protected static final String TAG = "MainMenuActivity";
         
     // Create an anonymous implementation of OnClickListener
     private View.OnClickListener sContinueButtonListener = new View.OnClickListener() {
@@ -95,6 +98,7 @@ public class MainMenuActivity extends Activity {
                 mBackground.startAnimation(mFadeOutAnimation);
                 mOptionsButton.startAnimation(mAlternateFadeOutAnimation);
                 mExtrasButton.startAnimation(mAlternateFadeOutAnimation);
+                mDraftsButton.startAnimation(mAlternateFadeOutAnimation);
                 mTicker.startAnimation(mAlternateFadeOutAnimation);
                 mPaused = true;
             }
@@ -111,6 +115,7 @@ public class MainMenuActivity extends Activity {
                 mBackground.startAnimation(mFadeOutAnimation);
                 mStartButton.startAnimation(mAlternateFadeOutAnimation);
                 mExtrasButton.startAnimation(mAlternateFadeOutAnimation);
+                mDraftsButton.startAnimation(mAlternateFadeOutAnimation);
                 mTicker.startAnimation(mAlternateFadeOutAnimation);
                 mPaused = true;
             }
@@ -122,6 +127,19 @@ public class MainMenuActivity extends Activity {
             if (!mPaused) {
             	//Intent i = new Intent(getBaseContext(), Settings.class);
             	Intent i = new Intent(getBaseContext(), AboutActivity.class);
+
+                v.startAnimation(mButtonFlickerAnimation);
+                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
+                mPaused = true;
+                
+            }
+        }
+    };
+    private View.OnClickListener sDraftsButtonListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            if (!mPaused) {
+            	//Intent i = new Intent(getBaseContext(), Settings.class);
+            	Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 
                 v.startAnimation(mButtonFlickerAnimation);
                 mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
@@ -189,8 +207,21 @@ public class MainMenuActivity extends Activity {
 ////		                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
 //
 //						startActivity(i);
-						Intent i = new Intent(getBaseContext(), CreateBlogEntryActivity.class);
+						Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
 
+						
+				        Uri uri = getContentResolver().insert(AuBlogHistory.CONTENT_URI, null);
+						// If we were unable to create a new blog entry, then just finish
+				        // this activity.  A RESULT_CANCELED will be sent back to the
+				        // original activity if they requested a result.
+				        if (uri == null) {
+				            Log.e(TAG, "Failed to insert new blog entry into " + getIntent().getData());
+				            Toast.makeText(MainMenuActivity.this, "Failed to insert new blog entry into "+ getIntent().getData()+" with this uri"+AuBlogHistory.CONTENT_URI, Toast.LENGTH_LONG).show();
+				            finish();
+				            return;
+				        }
+				        i.setData(uri);
+						
 		                v.startAnimation(mButtonFlickerAnimation);
 		                mButtonFlickerAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
 		                mPaused = true;
@@ -237,6 +268,9 @@ public class MainMenuActivity extends Activity {
         
         mExtrasButton = findViewById(R.id.extrasButton);
         mExtrasButton.setOnClickListener(sExtrasButtonListener);
+        
+        mDraftsButton = findViewById(R.id.draftsButton);
+        mDraftsButton.setOnClickListener(sDraftsButtonListener);
         
         mButtonFlickerAnimation = AnimationUtils.loadAnimation(this, R.anim.button_flicker);
         mFadeOutAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out);
@@ -411,8 +445,13 @@ public class MainMenuActivity extends Activity {
         }
         
         if (mJustCreated) {
+        	if (mDraftsButton != null) {
+                mDraftsButton.startAnimation(AnimationUtils.loadAnimation(this, R.anim.button_slide));
+            }
         	if (mStartButton != null) {
-                mStartButton.startAnimation(AnimationUtils.loadAnimation(this, R.anim.button_slide));
+            	Animation anim = AnimationUtils.loadAnimation(this, R.anim.button_slide);
+                anim.setStartOffset(500L);
+                mStartButton.startAnimation(anim);
             }
             if (mExtrasButton != null) {
             	Animation anim = AnimationUtils.loadAnimation(this, R.anim.button_slide);

@@ -24,9 +24,10 @@
     >
     
 	<TextView  
+		android:id="@+id/toptext_webview"
 	    android:layout_width="fill_parent" 
 	    android:layout_height="wrap_content" 
-	    android:text="intro"
+	    android:text=""
 	    android:padding="4dip"
 	    android:textSize="16sp"
 	    />

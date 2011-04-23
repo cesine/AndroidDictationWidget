@@ -48,7 +48,7 @@ import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.service.*;
 
 
-public class PublishActivity extends Activity implements View.OnClickListener {
+public class PublishActivity extends Activity  {
 
 	// private static final String TAG = "PreviewAndPublish";
 	private String mTitle;
@@ -72,51 +72,16 @@ public class PublishActivity extends Activity implements View.OnClickListener {
 		AuBlogHistory.PUBLISHED_IN
 	};
 
-	WebView webview;
-
-	final Handler mHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			Bundle content = msg.getData();
-			String progressId = content.getString(MSG_KEY);
-			if (progressId != null) {
-				if (progressId.equals("1")) {
-					publishProgress.setMessage("Preparing blog config...");
-				} else if (progressId.equals("2")) {
-					publishProgress.setMessage("Authenticating...");
-				} else if (progressId.equals("3")) {
-					publishProgress.setMessage("Contacting server...");
-				} else if (progressId.equals("4")) {
-					publishProgress.setMessage("Creating new entry...");
-				} else if (progressId.equals("5")) {
-					publishProgress.setMessage("Done...");
-				}
-			}
-		}
-	};
-
-	final Runnable mPublishResults = new Runnable() {
-		public void run() {
-			showPublishedStatus();
-		}
-	};
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.previewandpublish);
+		setContentView(R.layout.transparent_activity);
 		mUri = getIntent().getData();
 		
 		Toast tellUser = Toast.makeText(this, 
         		"The data in the uri is: \n"+mUri.toString(), Toast.LENGTH_LONG);
-        tellUser.show();
-//mCursor = managedQuery(mUri, PROJECTION, null, null, null);
+//        tellUser.show();
         mCursor = managedQuery(mUri, PROJECTION, null, null, null);
-        
-        Toast.makeText(PublishActivity.this, "The cursor returned is "+mCursor.toString(), Toast.LENGTH_LONG).show();
-
-//		mCursor = getContentResolver().query(mUri, null, null, null, null);
-//		startManagingCursor(mCursor);
 		if (mCursor != null) {
 			// Requery in case something changed while paused (such as the title)
 			mCursor.requery();
@@ -125,85 +90,23 @@ public class PublishActivity extends Activity implements View.OnClickListener {
 			try {
 				mTitle = mCursor.getString(0);
 				mContent = mCursor.getString(1);
-				// Log.i(TAG, "Title of post: " + title + ". Content of post: "+
-				// content);
 			} catch (IllegalArgumentException e) {
 				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
 				Toast.makeText(PublishActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
-
 			} catch (Exception e) {
 				// Log.e(TAG, "Exception (DataBase failed)");
 				Toast.makeText(PublishActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
-
 			}
 			myEntry = new BlogEntry();
 			myEntry.setBlogEntry(mContent);
 			myEntry.setTitle(mTitle);
 			myEntry.setCreated(new Date(System.currentTimeMillis()));
-			publishBlogEntry();
+//			publishBlogEntry();
 		}else{
 			Toast.makeText(PublishActivity.this, "There was a problem retriveing the data. not publishing... "+myEntry.toString(), Toast.LENGTH_LONG).show();
-
 		}
-				
-				EditText textTitle = (EditText) this.findViewById(R.id.PreviewTitle);
-				textTitle.setText(mTitle);
-				textTitle.setTextColor(Color.BLACK);
-				textTitle.setEnabled(false);
-				webview = (WebView) findViewById(R.id.PreviewContent);
-				webview.loadDataWithBaseURL(null, mContent, "text/html", "UTF-8", "about:blank");
-				WebSettings websettings = webview.getSettings();
-				websettings.setJavaScriptEnabled(true);
-				websettings.setJavaScriptCanOpenWindowsAutomatically(true);
-				webview.setClickable(true);
-				websettings.setLightTouchEnabled(true);
-				
-				if (this.getWindow().getWindowManager().getDefaultDisplay()
-						.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-					((LinearLayout) this.findViewById(R.id.LayoutForWebWiew)).setLayoutParams(
-							new LayoutParams(LayoutParams.FILL_PARENT,105));
-				} else if (this.getWindow().getWindowManager().getDefaultDisplay()
-						.getOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-					((LinearLayout) this.findViewById(R.id.LayoutForWebWiew)).setLayoutParams(
-							new LayoutParams(LayoutParams.FILL_PARENT,262));;
-				}
-				int w = this.getWindow().getWindowManager().getDefaultDisplay()
-						.getWidth() - 12;
-				((Button) this.findViewById(R.id.BackToCreateBlogEntry))
-						.setWidth(w / 2);
-				((Button) this.findViewById(R.id.Publish)).setWidth(w / 2);
 		
-				Button publishButton = (Button) findViewById(R.id.Publish);
-				publishButton.setOnClickListener(this);
-				this.findViewById(R.id.BackToCreateBlogEntry).setOnClickListener(
-						new OnClickListener() {
-							public void onClick(View v) {
-								Intent i = new Intent(PublishActivity.this,
-										CreateBlogEntry.class);
-								startActivity(i);
-								finish();
-							}
-						});
-
-
-		
-
-		//		publishButton.requestFocus();
 	}
-
-	//	@Override
-	//	public void onClick(View v) {
-	//		this.publishBlogEntry();
-	//	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		//		tracker.stop();
-	}
-
-
-
 	private void publishBlogEntry() {
 		final Activity thread_parent = this;
 		publishProgress = ProgressDialog.show(this, "Publishing blog entry",
@@ -264,10 +167,7 @@ public class PublishActivity extends Activity implements View.OnClickListener {
 						// Log.e(TAG, "SQLException: " + e.getMessage());
 					} catch (Exception e) {
 						// Log.e(TAG, "Exception: " + e.getMessage());
-						Alert
-						.showAlert(PublishActivity.this,
-								"Network connection failed",
-						"Please, check network settings of your device");
+						Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
 						finish();
 					}
 
@@ -297,10 +197,7 @@ public class PublishActivity extends Activity implements View.OnClickListener {
 							attempt++;
 						} catch (Exception e) {
 							// Log.e(TAG, "Exception: " + e.getMessage());
-							Alert
-							.showAlert(PublishActivity.this,
-									"Network connection failed",
-							"Please, check network settings of your device");
+							Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
 							finish();
 						}
 					}
@@ -356,10 +253,7 @@ public class PublishActivity extends Activity implements View.OnClickListener {
 							// Log.e(TAG, "SQLException: " + e.getMessage());
 						} catch (Exception e) {
 							// Log.e(TAG, "Exception: " + e.getMessage());
-							Alert
-							.showAlert(PublishActivity.this,
-									"Network connection failed",
-							"Please, check network settings of your device");
+							Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
 							mDbHelper.close();
 							setting.close();
 							finish();
@@ -387,6 +281,33 @@ public class PublishActivity extends Activity implements View.OnClickListener {
 		publish.start();
 		publishProgress.setMessage("Publishing in progress...");
 	}
+
+	final Handler mHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			Bundle content = msg.getData();
+			String progressId = content.getString(MSG_KEY);
+			if (progressId != null) {
+				if (progressId.equals("1")) {
+					publishProgress.setMessage("Preparing blog config...");
+				} else if (progressId.equals("2")) {
+					publishProgress.setMessage("Authenticating...");
+				} else if (progressId.equals("3")) {
+					publishProgress.setMessage("Contacting server...");
+				} else if (progressId.equals("4")) {
+					publishProgress.setMessage("Creating new entry...");
+				} else if (progressId.equals("5")) {
+					publishProgress.setMessage("Done...");
+				}
+			}
+		}
+	};
+
+	final Runnable mPublishResults = new Runnable() {
+		public void run() {
+			showPublishedStatus();
+		}
+	};
 	private void showPublishedStatus() {
 		publishProgress.dismiss();
 		if (publishStatus == 5) {
@@ -427,9 +348,4 @@ public class PublishActivity extends Activity implements View.OnClickListener {
 		}
 	}
 
-	@Override
-	public void onClick(View arg0) {
-		// TODO Auto-generated method stub
-		
-	}
 }
