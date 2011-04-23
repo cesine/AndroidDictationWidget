@@ -470,6 +470,7 @@ public class MainMenuActivity extends Activity {
         	mStartButton.clearAnimation();
         	mOptionsButton.clearAnimation();
         	mExtrasButton.clearAnimation();
+        	mDraftsButton.clearAnimation();
         }
         
         

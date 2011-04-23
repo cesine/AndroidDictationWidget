@@ -203,7 +203,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
             values.put(AuBlogHistory.ENTRY_LABELS, "");
         }       
         if (values.containsKey(AuBlogHistory.PARENT_ENTRY) == false) {
-            values.put(AuBlogHistory.PARENT_ENTRY, "");
+            values.put(AuBlogHistory.PARENT_ENTRY, "0");
         }  
         if (values.containsKey(AuBlogHistory.DAUGHTER_ENTRY) == false) {
             values.put(AuBlogHistory.DAUGHTER_ENTRY, "");

@@ -58,6 +58,7 @@ public class EditBlogEntryActivity extends Activity {
 	String mPostContent ="";
 	String mPostTitle ="";
 	String mPostLabels ="";
+	String mLongestEverContent ="";
 	private static final String[] PROJECTION = new String[] {
 		AuBlogHistory.ENTRY_TITLE, 
 		AuBlogHistory.ENTRY_CONTENT,
@@ -154,6 +155,9 @@ public class EditBlogEntryActivity extends Activity {
         	mPostContent= strContent;
         	mPostTitle=strTitle;
         	mPostLabels=strLabels;
+        	if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
+    			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+    		}
         }
         public void savePost(String strTitle, String strContent, String strLabels){
         	mPostContent= strContent;
@@ -189,6 +193,7 @@ public class EditBlogEntryActivity extends Activity {
 	      savedInstanceState.putString("title", mPostTitle);
 	      savedInstanceState.putString("content", mPostContent);
 	      savedInstanceState.putString("labels", mPostLabels);
+	      savedInstanceState.putString("longestcontentever", mLongestEverContent);
 //	      savedInstanceState.putString("uri", mUri.getPath());
       
       // etc.
@@ -202,6 +207,7 @@ public class EditBlogEntryActivity extends Activity {
       mPostTitle = savedInstanceState.getString("title");
       mPostContent = savedInstanceState.getString("content");
       mPostLabels = savedInstanceState.getString("labels");
+      mLongestEverContent = savedInstanceState.getString("longestcontentever");
 //      mUri = new Uri(savedInstanceState.getString("uri"));
     }
     @Override
@@ -227,15 +233,26 @@ public class EditBlogEntryActivity extends Activity {
 
 	}
 	private void saveAsSelfToDB(){
-		ContentValues values = new ContentValues();
-    	values.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
-    	values.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
-    	values.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
+		
     	try{
-    		getContentResolver().update(mUri, values,null, null);
-    		Log.d(TAG, "Post saved to database.");
-    		Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
-    	} catch (SQLException e) {
+    		if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
+    			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+    		}
+    		if ( mLongestEverContent.length() <=0 ){ 
+    			//delete the entry the blog entry is completely empty, or if the user never anything. this should prevent having empty entrys in the database, but keep entries that are zeroed out and had content before
+    			getContentResolver().delete(mUri, null, null);
+    			Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
+    		}else{
+	    		ContentValues values = new ContentValues();
+	        	values.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
+	        	values.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
+	        	values.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
+//	        	values.put(AuBlogHistory.USER_TOUCHED, "true"); TODO maybe make a field to indicate that the user never touched the entry, that way wont loose branches in the tree? 
+	    		getContentResolver().update(mUri, values,null, null);
+	    		Log.d(TAG, "Post saved to database.");
+	    		Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
+    		}
+    		    	} catch (SQLException e) {
     		// Log.e(TAG,"SQLException (createPost(title, content))");
     		Toast.makeText(EditBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
     	} catch (Exception e) {
@@ -253,7 +270,12 @@ public class EditBlogEntryActivity extends Activity {
         	daughterValues.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
         	daughterValues.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
         	daughterValues.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
-    		daughterValues.put(AuBlogHistory.PARENT_ENTRY, mUri.getLastPathSegment());
+        	if ( (mPostTitle+mPostContent+mPostLabels).length() <= 0 ){
+        		//if the user blanked out the blog entry, probably the are restarting from scratch so set the parent to zero node
+        		daughterValues.put(AuBlogHistory.PARENT_ENTRY, 0);
+    		}else{
+    			daughterValues.put(AuBlogHistory.PARENT_ENTRY, mUri.getLastPathSegment());
+    		}
     		Uri daughterUri = getContentResolver().insert(AuBlogHistory.CONTENT_URI, daughterValues);
     		/*
     		 * Save parent but just tell it has a daughter, dont put the new values into its entry.

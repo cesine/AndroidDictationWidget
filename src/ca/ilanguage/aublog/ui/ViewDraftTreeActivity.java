@@ -80,7 +80,7 @@ public class ViewDraftTreeActivity extends Activity {
         webSettings.setJavaScriptEnabled(true);
         
         
-		mWebView.loadUrl("file:///android_asset/view_draft_tree.html");
+		mWebView.loadUrl("file:///android_asset/jit/space_tree_demo.html");//view_draft_tree.html");
     }
     public class JavaScriptInterface {
         Context mContext;
