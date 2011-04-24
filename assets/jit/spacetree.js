@@ -21,14 +21,14 @@ var Log = {
     if (!this.elem) 
       this.elem = document.getElementById('log');
     this.elem.innerHTML = text;
-    this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
+    this.elem.style.left = (200 - this.elem.offsetWidth / 2) + 'px';
   }
 };
 
+//the original data
+function loadJasonDataLocal(){
 
-function init(){
-    //init data
-    var json = {
+    return {
         id: "node02",
         name: "0.2",
         data: {},
@@ -759,10 +759,18 @@ function init(){
             }]
         }]
     };
+    
+}
+
+function init(json){
+    //init data
+	//json = loadJasonDataLocal();
     //end
     //init Spacetree
     //Create a new ST instance
     var st = new $jit.ST({
+    	orientation: "top",
+    	indent:10,
         //id of viz container element
         injectInto: 'infovis',
         //set duration for the animation
@@ -780,9 +788,9 @@ function init(){
         //set overridable=true for styling individual
         //nodes or edges
         Node: {
-            height: 20,
-            width: 60,
-            type: 'rectangle',
+            height: 30,
+            width: 40,
+            type: 'ellipse',
             color: '#aaa',
             overridable: true
         },
@@ -815,13 +823,13 @@ function init(){
             };
             //set label styles
             var style = label.style;
-            style.width = 60 + 'px';
+            style.width = 40 + 'px';
             style.height = 17 + 'px';            
             style.cursor = 'pointer';
             style.color = '#333';
             style.fontSize = '0.8em';
             style.textAlign= 'center';
-            style.paddingTop = '3px';
+            style.paddingTop = '8px';
         },
         
         //This method is called right before plotting
@@ -844,7 +852,7 @@ function init(){
                     node.eachSubnode(function(n) { count++; });
                     //assign a node color based on
                     //how many children it has
-                    node.data.$color = ['#aaa', '#baa', '#caa', '#daa', '#eaa', '#faa'][count];                    
+                    node.data.$color = ['#aaa', '#abb', '#acc', '#add', '#aee', '#aff'][count];                    
                 }
             }
         },
@@ -867,6 +875,7 @@ function init(){
     });
     //load json data
     st.loadJSON(json);
+
     //compute node positions and layout
     st.compute();
     //optional: make a translation of the tree
@@ -874,6 +883,7 @@ function init(){
     //emulate a click on the root node.
     st.onClick(st.root);
     //end
+    
     //Add event handlers to switch spacetree orientation.
     var top = $jit.id('r-top'), 
         left = $jit.id('r-left'), 
@@ -884,10 +894,10 @@ function init(){
     
     function changeHandler() {
         if(this.checked) {
-            top.disabled = bottom.disabled = right.disabled = left.disabled = true;
+             bottom.disabled = right.disabled = left.disabled = top.disabled = true;
             st.switchPosition(this.value, "animate", {
                 onComplete: function(){
-                    top.disabled = bottom.disabled = right.disabled = left.disabled = false;
+                    bottom.disabled = right.disabled = left.disabled = top.disabled = false;
                 }
             });
         }
