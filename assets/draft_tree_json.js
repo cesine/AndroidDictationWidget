@@ -56,13 +56,13 @@ json = {
                     name: "3.7",
                     data: {},
                     children: [{
-                        id: "node48",
-                        name: "4.8",
+                        id: "node49",
+                        name: "4.9",
                         data: {},
                         children: []
                     }, {
-                        id: "node49",
-                        name: "4.9",
+                        id: "node48",
+                        name: "4.8",
                         data: {},
                         children: []
                     }, {
@@ -799,8 +799,8 @@ json = {
             Log.write("loading " + node.name);
         },
         
-        onAfterCompute: function(){
-            Log.write("done");
+        onAfterCompute: function(node){
+            Log.write("<input type='button' value='Edit "+node.name+"' onClick='editUri("+node.id+")' />");
         },
         
         //This method is called on DOM label creation.
