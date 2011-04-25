@@ -36,7 +36,7 @@ public class AuBlogHistoryDatabase {
 	    String AUDIO_FILES = "audiofiles";
 	    //arrange entry histories in a heirarchy based on edits
 	    String PARENT_ENTRY = "parententry";
-	    String DAUGHTER_ENTRY = "daughterentry";
+	    String DELETED = "deleted";//changed from daughter entry
 	    String PUBLISHED = "published";
 	    String TIME_CREATED = "timecreated";
 	    String TIME_EDITED = "timeedited";

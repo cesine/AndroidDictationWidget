@@ -101,7 +101,7 @@ public class PublishActivity extends Activity  {
 			myEntry.setBlogEntry(mContent);
 			myEntry.setTitle(mTitle);
 			myEntry.setCreated(new Date(System.currentTimeMillis()));
-//			publishBlogEntry();
+			publishBlogEntry();
 		}else{
 			Toast.makeText(PublishActivity.this, "There was a problem retriveing the data. not publishing... "+myEntry.toString(), Toast.LENGTH_LONG).show();
 		}

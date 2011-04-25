@@ -81,6 +81,7 @@ $(document).ready(function()	{
 <a href="#" class="toggle">this one to <span>remove markItUp!</span></a></p>-->
 <p>
 
+<input type="button" value="Delete" onClick="deletePost()" />
 <input type="button" value="Preview" onClick="savePostToDB()" />
 <input type="button" value="Save" onClick="savePostToDB()" />
 <input type="button" value="Save and Publish" onClick="publishPostToDB()" />
@@ -90,22 +91,16 @@ $(document).ready(function()	{
         //Android.showToast(toast);
     	Android.showToast(toast);
     }
+    function deletePost(){
+    	Android.deletePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    }
     function savePostToDB(){
-    	var content ="";
-    	var title = "";
-    	var labels ="";
     	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function savePostToState(){
-    	var content ="";
-    	var title = "";
-    	var labels ="";
     	Android.saveState(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function publishPostToDB(){
-    	var content ="";
-    	var title = "";
-    	var labels ="";
     	Android.publishPost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function fillFromAndroidActivity(){

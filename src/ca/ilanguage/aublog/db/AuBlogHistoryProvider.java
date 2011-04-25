@@ -31,7 +31,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
     private static final String TAG = "AuBlogHistoryProvider";
 
     private static final String DATABASE_NAME = "aubloghistory.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     //private static final String  AUBLOG_HISTORY_TABLE_NAME= AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME;
 
     private static HashMap<String, String> sAuBlogHistoryProjectionMap;
@@ -192,7 +192,12 @@ public class AuBlogHistoryProvider extends ContentProvider {
         if (values.containsKey(AuBlogHistory.PUBLISHED) == false) {
             values.put(AuBlogHistory.PUBLISHED, "0");
         }       
- 
+        if (values.containsKey(AuBlogHistory.PARENT_ENTRY) == false) {
+            values.put(AuBlogHistory.PARENT_ENTRY, "0");
+        }  
+        if (values.containsKey(AuBlogHistory.DELETED) == false) {
+            values.put(AuBlogHistory.DELETED, "0");
+        }  
 
       // initialize nullable fields here
         if (values.containsKey(AuBlogHistory.ENTRY_TITLE) == false) {
@@ -205,12 +210,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
         if (values.containsKey(AuBlogHistory.ENTRY_LABELS) == false) {
             values.put(AuBlogHistory.ENTRY_LABELS, "");
         }       
-        if (values.containsKey(AuBlogHistory.PARENT_ENTRY) == false) {
-            values.put(AuBlogHistory.PARENT_ENTRY, "0");
-        }  
-        if (values.containsKey(AuBlogHistory.DAUGHTER_ENTRY) == false) {
-            values.put(AuBlogHistory.DAUGHTER_ENTRY, "");
-        }       
+     
      
         if (values.containsKey(AuBlogHistory.AUDIO_FILES) == false) {
             values.put(AuBlogHistory.AUDIO_FILES, "");
@@ -324,7 +324,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.PUBLISHED, AuBlogHistory.PUBLISHED);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.PUBLISHED_IN, AuBlogHistory.PUBLISHED_IN);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.PARENT_ENTRY, AuBlogHistory.PARENT_ENTRY);
-	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.DAUGHTER_ENTRY, AuBlogHistory.DAUGHTER_ENTRY);
+	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.DELETED, AuBlogHistory.DELETED);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.LAST_MODIFIED, AuBlogHistory.LAST_MODIFIED);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.TIME_CREATED, AuBlogHistory.TIME_CREATED);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.TIME_EDITED, AuBlogHistory.TIME_EDITED);
@@ -363,7 +363,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
             		+ AuBlogHistory.ENTRY_LABELS + " TEXT,"
             		+ AuBlogHistory.ENTRY_TITLE + " TEXT,"
             		+ AuBlogHistory.PARENT_ENTRY + " INTEGER,"
-            		+ AuBlogHistory.DAUGHTER_ENTRY   + " INTEGER,"
+            		+ AuBlogHistory.DELETED   + " INTEGER,"
             		+ AuBlogHistory.PUBLISHED_IN + " TEXT,"
             		+ AuBlogHistory.AUDIO_FILES + " TEXT,"
             		+ AuBlogHistory.LAST_MODIFIED + " INTEGER,"
