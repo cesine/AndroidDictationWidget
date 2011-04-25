@@ -107,9 +107,9 @@ public class ViewDraftTreeActivity extends Activity {
         }
         public void editUri(String uri){
         	Toast.makeText(mContext, "Editing post number "+uri, Toast.LENGTH_SHORT).show();
-//        	Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
-//        	i.setData( AuBlogHistory.CONTENT_URI.buildUpon().appendPath(uri).build() );
-//        	startActivity(i);
+        	Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
+        	i.setData( AuBlogHistory.CONTENT_URI.buildUpon().appendPath(uri).build() );
+        	startActivity(i);
         }
      
         
