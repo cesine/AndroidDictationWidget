@@ -138,6 +138,9 @@ public class MainMenuActivity extends Activity {
     private View.OnClickListener sDraftsButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
             if (!mPaused) {
+            	
+            	Toast.makeText(MainMenuActivity.this, "Creating drafts tree, this may take a few moments. ", Toast.LENGTH_LONG).show();
+
             	//Intent i = new Intent(getBaseContext(), Settings.class);
             	Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 

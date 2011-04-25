@@ -57,6 +57,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 	public Cursor fetchAllPosts() {
 		return query(AuBlogHistory.CONTENT_URI, null, null, null, null);
 	}
+
 //	/*
 //	 * add a where clause where publised=1 not published=0
 //	 */
@@ -117,7 +118,9 @@ public class AuBlogHistoryProvider extends ContentProvider {
 //		//TODO might be broken, just included for compatability wiht existing code
 //		return delete(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(rowId.toString()).build(), null, null) > 0;
 //	}
-    
+	public Cursor fetchDaughters(Uri uri){
+		return query(uri, null, AuBlogHistory.PARENT_ENTRY +"="+uri.getLastPathSegment(), null, null);
+	}
      
 	@Override
 	public int delete(Uri uri, String where, String[] whereArgs) {
