@@ -118,40 +118,13 @@ public class ViewDraftTreeActivity extends Activity {
 
 	    public void deleteId(String id){
 	    	Toast.makeText(mContext, "Are you sure you want to delete post number "+id, Toast.LENGTH_SHORT).show();
-
 	    	Uri uri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
-	    	Cursor nodeCursor = managedQuery(uri, PROJECTION, null, null, null);
-	    	nodeCursor.requery();
-	        // Make sure we are at the one and only row in the cursor.
-	    	nodeCursor.moveToFirst();
-	    	String grandParentId=nodeCursor.getString(6);
-	    	nodeCursor.close();
-			/*
-			 * find out the node's children, and set their parent id to the parent of this node.
-			 */
-			Cursor cursor = managedQuery(AuBlogHistory.CONTENT_URI, PROJECTION, AuBlogHistory.PARENT_ENTRY +"="+uri.getLastPathSegment(), null, null);
-			if ((cursor != null) ) {
-				// Requery in case something changed while paused (such as the title)
-				cursor.requery();
-	            // Make sure we are at the one and only row in the cursor.
-	            cursor.moveToFirst();
-	            while (cursor.isAfterLast() == false){
-	            	String daughterId = cursor.getString(0);
-	            	ContentValues daughterValues = new ContentValues();
-	            	daughterValues.put(AuBlogHistory.PARENT_ENTRY, grandParentId);
-	            	getContentResolver().update(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(daughterId).build(), daughterValues,null, null);
-	            	cursor.moveToNext();
-	            }
-	            //firstChild=true;
-//	            cursor.deactivate();
-	    	}
-			
 			/*
 			 * Flag entry as deleted
 			 */
 			ContentValues values = new ContentValues();
 			values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
-			getContentResolver().update(mUri, values,null, null);
+			getContentResolver().update(uri, values,null, null);
 //			getContentResolver().delete(uri, null, null);
 			Toast.makeText(ViewDraftTreeActivity.this, "Will refresh here Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
 			refreshTree();

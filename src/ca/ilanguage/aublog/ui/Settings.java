@@ -500,7 +500,7 @@ public class Settings extends Activity {
 								.setTitle("Success")
 								.setPositiveButton("OK", null)
 								.setMessage(
-										"Your Blogger account has been successfully saved, now you can Create New Blog entries and publish them to this account.")
+										"Your Blogger account has been saved, be sure to verify the information so you can publish blog entries to this account. For now you can Create New Blog Entries using the Main Menu.")
 								.create();
 						dlg.setOnDismissListener(new OnDismissListener() {
 							@Override

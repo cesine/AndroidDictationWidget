@@ -50,7 +50,6 @@ public class EditBlogEntryActivity extends Activity {
 	//uri of the entry being edited.
 	private Uri mUri;
 	private Cursor mCursor;
-	private Boolean mDeleted = false;
 	//savedInstanceState
 	
 	private static final int GROUP_BASIC = 0;
@@ -60,6 +59,9 @@ public class EditBlogEntryActivity extends Activity {
 	String mPostContent ="";
 	String mPostTitle ="";
 	String mPostLabels ="";
+	String mPostParent ="";
+	String mPostId ="";
+	private Boolean mDeleted = false;
 	String mLongestEverContent ="";
 	private static final String[] PROJECTION = new String[] {
 		AuBlogHistory._ID, //0
@@ -106,6 +108,13 @@ public class EditBlogEntryActivity extends Activity {
 				mPostTitle = mCursor.getString(1);
 				mPostContent = mCursor.getString(2);
 				mPostLabels =mCursor.getString(3);
+				mPostId = mCursor.getString(0);
+				if("0".equals(mCursor.getString(5))){ 
+					mDeleted=false;
+				}else{
+					mDeleted=true;
+				}
+				mPostParent = mCursor.getString(6);
                 String nodeAsString="id:"+mCursor.getString(0)+":\ntitle:"+mCursor.getString(1)+":\ncontent:"+mCursor.getString(2)+":\nlabels:"+mCursor.getString(3)+":\npublished:"+mCursor.getString(4)+":\ndeleted:"+mCursor.getString(5)+":\nparent:"+mCursor.getString(6)+":";
                 Toast.makeText(EditBlogEntryActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
 
@@ -160,23 +169,18 @@ public class EditBlogEntryActivity extends Activity {
         public String fetchPostLabels(){
         	return mPostLabels;
         }
+        public String fetchDebugInfo(){
+        	return "Id: "+mPostId+" Parent: "+mPostParent+" Deleted: "+mDeleted.toString()+" LongestEverString:"+mLongestEverContent;
+        }
         public void saveState(String strTitle, String strContent, String strLabels){
-        	if(mDeleted = true){
-        		return;
-        	}
-        	mPostContent= strContent;
-        	mPostTitle=strTitle;
-        	mPostLabels=strLabels;
-        	if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
-    			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
-    		}
+        	saveStateToActivity(strTitle, strContent, strLabels);
         }
         public void savePost(String strTitle, String strContent, String strLabels){
 //        	mPostContent= strContent;
 //        	mPostTitle=strTitle;
 //        	mPostLabels=strLabels;
-        	saveState(strTitle, strContent, strLabels);
-        	saveAsDaughterToDB();
+//        	saveState(strTitle, strContent, strLabels);//dont save the post to this entry, instead it should only go in the next entry.
+        	saveAsDaughterToDB(strTitle, strContent, strLabels);
     		Toast.makeText(EditBlogEntryActivity.this, "Saved \n\""+mPostTitle+"\"", Toast.LENGTH_LONG).show();
 
         }
@@ -213,6 +217,8 @@ public class EditBlogEntryActivity extends Activity {
 	      savedInstanceState.putString("labels", mPostLabels);
 	      savedInstanceState.putString("longestcontentever", mLongestEverContent);
 	      savedInstanceState.putBoolean("deleted", mDeleted);
+	      savedInstanceState.putString("parentid", mPostParent);
+	      savedInstanceState.putString("id",mPostId);
 //	      savedInstanceState.putString("uri", mUri.getPath());
       
       // etc.
@@ -228,6 +234,8 @@ public class EditBlogEntryActivity extends Activity {
       mPostLabels = savedInstanceState.getString("labels");
       mLongestEverContent = savedInstanceState.getString("longestcontentever");
       mDeleted = savedInstanceState.getBoolean("deleted");
+      mPostParent = savedInstanceState.getString("parentid");
+      mPostId = savedInstanceState.getString("id");
 //      mUri = new Uri(savedInstanceState.getString("uri"));
     }
     @Override
@@ -252,18 +260,30 @@ public class EditBlogEntryActivity extends Activity {
 //		mWebView.loadUrl("javascript:savePostToDB()");
 
 	}
+	private void saveStateToActivity(String strTitle, String strContent, String strLabels){
+    	if(mDeleted == true){
+    		return;
+    	}
+    	mPostContent= strContent;
+    	mPostTitle=strTitle;
+    	mPostLabels=strLabels;
+    	if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
+			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+		}
+    }
 	private void saveAsSelfToDB(){
-		if (mDeleted ==true){
+		if (mDeleted == true){
 			return ;
 		}
     	try{
     		if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
     			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
     		}
-    		if ( mLongestEverContent.length() <=3 ){ 
-    			//delete the entry the blog entry is completely empty, or if the user never anything. this should prevent having empty entrys in the database, but keep entries that are zeroed out and had content before
-    			deleteEntry(mUri);
-    		}else{
+//    		if ( mLongestEverContent.length() <=3 ){ 
+//    			//delete the entry the blog entry is completely empty, or if the user never anything. this should prevent having empty entrys in the database, but keep entries that are zeroed out and had content before
+//    			deleteEntry(mUri);
+//    		}
+    		else{
 	    		ContentValues values = new ContentValues();
 	        	values.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
 	        	values.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
@@ -283,54 +303,35 @@ public class EditBlogEntryActivity extends Activity {
 	}
 	public void deleteEntry(Uri uri){
     	mDeleted = true;
-    	Cursor nodeCursor = managedQuery(uri, PROJECTION, null, null, null);
-    	nodeCursor.requery();
-        // Make sure we are at the one and only row in the cursor.
-    	nodeCursor.moveToFirst();
-    	String grandParentId=nodeCursor.getString(6);
-		/*
-		 * find out the node's children, and set their parent id to the parent of this node.
-		 */
-		Cursor cursor = managedQuery(AuBlogHistory.CONTENT_URI, PROJECTION, AuBlogHistory.PARENT_ENTRY +"="+uri.getLastPathSegment(), null, null);
-		if ((cursor != null) ) {
-			// Requery in case something changed while paused (such as the title)
-			cursor.requery();
-            // Make sure we are at the one and only row in the cursor.
-            cursor.moveToFirst();
-            while (cursor.isAfterLast() == false){
-            	String daughterId = cursor.getString(0);
-            	ContentValues daughterValues = new ContentValues();
-            	daughterValues.put(AuBlogHistory.PARENT_ENTRY, grandParentId);
-            	getContentResolver().update(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(daughterId).build(), daughterValues, null, null);
-            	cursor.moveToNext();
-            }
-            //firstChild=true;
-//            cursor.deactivate();
-    	}
-		
-		/*
+    	/*
 		 * Flag entry as deleted
 		 */
 		ContentValues values = new ContentValues();
 		values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
-		getContentResolver().update(mUri, values,null, null);
+		getContentResolver().update(uri, values,null, null);
 //		getContentResolver().delete(uri, null, null);
 		Toast.makeText(EditBlogEntryActivity.this, "Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
 		finish();
 	}
 
-	private void saveAsDaughterToDB(){
+	private void saveAsDaughterToDB(String strTitle, String strContent, String strLabels){
     	try{
     		/*
     		 * Create daughter
     		 */
         	ContentValues daughterValues = new ContentValues();
-        	daughterValues.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
-        	daughterValues.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
-        	daughterValues.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
+        	daughterValues.put(AuBlogHistory.ENTRY_TITLE, strTitle);
+        	daughterValues.put(AuBlogHistory.ENTRY_CONTENT, strContent);
+        	daughterValues.put(AuBlogHistory.ENTRY_LABELS, strLabels);
         	if ( (mPostTitle+mPostContent+mPostLabels).length() <= 0 ){
+        		if (mLongestEverContent.length() <= 0 ){
+        			saveStateToActivity(strTitle, strContent, strLabels);
+        			saveAsSelfToDB();
+        			return;
+        		}
         		//if the user blanked out the blog entry, probably they are restarting from scratch so set the parent to zero node
         		daughterValues.put(AuBlogHistory.PARENT_ENTRY, 0);
+        		
     		}else{
     			daughterValues.put(AuBlogHistory.PARENT_ENTRY, mUri.getLastPathSegment());
     		}
@@ -343,18 +344,23 @@ public class EditBlogEntryActivity extends Activity {
 //    		parentValues.put(AuBlogHistory.DELETED,"true");
 //    		getContentResolver().update(mUri, parentValues,null, null);
     		/*
-    		 * Set the daughter to the active mUri
+    		 * Set the daughter to the active mUri, and reinitialize the state values to the daughers values
     		 */
+    		mPostParent=mUri.getLastPathSegment();
     		Toast.makeText(EditBlogEntryActivity.this, "Post "+daughterUri.getLastPathSegment()+" saved as daugher of: " +mUri.getLastPathSegment()+" to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
     		mUri=daughterUri;
     		getIntent().setData(mUri);
+    		saveStateToActivity(strTitle, strContent, strLabels);
+    		mDeleted=false;
+    		mPostId=mUri.getLastPathSegment();
+    		
     		Log.d(TAG, "Post saved to database.");
     		    	} catch (SQLException e) {
     		// Log.e(TAG,"SQLException (createPost(title, content))");
     		Toast.makeText(EditBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
     	} catch (Exception e) {
     		// Log.e(TAG, "Exception: " + e.getMessage());
-    		Toast.makeText(EditBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
+    		Toast.makeText(EditBlogEntryActivity.this, "Exception "+e, Toast.LENGTH_LONG).show();
     	}
 		
 	}

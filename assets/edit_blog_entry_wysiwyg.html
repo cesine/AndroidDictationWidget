@@ -93,12 +93,15 @@ $(document).ready(function()	{
     }
     function deletePost(){
     	Android.deletePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	document.getElementById('debugbox').value=Android.fetchDebugInfo();
     }
     function savePostToDB(){
     	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	document.getElementById('debugbox').value=Android.fetchDebugInfo();
     }
     function savePostToState(){
     	Android.saveState(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	document.getElementById('debugbox').value=Android.fetchDebugInfo();
     }
     function publishPostToDB(){
     	Android.publishPost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
@@ -107,12 +110,15 @@ $(document).ready(function()	{
     	document.getElementById('f-title').value= Android.fetchPostTitle();
     	document.getElementById('markItUp').value= Android.fetchPostContent();
     	document.getElementById('post-labels').value= Android.fetchPostLabels();
+    	document.getElementById('debugbox').value=Android.fetchDebugInfo();
     }
 </script>
 
 <div id="container">
 
-<table  id="titles"  ">
+<input type="text" name="debug" value="" id="debugbox" >
+
+<table  id="titles"  >
 <tbody><tr><td><label for="f-title">Title:</label></td>
 <td>
 	<div class="errorbox-good"><input type="text" name="title" value="" id="f-title" tabindex="1" class="text" onkeyup="setPreviewTitle(getTitle());" maxlength="150" dir="ltr" size="48"></div></td></tr>

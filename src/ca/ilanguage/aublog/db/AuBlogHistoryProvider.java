@@ -286,6 +286,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] selectionArgs) {
+		//TODO add modified set to current time in the values ?
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         int count;
         switch (sUriMatcher.match(uri)) {
