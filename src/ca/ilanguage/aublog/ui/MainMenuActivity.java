@@ -567,7 +567,7 @@ public class MainMenuActivity extends Activity {
         	+'"'
         	+"<input type='button' value='Edit "
         	+'"'
-        	+"+node.hidden+node.name+"
+        	+"+node.name+"
         	+'"'
         	+"' onClick='editId("
         	+'"'
@@ -638,14 +638,14 @@ public class MainMenuActivity extends Activity {
                  * if this node is flagged as deleted, abort the subtree and the node
                  */
                 String nodeAsString="id:"+cursor.getString(0)+":\ntitle:"+cursor.getString(1)+":\ncontent:"+cursor.getString(2)+":\nlabels:"+cursor.getString(3)+":\npublished:"+cursor.getString(4)+":\ndeleted:"+cursor.getString(5)+":\nparent:"+cursor.getString(6)+":";
-                Toast.makeText(MainMenuActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
+//                Toast.makeText(MainMenuActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
 
                 if ( "1".equals(cursor.getString(5) ) ){
-                	Toast.makeText(MainMenuActivity.this, "A deleted/hidden post:"+nodeAsString, Toast.LENGTH_LONG).show();
+//                	Toast.makeText(MainMenuActivity.this, "A deleted/hidden post:"+nodeAsString, Toast.LENGTH_LONG).show();
 //                	cursor.moveToLast();
 //                	cursor.moveToNext();
                 }else{
-                	Toast.makeText(MainMenuActivity.this, "Post:"+nodeAsString, Toast.LENGTH_LONG).show();
+//                	Toast.makeText(MainMenuActivity.this, "Post:"+nodeAsString, Toast.LENGTH_LONG).show();
 
                 }
                 /*
@@ -657,7 +657,9 @@ public class MainMenuActivity extends Activity {
                 	}
                 	String Id=cursor.getString(0);
                 	node = node+"{\nid: \""+ Id
-                	+"\",\nname: \""+cursor.getString(5)+cursor.getString(1)
+                	+"\",\nname: \"";
+                		if ("1".equals(cursor.getString(5) ) ){node = node+ "*";} //if the node is deleted write  a star
+                	node = node+cursor.getString(1)
                 	+"\",\nhidden: \""+cursor.getString(5)
                 	+"\",\ndata: {"
                 	+"},\nchildren: [";
@@ -681,7 +683,7 @@ public class MainMenuActivity extends Activity {
 			Toast.makeText(MainMenuActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
 		} catch (Exception e) {
 			// Log.e(TAG, "Exception (DataBase failed)");
-			Toast.makeText(MainMenuActivity.this, "There was an error with the cursor "+e, Toast.LENGTH_LONG).show();
+//			Toast.makeText(MainMenuActivity.this, "There was an error with the cursor "+e, Toast.LENGTH_LONG).show();
 		}
 
 		//end root node

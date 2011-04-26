@@ -3657,7 +3657,7 @@
 					var B = {};
 					B.id = D.id;
 					B.name = D.name;
-					B.hidden = D.hidden
+//					B.hidden = D.hidden
 					B.data = D.data;
 					var C = [];
 					D.eachSubnode(function(E) {
