@@ -532,8 +532,9 @@ public class MainMenuActivity extends Activity {
 	}
 
 
-    public String generateDraftTree(){
+    public  String generateDraftTree(){
 //    	BufferedWriter mOut;
+    	
     	String mResultsFile="draft_space_tree.js";
 //    	FileWriter fstream;
     	/*
@@ -568,7 +569,15 @@ public class MainMenuActivity extends Activity {
         	+'"'
         	+"+node.name+"
         	+'"'
-        	+"' onClick='editUri("
+        	+"' onClick='editId("
+        	+'"'
+        	+"+node.id+"
+        	+'"'
+        	+")'/><br /><input type='button' value='Delete "
+        	+'"'
+        	+"+node.name+"
+        	+'"'
+        	+"' onClick='deleteId("
         	+'"'
         	+"+node.id+"
         	+'"'
@@ -621,7 +630,7 @@ public class MainMenuActivity extends Activity {
     		/*
     		 * find all nodes with this node as its parent
     		 */
-        	Cursor cursor =managedQuery(AuBlogHistory.CONTENT_URI, PROJECTION, AuBlogHistory.PARENT_ENTRY +"="+id, null, null);
+        	Cursor cursor = managedQuery(AuBlogHistory.CONTENT_URI, PROJECTION, AuBlogHistory.PARENT_ENTRY +"="+id, null, null);
 //        	Toast.makeText(MainMenuActivity.this, "There are \n"+cursor.getCount()+" daughters", Toast.LENGTH_LONG).show();
         	if ((cursor != null) ) {
     			// Requery in case something changed while paused (such as the title)
@@ -631,8 +640,15 @@ public class MainMenuActivity extends Activity {
                 /*
                  * if this node is flagged as deleted, abort the subtree and the node
                  */
+                String nodeAsString=cursor.getString(0)+"\n"+cursor.getString(1)+"\n"+cursor.getString(2)+"\n"+cursor.getString(3)+"\n"+cursor.getString(4)+"\n"+cursor.getString(5)+"\n"+cursor.getString(6);
+                Toast.makeText(MainMenuActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
+
                 if ( "1".equals(cursor.getString(5) ) ){
+                	Toast.makeText(MainMenuActivity.this, "Skipping a deleted/hidden post:"+nodeAsString, Toast.LENGTH_LONG).show();
                 	cursor.moveToLast();
+                	cursor.moveToNext();
+                }else{
+                	
                 }
                 /*
                  * for each daughter, print the daughter and her subtree
@@ -641,8 +657,8 @@ public class MainMenuActivity extends Activity {
                 	if(!firstChild){
                 		node= node+",";
                 	}
-                	id=cursor.getString(0);
-                	node = node+"{\nid: \""+ id
+                	String Id=cursor.getString(0);
+                	node = node+"{\nid: \""+ Id
                 	+"\",\nname: \""+cursor.getString(1)
                 	+"\",\ndata: {"
                 	+"},\nchildren: [";
@@ -650,21 +666,23 @@ public class MainMenuActivity extends Activity {
                 	/*
                 	 * find all nodes with this node as its parent
                 	 */
-                	node = node + getSubtree(id);
+                	node = node + getSubtree(Id);
 
                 	node =node+ "]\n} ";
                 	firstChild=false;
                 	cursor.moveToNext();
                 }
                 //firstChild=true;
-                cursor.deactivate();
+//                cursor.deactivate();
+                String temp ="";
+                
         	}
     	} catch (IllegalArgumentException e) {
 			// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
 			Toast.makeText(MainMenuActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
 		} catch (Exception e) {
 			// Log.e(TAG, "Exception (DataBase failed)");
-//			Toast.makeText(MainMenuActivity.this, "There was an error with the cursor "+e, Toast.LENGTH_LONG).show();
+			Toast.makeText(MainMenuActivity.this, "There was an error with the cursor "+e, Toast.LENGTH_LONG).show();
 		}
 
 		//end root node

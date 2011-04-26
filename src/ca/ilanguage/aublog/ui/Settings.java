@@ -122,7 +122,7 @@ public class Settings extends Activity {
 		private void showVerifyStatus() {
 			verifyProgress.dismiss();
 			if (verifyStatus == 5) {
-				Alert.showAlert(Settings.this, "Success", "Blogs verified OK!");
+				Alert.showAlert(Settings.this, "Success", "Blogger account verified.");
 				Button SaveProfile = (Button) (Settings.this
 						.findViewById(R.id.Save));
 				SaveProfile.setEnabled(true);
@@ -258,8 +258,7 @@ public class Settings extends Activity {
 		this.findViewById(R.id.BackToMainActivity).setOnClickListener(
 				new OnClickListener() {
 					public void onClick(View v) {
-						Intent i = new Intent(Settings.this, MainMenuActivity.class);
-						startActivity(i);
+						
 						finish();
 					}
 				});
@@ -351,7 +350,7 @@ public class Settings extends Activity {
 												.showAlert(
 														Settings.this,
 														"Network connection failed",
-														"Please, check network settings of your device");
+														"Please check network settings of your device");
 										finish();
 									}
 								}
@@ -501,14 +500,12 @@ public class Settings extends Activity {
 								.setTitle("Success")
 								.setPositiveButton("OK", null)
 								.setMessage(
-										"Your profile has been successfully saved.")
+										"Your Blogger account has been successfully saved, now you can Create New Blog entries and publish them to this account.")
 								.create();
 						dlg.setOnDismissListener(new OnDismissListener() {
 							@Override
 							public void onDismiss(DialogInterface dialog) {
-								Intent i = new Intent(Settings.this,
-										MainMenuActivity.class);
-								startActivity(i);
+								
 								finish();
 							}
 						});
@@ -533,9 +530,7 @@ public class Settings extends Activity {
 						dlg.setOnDismissListener(new OnDismissListener() {
 							@Override
 							public void onDismiss(DialogInterface dialog) {
-								Intent i = new Intent(Settings.this,
-										MainMenuActivity.class);
-								startActivity(i);
+								
 								finish();
 							}
 						});
@@ -556,10 +551,10 @@ public class Settings extends Activity {
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			Intent i = new Intent(Settings.this, MainMenuActivity.class);
+			
 			mDbHelper.close();
 			setting.close();
-			startActivity(i);
+			
 			finish();
 			return true;
 		}

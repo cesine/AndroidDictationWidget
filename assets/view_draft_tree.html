@@ -28,13 +28,20 @@
         //Android.showToast(toast);
     	Android.showToast(toast);
     }
-    function editUri(uri){
-    	Android.editUri(uri);
+    function editId(id){
+    	Android.editId(id);
+    	// /mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js
+    }
+    function deleteId(id){
+    	Android.deleteId(id);
     	// /mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js
     }
     function loadJsonData(){
     	 Android.loadData();
 
+    }
+    function refreshTree(){
+    	Android.refreshTree();
     }
     -->
 </script>
@@ -42,6 +49,9 @@
  
 <div id="left-container"> 
  <h3>Draft Tree</h3>
+ 
+<input type="button" value="Refresh" onClick="refreshTree()" />
+
 <h4>Tree Orientation</h4> 
 <table> 
     <tr> 

@@ -50,6 +50,7 @@ public class EditBlogEntryActivity extends Activity {
 	//uri of the entry being edited.
 	private Uri mUri;
 	private Cursor mCursor;
+	private Boolean mDeleted = false;
 	//savedInstanceState
 	
 	private static final int GROUP_BASIC = 0;
@@ -61,9 +62,13 @@ public class EditBlogEntryActivity extends Activity {
 	String mPostLabels ="";
 	String mLongestEverContent ="";
 	private static final String[] PROJECTION = new String[] {
+		AuBlogHistory._ID, //0
 		AuBlogHistory.ENTRY_TITLE, 
-		AuBlogHistory.ENTRY_CONTENT,
-		AuBlogHistory.ENTRY_LABELS
+		AuBlogHistory.ENTRY_CONTENT, //2
+		AuBlogHistory.ENTRY_LABELS,
+		AuBlogHistory.PUBLISHED, //4
+		AuBlogHistory.DELETED,
+		AuBlogHistory.PARENT_ENTRY //6
 	};
 	
 	private WebView mWebView;
@@ -84,7 +89,7 @@ public class EditBlogEntryActivity extends Activity {
         mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setSavePassword(false);
-        webSettings.setSaveFormData(false);
+        webSettings.setSaveFormData(true);
         webSettings.setJavaScriptEnabled(true);
         
         /**
@@ -98,9 +103,12 @@ public class EditBlogEntryActivity extends Activity {
             // Make sure we are at the one and only row in the cursor.
             mCursor.moveToFirst();
 			try {
-				mPostTitle = mCursor.getString(0);
-				mPostContent = mCursor.getString(1);
-				mPostLabels =mCursor.getString(2);
+				mPostTitle = mCursor.getString(1);
+				mPostContent = mCursor.getString(2);
+				mPostLabels =mCursor.getString(3);
+                String nodeAsString="id:"+mCursor.getString(0)+":\ntitle:"+mCursor.getString(1)+":\ncontent:"+mCursor.getString(2)+":\nlabels:"+mCursor.getString(3)+":\npublished:"+mCursor.getString(4)+":\ndeleted:"+mCursor.getString(5)+":\nparent:"+mCursor.getString(6)+":";
+                Toast.makeText(EditBlogEntryActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
+
 			} catch (IllegalArgumentException e) {
 				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
 				Toast.makeText(EditBlogEntryActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
@@ -153,6 +161,9 @@ public class EditBlogEntryActivity extends Activity {
         	return mPostLabels;
         }
         public void saveState(String strTitle, String strContent, String strLabels){
+        	if(mDeleted = true){
+        		return;
+        	}
         	mPostContent= strContent;
         	mPostTitle=strTitle;
         	mPostLabels=strLabels;
@@ -161,9 +172,10 @@ public class EditBlogEntryActivity extends Activity {
     		}
         }
         public void savePost(String strTitle, String strContent, String strLabels){
-        	mPostContent= strContent;
-        	mPostTitle=strTitle;
-        	mPostLabels=strLabels;
+//        	mPostContent= strContent;
+//        	mPostTitle=strTitle;
+//        	mPostLabels=strLabels;
+        	saveState(strTitle, strContent, strLabels);
         	saveAsDaughterToDB();
     		Toast.makeText(EditBlogEntryActivity.this, "Saved \n\""+mPostTitle+"\"", Toast.LENGTH_LONG).show();
 
@@ -200,6 +212,7 @@ public class EditBlogEntryActivity extends Activity {
 	      savedInstanceState.putString("content", mPostContent);
 	      savedInstanceState.putString("labels", mPostLabels);
 	      savedInstanceState.putString("longestcontentever", mLongestEverContent);
+	      savedInstanceState.putBoolean("deleted", mDeleted);
 //	      savedInstanceState.putString("uri", mUri.getPath());
       
       // etc.
@@ -214,6 +227,7 @@ public class EditBlogEntryActivity extends Activity {
       mPostContent = savedInstanceState.getString("content");
       mPostLabels = savedInstanceState.getString("labels");
       mLongestEverContent = savedInstanceState.getString("longestcontentever");
+      mDeleted = savedInstanceState.getBoolean("deleted");
 //      mUri = new Uri(savedInstanceState.getString("uri"));
     }
     @Override
@@ -239,7 +253,9 @@ public class EditBlogEntryActivity extends Activity {
 
 	}
 	private void saveAsSelfToDB(){
-		
+		if (mDeleted ==true){
+			return ;
+		}
     	try{
     		if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
     			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
@@ -266,21 +282,12 @@ public class EditBlogEntryActivity extends Activity {
     	}
 	}
 	public void deleteEntry(Uri uri){
-    	String[] PROJECTION = new String[] {
-        		AuBlogHistory._ID, //0
-        		AuBlogHistory.ENTRY_TITLE, 
-        		AuBlogHistory.ENTRY_CONTENT, //2
-        		AuBlogHistory.ENTRY_LABELS,
-        		AuBlogHistory.PUBLISHED, //4
-        		AuBlogHistory.DELETED,
-        		AuBlogHistory.PARENT_ENTRY //6
-        	};
+    	mDeleted = true;
     	Cursor nodeCursor = managedQuery(uri, PROJECTION, null, null, null);
     	nodeCursor.requery();
         // Make sure we are at the one and only row in the cursor.
     	nodeCursor.moveToFirst();
     	String grandParentId=nodeCursor.getString(6);
-    	nodeCursor.close();
 		/*
 		 * find out the node's children, and set their parent id to the parent of this node.
 		 */
@@ -294,11 +301,11 @@ public class EditBlogEntryActivity extends Activity {
             	String daughterId = cursor.getString(0);
             	ContentValues daughterValues = new ContentValues();
             	daughterValues.put(AuBlogHistory.PARENT_ENTRY, grandParentId);
-            	getContentResolver().update(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(daughterId).build(), daughterValues,null, null);
+            	getContentResolver().update(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(daughterId).build(), daughterValues, null, null);
             	cursor.moveToNext();
             }
             //firstChild=true;
-            cursor.deactivate();
+//            cursor.deactivate();
     	}
 		
 		/*
@@ -309,7 +316,7 @@ public class EditBlogEntryActivity extends Activity {
 		getContentResolver().update(mUri, values,null, null);
 //		getContentResolver().delete(uri, null, null);
 		Toast.makeText(EditBlogEntryActivity.this, "Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
-	
+		finish();
 	}
 
 	private void saveAsDaughterToDB(){
