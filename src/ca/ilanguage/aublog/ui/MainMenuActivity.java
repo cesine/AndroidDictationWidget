@@ -115,7 +115,8 @@ public class MainMenuActivity extends Activity {
     private View.OnClickListener sOptionButtonListener = new View.OnClickListener() {
         public void onClick(View v) {
             if (!mPaused) {
-                Intent i = new Intent(getBaseContext(), SetPreferencesActivity.class);
+//                Intent i = new Intent(getBaseContext(), SetPreferencesActivity.class);
+                Intent i = new Intent(getBaseContext(), Settings.class);
 
                 v.startAnimation(mButtonFlickerAnimation);
                 mFadeOutAnimation.setAnimationListener(new StartActivityAfterAnimation(i));
@@ -311,6 +312,7 @@ public class MainMenuActivity extends Activity {
         }
         
         mJustCreated = true;
+        mJustCreated = false;
         
         // Keep the volume control type consistent across all activities.
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
