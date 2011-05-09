@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<title>markItUp! Universal markup editor</title>
+<title>AuBlog editor</title>
 <link rel="stylesheet" type="text/css" href="markitup/images/style.css" />
 <!-- jQuery -->
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
@@ -88,14 +88,19 @@ $(document).ready(function()	{
 <script type="text/javascript">
 
     function showAndroidToast(toast) {
-        //Android.showToast(toast);
+        //Android.readTTS(toast);
     	Android.showToast(toast);
+    }
+    function readTTSPost(){
+    	Android.readToTTS("This is what your blog entry says... "+document.getElementById('markItUp').value);
     }
     function deletePost(){
     	Android.deletePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     	document.getElementById('debugbox').value=Android.fetchDebugInfo();
     }
     function savePostToDB(){
+    	//showAndroidToast("Hi from the JavaScript.");
+    	readTTSPost();
     	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     	document.getElementById('debugbox').value=Android.fetchDebugInfo();
     }

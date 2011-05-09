@@ -762,9 +762,9 @@ function loadJasonDataLocal(){
     
 }
 
-function init(json){
+function init(){
     //init data
-	//json = loadJasonDataLocal();
+	json = loadJasonDataLocal();
     //end
     //init Spacetree
     //Create a new ST instance

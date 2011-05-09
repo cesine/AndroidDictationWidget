@@ -1,5 +1,7 @@
 package ca.ilanguage.aublog.ui;
 
+import java.util.Locale;
+
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,10 +10,12 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Color;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.net.NetworkInfo.DetailedState;
 import android.os.Bundle;
 import android.os.Handler;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -43,10 +47,20 @@ import ca.ilanguage.aublog.util.Alert;
  * code paths for this sort of communication.
  *
  */
-public class EditBlogEntryActivity extends Activity {
+public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnInitListener {
 
     private static final String TAG = "CreateBlogEntryActivity";
-
+    /** Talk to the user */
+    private TextToSpeech mTts;
+    
+    private Long mStartTime;
+    private Long mEndTime;
+    private Long mTimeAudioWasRecorded;
+    
+    private String mDateString ="";
+    private String mAudioResultsFile;
+    private MediaRecorder mRecorder;
+    
 	//uri of the entry being edited.
 	private Uri mUri;
 	private Cursor mCursor;
@@ -75,7 +89,32 @@ public class EditBlogEntryActivity extends Activity {
 	
 	private WebView mWebView;
     private Handler mHandler = new Handler();
+  
+    //implement on Init for the text to speech
+	public void onInit(int status) {
+		if (status == TextToSpeech.SUCCESS) {
+			// Set preferred language to US english.
+			// Note that a language may not be available, and the result will
+			// indicate this.
+			int result = mTts.setLanguage(Locale.US);
+			// Try this someday for some interesting results.
+			// int result mTts.setLanguage(Locale.FRANCE);
+			if (result == TextToSpeech.LANG_MISSING_DATA
+					|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
+				// Language data is missing or the language is not supported.
+				Log.e(TAG, "Language is not available.");
+				//Toast.makeText(EditBlogEntryActivity.this, "The English TextToSpeech isn't installed, you can go into the \nAndroid's settings in the \nVoice Input and Output menu to turn it on. ", Toast.LENGTH_LONG).show();
 
+			} else {
+				//everything is working.
+			}
+		} else {
+			// Initialization failed.
+			Log.e(TAG, "Sorry, I can't talk to you because I could not initialize TextToSpeech.");
+		}
+	}
+    
+    
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
       super.onConfigurationChanged(newConfig);
@@ -84,8 +123,12 @@ public class EditBlogEntryActivity extends Activity {
 
     }
     @Override
-    public void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mTts = new TextToSpeech(this, this);
+        mTts.speak("The text to speech is working. This means I can talk to you so that you don't have to look at the screen.",
+        TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
+        null);
         setContentView(R.layout.main_webview);
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
@@ -157,7 +200,11 @@ public class EditBlogEntryActivity extends Activity {
          * 
          * */
         public void showToast(String toast) {
-            Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+            //readTTS(toast);
+        	Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+        }
+        public void readToTTS(String message){
+        	readTTS(message);
         }
         
         public String fetchPostContent(){
@@ -313,7 +360,9 @@ public class EditBlogEntryActivity extends Activity {
 		Toast.makeText(EditBlogEntryActivity.this, "Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
 		finish();
 	}
-
+	public void readTTS(String message){
+		mTts.speak(message,TextToSpeech.QUEUE_FLUSH, null);
+	}
 	private void saveAsDaughterToDB(String strTitle, String strContent, String strLabels){
     	try{
     		/*
@@ -353,7 +402,9 @@ public class EditBlogEntryActivity extends Activity {
     		saveStateToActivity(strTitle, strContent, strLabels);
     		mDeleted=false;
     		mPostId=mUri.getLastPathSegment();
-    		
+    		mTts.speak("The text to speech is working. This means I can talk to you so that you don't have to look at the screen.",
+    		        TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
+    		        null);
     		Log.d(TAG, "Post saved to database.");
     		    	} catch (SQLException e) {
     		// Log.e(TAG,"SQLException (createPost(title, content))");
