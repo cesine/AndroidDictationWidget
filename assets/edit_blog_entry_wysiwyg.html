@@ -80,17 +80,36 @@ $(document).ready(function()	{
 <!-- <p>Click <a href="#" class="add">this link to insert content</a> from anywhere in the page or 
 <a href="#" class="toggle">this one to <span>remove markItUp!</span></a></p>-->
 <p>
-
 <input type="button" value="Delete" onClick="deletePost()" />
 <input type="button" value="Preview" onClick="savePostToDB()" />
 <input type="button" value="Save" onClick="savePostToDB()" />
 <input type="button" value="Save and Publish" onClick="publishPostToDB()" />
-<script type="text/javascript">
 
+<input type="button" value="Record" onClick="startRecording()" />
+<input type="button" value="Pause" onClick="pauseRecording()" />
+<input type="button" value="Stop" onClick="stopRecording()" />
+<input type="button" value="Time" onClick="timeRecording()" />
+
+<script type="text/javascript">
+	
+    function startRecording() {
+    	document.getElementById('debugbox').value=Android.startToRecord();
+    }
+    function pauseRecording() {
+    	document.getElementById('debugbox').value=Android.pauseRecord();
+    }
+    function stopRecording() {
+    	document.getElementById('debugbox').value=Android.stopRecord();
+    }
+    function timeRecording() {
+    	document.getElementById('debugbox').value=Android.getTimeRecording():
+    }
+    
     function showAndroidToast(toast) {
         //Android.readTTS(toast);
     	Android.showToast(toast);
     }
+    
     function readTTSPost(){
     	Android.readToTTS("This is what your blog entry says... "+document.getElementById('markItUp').value);
     }

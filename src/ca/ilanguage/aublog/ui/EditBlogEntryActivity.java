@@ -60,6 +60,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private String mDateString ="";
     private String mAudioResultsFile;
     private MediaRecorder mRecorder;
+    //TDDO adde recording logic 
+    //TODO figure out the problems with the account database,decoup0le the account database with the blog entry screen
     
 	//uri of the entry being edited.
 	private Uri mUri;
@@ -126,9 +128,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
-        mTts.speak("The text to speech is working. This means I can talk to you so that you don't have to look at the screen.",
-        TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
-        null);
+        //TODO add some logic to turn this message on and off using defaults and preferences
+        
+//        mTts.speak("The text to speech is working. This means I can talk to you so that you don't have to look at the screen.",
+//        TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
+//        null);
         setContentView(R.layout.main_webview);
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
@@ -205,6 +209,22 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         }
         public void readToTTS(String message){
         	readTTS(message);
+        }
+        /*
+         * methods to record and manage recording of blog entry
+         * TODO add some infomesages into the tool bar
+         */
+        public String startToRecord(){
+        	return beginRecording();
+        }
+        public String stopRecord(){
+        	return stopSaveRecording();
+        }
+        public String pauseRecord(){
+        	return pauseTheRecording();
+        }
+        public String getTimeRecording(){
+        	return returnTimeRecording();
         }
         
         public String fetchPostContent(){
@@ -361,8 +381,24 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		finish();
 	}
 	public void readTTS(String message){
-		mTts.speak(message,TextToSpeech.QUEUE_FLUSH, null);
+		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);
+		//TODO change other flush to queue add 
 	}
+	
+	public String beginRecording(){
+		return "Recording...";
+	}
+	public String stopSaveRecording(){
+		return "Saved.";
+	}
+	public String pauseTheRecording(){
+		return "Paused.";
+	}
+	public String returnTimeRecording(){
+		return "hi";
+	}
+	
+	
 	private void saveAsDaughterToDB(String strTitle, String strContent, String strLabels){
     	try{
     		/*
