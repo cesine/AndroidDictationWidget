@@ -1,5 +1,7 @@
 package ca.ilanguage.aublog.ui;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 
 import android.app.Activity;
@@ -32,6 +34,7 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.db.DBTextAdapter;
 import ca.ilanguage.aublog.db.AuBlogHistoryProvider;
 import ca.ilanguage.aublog.util.Alert;
+
 /**
  * Demonstrates how to embed a WebView in your activity. Also demonstrates how
  * to have javascript in the WebView call into the activity, and how the activity 
@@ -59,6 +62,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     
     private String mDateString ="";
     private String mAudioResultsFile;
+    private String mAuBlogDirectory = "/sdcard/AuBlog";
     private MediaRecorder mRecorder;
     //TDDO adde recording logic 
     //TODO figure out the problems with the account database,decoup0le the account database with the blog entry screen
@@ -133,6 +137,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 //        mTts.speak("The text to speech is working. This means I can talk to you so that you don't have to look at the screen.",
 //        TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
 //        null);
+        mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
+	    mDateString = mDateString.replaceAll("/","_").replaceAll(" ","_");
+     
+     
+        
         setContentView(R.layout.main_webview);
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
@@ -386,16 +395,46 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	
 	public String beginRecording(){
+		/*
+		 * TODO get audio from blue tooth or mic or usb mic?
+		 */
+		mStartTime=System.currentTimeMillis();
+		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
+		mDateString = mDateString.replaceAll("/","_").replaceAll(" ","_");
+		mAudioResultsFile = mAuBlogDirectory+"audio/"+mDateString+"_"+System.currentTimeMillis()+"_"+mPostTitle+".mp3";    
+		new File(mAudioResultsFile).mkdirs();
+		mRecorder = new MediaRecorder();
+		try {
+	    	//http://www.benmccann.com/dev-blog/android-audio-recording-tutorial/
+	    	mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+		    mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+		    mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+		    mRecorder.setOutputFile(mAudioResultsFile);
+		    mRecorder.prepare();
+		    mRecorder.start();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			Toast.makeText(EditBlogEntryActivity.this, "The App cannot save audio, maybe the Android is attached to a computer?", Toast.LENGTH_SHORT).show();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Toast.makeText(EditBlogEntryActivity.this, "The App cannot save audio, maybe the Android is attached to a computer?", Toast.LENGTH_SHORT).show();
+		}
 		return "Recording...";
 	}
 	public String stopSaveRecording(){
-		return "Saved.";
+		mEndTime=System.currentTimeMillis();
+	   	mRecorder.stop();
+	   	mRecorder.release();
+	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
+		return "Saved."+mTimeAudioWasRecorded/100+"sec";
 	}
 	public String pauseTheRecording(){
 		return "Paused.";
 	}
 	public String returnTimeRecording(){
-		return "hi";
+		Long timePassed = (System.currentTimeMillis()-mStartTime)/1000;
+		return timePassed+"min";
 	}
 	
 	
