@@ -88,7 +88,6 @@ $(document).ready(function()	{
 <input type="button" value="Record" onClick="startRecording()" />
 <input type="button" value="Pause" onClick="pauseRecording()" />
 <input type="button" value="Stop" onClick="stopRecording()" />
-<input type="button" value="Time" onClick="timeRecording()" />
 
 <script type="text/javascript">
 	
@@ -101,9 +100,9 @@ $(document).ready(function()	{
     function stopRecording() {
     	document.getElementById('debugbox').value=Android.stopRecord();
     }
-    function timeRecording() {
-    	document.getElementById('debugbox').value=Android.getTimeRecording():
-    }
+    //function timeRecording() {
+    	//document.getElementById('debugbox').value=Android.getTimeRecording():
+    //}
     
     function showAndroidToast(toast) {
         //Android.readTTS(toast);

@@ -62,7 +62,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     
     private String mDateString ="";
     private String mAudioResultsFile;
-    private String mAuBlogDirectory = "/sdcard/AuBlog";
+    private String mAuBlogDirectory = "/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
     //TDDO adde recording logic 
     //TODO figure out the problems with the account database,decoup0le the account database with the blog entry screen
@@ -401,8 +401,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mStartTime=System.currentTimeMillis();
 		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
 		mDateString = mDateString.replaceAll("/","_").replaceAll(" ","_");
-		mAudioResultsFile = mAuBlogDirectory+"audio/"+mDateString+"_"+System.currentTimeMillis()+"_"+mPostTitle+".mp3";    
+		mAudioResultsFile = mAuBlogDirectory+"audio/";
 		new File(mAudioResultsFile).mkdirs();
+		mAudioResultsFile=mAudioResultsFile+mDateString+"_"+System.currentTimeMillis()+"_"+mPostTitle+".mp3";    
 		mRecorder = new MediaRecorder();
 		try {
 	    	//http://www.benmccann.com/dev-blog/android-audio-recording-tutorial/
