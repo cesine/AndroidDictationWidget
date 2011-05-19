@@ -9,6 +9,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
@@ -40,6 +41,8 @@ import ca.ilanguage.aublog.db.AuBlogHistoryProvider;
 import ca.ilanguage.aublog.db.BlogEntry;
 import ca.ilanguage.aublog.db.DBAdapter;
 import ca.ilanguage.aublog.db.DBTextAdapter;
+import ca.ilanguage.aublog.util.AuBlog;
+import ca.ilanguage.aublog.util.PreferenceConstants;
 import ca.ilanguage.aublog.util.SpannableBufferHelper;
 import ca.ilanguage.aublog.util.Alert;
 
@@ -59,8 +62,9 @@ public class PublishActivity extends Activity  {
 	int publishStatus = 0;
 	private ProgressDialog publishProgress = null;
 	private int attempt = 0;
-	private DBAdapter mDbHelper;
-	private static Cursor setting = null;
+	private String mBloggerAccount;
+	private String mBloggerPassword;
+	
 	//	private DBTextAdapter mDbTextHelper;
 	private static Cursor mCursor = null;
 	private Uri mUri;
@@ -76,11 +80,27 @@ public class PublishActivity extends Activity  {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.transparent_activity);
-		mUri = getIntent().getData();
 		
+
+		/*
+		 * TODO get blogger infomation out of the preferences
+		 */
+			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		    
+//		    mLevelRow = prefs.getInt(PreferenceConstants.PREFERENCE_LEVEL_ROW, 0);
+//		    mLevelIndex = prefs.getInt(PreferenceConstants.PREFERENCE_LEVEL_INDEX, 0);
+			//mBloggerAccount= "cesine.ca@gmail.com";
+		mBloggerAccount = prefs.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "see settings");
+		mBloggerPassword =prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
+		Toast.makeText(PublishActivity.this, "Account name is "+mBloggerAccount, Toast.LENGTH_LONG).show();
+		
+		/*
+		 * Get the data out of the database for the relevent blog post taht this activity was called on, display the information to the user.
+		 */
+		mUri = getIntent().getData();
 		Toast tellUser = Toast.makeText(this, 
         		"The data in the uri is: \n"+mUri.toString(), Toast.LENGTH_LONG);
-//        tellUser.show();
+        tellUser.show();
         mCursor = managedQuery(mUri, PROJECTION, null, null, null);
 		if (mCursor != null) {
 			// Requery in case something changed while paused (such as the title)
@@ -136,43 +156,26 @@ public class PublishActivity extends Activity  {
 				String auth_id = null;
 				boolean authFlag = false;
 				attempt = 0;
-				while ((attempt <= MainMenuActivity.AMOUNTOFATTEMPTS)
+				while ((attempt <= AuBlog.AMOUNTOFATTEMPTS)
 						&& (!authFlag)) {
 					try {
-						mDbHelper = new DBAdapter(PublishActivity.this);
-						try {
-							mDbHelper.open();
-						} catch (SQLException e) {
-							// Log.e(TAG, "Database has not opened");
-						}
-						setting = mDbHelper.fetchSettindById(1);
-						startManagingCursor(setting);
-						auth_id = blogapi
-						.getAuthId(
-								setting
-								.getString(setting
-										.getColumnIndexOrThrow(DBAdapter.KEY_LOGIN)),
-										setting
-										.getString(setting
-												.getColumnIndexOrThrow(DBAdapter.KEY_PASSWORD)));
-						mDbHelper.close();
-						setting.close();
+						auth_id = blogapi.getAuthId(mBloggerAccount,mBloggerPassword);
 						authFlag = true;
 						attempt = 0;
 					} catch (com.google.gdata.util.AuthenticationException e) {
 						attempt++;
 						// Log.e(TAG, "AuthenticationException " +
 						// e.getMessage());
-					} catch (SQLException e) {
-						// Log.e(TAG, "SQLException: " + e.getMessage());
-					} catch (Exception e) {
+					}  catch (Exception e) {
 						// Log.e(TAG, "Exception: " + e.getMessage());
 						Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
+						//stop the thread and go back to publish activity
 						finish();
 					}
 
 				}
 				publishStatus = 1;
+				Toast.makeText(PublishActivity.this, "Got auth token:" + auth_id, Toast.LENGTH_LONG).show();
 				// Log.d(TAG, "Got auth token:" + auth_id);
 				publishStatus = 2;
 				if (auth_id != null) {
@@ -183,7 +186,7 @@ public class PublishActivity extends Activity  {
 					String postUri = null;
 					authFlag = false;
 					attempt = 0;
-					while ((attempt <= MainMenuActivity.AMOUNTOFATTEMPTS)
+					while ((attempt <= AuBlog.AMOUNTOFATTEMPTS)
 							&& (!authFlag)) {
 						try {
 							postUri = blogapi.getPostUrl();
@@ -214,17 +217,14 @@ public class PublishActivity extends Activity  {
 					mHandler.sendMessage(statusMsg);
 					authFlag = false;
 					attempt = 0;
-					while ((attempt <= MainMenuActivity.AMOUNTOFATTEMPTS)
+					
+					/*TODO clean from here
+					 * 
+					 */
+					while ((attempt <= AuBlog.AMOUNTOFATTEMPTS)
 							&& (!authFlag)) {
 						try {
-							mDbHelper = new DBAdapter(PublishActivity.this);
-							try {
-								mDbHelper.open();
-							} catch (SQLException e) {
-								// Log.e(TAG, "Database has not opened");
-							}
-							setting = mDbHelper.fetchSettindById(1);
-							startManagingCursor(setting);
+							
 							publishOk = blogapi
 							.createPost(
 									thread_parent,
@@ -234,35 +234,26 @@ public class PublishActivity extends Activity  {
 									myEntry.getTitle(),
 									null,
 									entry,
-									setting
-									.getString(setting
-											.getColumnIndexOrThrow(DBAdapter.KEY_LOGIN)),
-											setting
-											.getString(setting
-													.getColumnIndexOrThrow(DBAdapter.KEY_PASSWORD)),
+									mBloggerAccount,
+											mBloggerPassword,
 													myEntry.isDraft());
-							mDbHelper.close();
-							setting.close();
+							
 							authFlag = true;
 							attempt = 0;
 						} catch (ServiceException e) {
 							// Log.e(TAG, "ServiceException: " +
 							// e.getMessage());
 							attempt++;
-						} catch (SQLException e) {
-							// Log.e(TAG, "SQLException: " + e.getMessage());
 						} catch (Exception e) {
 							// Log.e(TAG, "Exception: " + e.getMessage());
 							Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
-							mDbHelper.close();
-							setting.close();
+							//finish thread?
 							finish();
 						}
 					}
 				} else {
 					publishStatus = 3;
-					mDbHelper.close();
-					setting.close();
+					
 				}
 				status.putString(MSG_KEY, "5");
 				statusMsg = mHandler.obtainMessage();

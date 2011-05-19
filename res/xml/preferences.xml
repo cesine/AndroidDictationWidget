@@ -35,76 +35,25 @@
                 xmlns:replica="http://schemas.android.com/apk/res/ca.ilanguage.aublog">
 			<CheckBoxPreference
        			android:key="enableClickAttack"
-                android:title="@string/preference_enable_click_attack"
-                android:summaryOn="@string/preference_enable_click_attack_summary"
-                android:summaryOff="@string/preference_enable_click_attack_summary"
+                android:title="@string/preference_enable_blogger_account"
+                android:summaryOn="@string/preference_enable_blogger_account_summary"
+                android:summaryOff="@string/preference_enable_blogger_account_summary"
                 android:defaultValue="true"
                 android:persistent="true"
                 />
-                
-            <ca.ilanguage.aublog.util.KeyboardConfigDialogPreference
-       			android:key="keyconfig"
-                android:title="@string/preference_key_config"
-                android:summary="@string/preference_key_config_summary"
-                android:dialogLayout="@layout/key_config" 
-                android:dialogTitle="@string/preference_key_config_dialog_title"
-                android:negativeButtonText="@string/preference_key_config_dialog_cancel"
-                android:positiveButtonText="@string/preference_key_config_dialog_ok"
-                replica:leftKey="keyLeft"
-                replica:rightKey="keyRight"
-                replica:jumpKey="keyJump"
-                replica:attackKey="keyAttack"
-                />
-                
-           	<ca.ilanguage.aublog.util.SliderPreference
-                android:key="movementSensitivity"
-                android:defaultValue="100"
-                android:title="@string/preference_movement_sensitivity" 
-                android:summary="@string/preference_movement_sensitivity_summary"
-                replica:maxText="@string/preference_movement_max"
-                replica:minText="@string/preference_movement_min" 
-                android:persistent="true"/>     
-                
-            <CheckBoxPreference
-       			android:key="enableScreenControls"
-                android:title="@string/preference_enable_screen_controls"
-                android:summaryOn="@string/preference_enable_screen_controls_summary"
-                android:summaryOff="@string/preference_enable_screen_controls_summary"
-                android:defaultValue="false"
-                android:persistent="true"
-                android:disableDependentsState="true"
-                />
-                  
-            <CheckBoxPreference
-       			android:key="enableTiltControls"
-                android:title="@string/preference_enable_tilt_controls"
-                android:summaryOn="@string/preference_enable_tilt_controls_summary"
-                android:summaryOff="@string/preference_enable_tilt_controls_summary"
-                android:defaultValue="false"
-                android:persistent="true"
-                android:dependency="enableScreenControls"
-                />
-                
-             <ca.ilanguage.aublog.util.SliderPreference
-                android:key="tiltSensitivity"
-                android:defaultValue="50"
-                android:title="@string/preference_tilt_sensitivity" 
-                android:summary="@string/preference_tilt_sensitivity_summary"
-                replica:maxText="@string/preference_tilt_max"
-                replica:minText="@string/preference_tilt_min"
-                android:persistent="true"
-                android:dependency="enableTiltControls"/>        
- 
+    		<EditTextPreference android:title="Edit Text Preference"
+				android:key="bloggerAccount" 
+				android:summary="Enter Your Name" android:dialogTitle="Enter Your Name"
+				android:defaultValue="Android Partaker"/>
+			
+			<EditTextPreference android:title="Edit Text Preference"
+				android:key="bloggerPassword"  android:password="true"
+				android:summary="Enter Your Password" android:dialogTitle="Enter Your password"
+				android:defaultValue="Android Partaker"/>
+			
+                   
         </PreferenceScreen>
             
-        <CheckBoxPreference
-       			android:key="safeMode"
-                android:title="@string/preference_safe_mode"
-                android:summaryOn="@string/preference_safe_mode_summary"
-                android:summaryOff="@string/preference_safe_mode_summary"
-                android:defaultValue="false"
-                android:persistent="true"
-                />
                 
     </PreferenceCategory>
     
@@ -139,7 +88,7 @@
                 android:title="@string/preference_visit_site">
 
             <intent android:action="android.intent.action.VIEW"
-                    android:data="http://replicaisland.net" />
+                    android:data="http://aublog.net" />
 
         </PreferenceScreen>
         

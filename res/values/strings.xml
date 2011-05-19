@@ -18,21 +18,24 @@
 
 <!-- UI -->
 <string name="preference_save_game">AuBlog Data</string>
-<string name="preference_erase_save_game">Erase Saved AuBlog</string>
-<string name="preference_erase_save_game_dialog">Really erase your saved AuBlog?  All of your progress will be lost!</string>
+<string name="preference_erase_save_game">Erase Saved AuBlog Drafts</string>
+<string name="preference_erase_save_game_dialog">Really erase your saved drafts?  All of your drafts will be lost!</string>
 <string name="preference_erase_save_game_dialog_title">Now wait just a minute</string>
-<string name="preference_erase_save_game_dialog_ok">Erase Save</string>
+<string name="preference_erase_save_game_dialog_ok">Erase Drafts</string>
 <string name="preference_erase_save_game_dialog_cancel">Cancel</string>
 
 
 <string name="preference_game_settings">AuBlog Settings</string>
-<string name="preference_enable_sound">Enable Sound</string>
-<string name="preference_enable_sound_summary">Disabling sound may improve performance on some devices.</string>
+<string name="preference_enable_sound">Enable Text to Speech</string>
+<string name="preference_enable_sound_summary">The Text to Speech voice might be annoying for some users, you can search for Loquendo on the Market if you want a nice voice.</string>
 
 <string name="preference_safe_mode">Safe Mode</string>
 <string name="preference_safe_mode_summary">Enables safety hacks for broken devices (Cliq, etc), but causes some visual artifacts. Try this if you have problems.</string>
 
-<string name="preference_configure_controls">Configure Controls</string>
+<string name="preference_configure_controls">Configure Blogger Accounts</string>
+<string name="preference_enable_blogger_account">Use this account</string>
+<string name="preference_enable_blogger_account_summary">Use this blogger account to publish your posts by default.</string>
+
 <string name="preference_enable_click_attack">Click Attack</string>
 <string name="preference_enable_click_attack_summary">Use the trackball click or directional pad center button to attack.</string>
 <string name="preference_enable_screen_controls">On-Screen Controls</string>
@@ -62,16 +65,16 @@
 <string name="preference_key_config_attack">Attack</string>
 
 
-<string name="preference_enable_statistics">Report Play Statistics</string>
-<string name="preference_enable_statistics_summary">Sends anonymous play statistics to a server to help us make this game more fun.</string>
+<string name="preference_enable_statistics">Report my edit Statistics</string>
+<string name="preference_enable_statistics_summary">Sends anonymous edit statistics to a server to help us make this app more useful and adaptive.</string>
 
 
 <string name="preference_about">About</string>
 <string name="preference_about_title">About AuBlog</string>
-<string name="preference_about_summary">AuBlog was made by Chris Pruett and Genki Mine, and produced by Tom Moss.</string>
+<string name="preference_about_summary">AuBlog was made by Gina Cook and Meghan Perry, and produced by iLanguage Lab.</string>
 <string name="preference_visit_site">Go to the AuBlog web site</string>
 <string name="preference_thanks_title">Special Thanks</string>
-<string name="preference_thanks_summary">Special Thanks to Eido Inoue, Casey Richardson, Jason Chen, Tim Mansfield, and the Android Team for their support of this project.</string>
+<string name="preference_thanks_summary">Special Thanks to the Montreal Computational Linguistics community, and the Android Open Source developers for their work which directly or indirectly contributed to this project.</string>
 <string name="preference_licence_title">License</string>
 <string name="preference_licence_summary">Portions of this AuBlog are modifications based on work created and shared by Google and used according to terms described in the Creative Commons 3.0 Attribution License.</string>
 <string name="preference_misc">More Information</string>
@@ -109,8 +112,8 @@
 <string name="nav_type">Trackball</string>
 
 <string name="whats_new_dialog_title">AuBlog</string>
-<string name="whats_new_dialog_ok">Rock on!</string>
-<string name="whats_new_dialog_message">Thanks for downloading AuBlog.  Over 500 people use AuBlog!\n\n
+<string name="whats_new_dialog_ok">Let\'s get started!</string>
+<string name="whats_new_dialog_message">Thanks for downloading AuBlog.\n\n
 This is an open source project.  If you are interested in how it works, or would like to add your
 own modules, check out the source at our web site, aublog.net.
 \n
@@ -127,7 +130,7 @@ Based on your device hardware, the following control scheme has been automatical
 &lt;br>
 &lt;small>%1s&lt;/small>
 &lt;br>
-&lt;br>AuBlog supports many different control configurations.  Control options can be changed at 
+&lt;br>AuBlog supports many different blog configurations.  Control options can be changed at 
 any time using the Configure Controls button in Options.
 &lt;br>
 &lt;br>

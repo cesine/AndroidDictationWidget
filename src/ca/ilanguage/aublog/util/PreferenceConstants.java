@@ -45,7 +45,9 @@ public class PreferenceConstants {
     public static final String PREFERENCE_ATTACK_KEY = "keyAttack";
     public static final String PREFERENCE_JUMP_KEY = "keyJump";
     
-    public static final String PREFERENCE_NAME = "ReplicaIslandPrefs";
+    public static final String PREFERENCE_NAME = "AuBlogPrefs";
+    public static final String PREFERENCE_ACCOUNT = "bloggerAccount";
+    public static final String PREFERENCE_PASSWORD = "bloggerPassword";
 	
 	
 	

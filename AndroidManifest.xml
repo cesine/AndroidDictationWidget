@@ -67,6 +67,7 @@
 	   			 
 	    <activity android:name="ca.ilanguage.aublog.ui.EditBlogEntryActivity" android:label="Create new post">
 		</activity>
+		<activity android:name="ca.ilanguage.aublog.ui.AuBlog" android:label="AuBlog"/>
 	    <activity android:name="ca.ilanguage.aublog.ui.ViewDraftTreeActivity" android:label="View drafts">
 		</activity>
 	    <activity android:name="ca.ilanguage.aublog.ui.AboutActivity" android:label="About AuBlog">

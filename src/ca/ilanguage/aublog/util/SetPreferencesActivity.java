@@ -20,13 +20,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
+	
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,13 +46,25 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         	YesNoDialogPreference yesNo = (YesNoDialogPreference)eraseGameButton;
         	yesNo.setListener(this);
         }
+        //Preference acc = getPreferenceManager().findPreference("bloggerAccount");
         
+        
+        /*
         Preference configureKeyboardPref = getPreferenceManager().findPreference("keyconfig");
         if (configureKeyboardPref != null) {
-        	KeyboardConfigDialogPreference config = (KeyboardConfigDialogPreference)configureKeyboardPref;
+        	BlogAccountConfigDialogPreference config = (BlogAccountConfigDialogPreference)configureKeyboardPref;
         	config.setPrefs(getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE));
         	config.setContext(this);
         }
+        
+        
+        addPreferencesFromResource(R.xml.preference);
+7
+        PreferenceManager.setDefaultValues(PreferenceExample.this, R.xml.preference, false);
+        
+        SharedPreferences myPreference=PreferenceManager.getDefaultSharedPreferences(this);
+
+        */
         
         if (getIntent().getBooleanExtra("controlConfig", false)) {
         	PreferenceScreen controlConfig = (PreferenceScreen)getPreferenceManager().findPreference("controlConfigScreen");
