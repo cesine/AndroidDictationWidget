@@ -46,7 +46,7 @@
 	   			  android:configChanges="keyboardHidden|orientation"/>
 		     					
 		     					
-		<activity android:name="ca.ilanguage.aublog.util.SetPreferencesActivity"
+		<activity android:name="ca.ilanguage.aublog.preferences.SetPreferencesActivity"
 				   />
 		     					
     	<activity android:name="ca.ilanguage.aublog.util.AnimationPlayerActivity"
@@ -72,16 +72,11 @@
 		</activity>
 	    <activity android:name="ca.ilanguage.aublog.ui.AboutActivity" android:label="About AuBlog">
 		</activity>
-	   			   			 
-	    <activity android:name="ca.ilanguage.aublog.ui.CreateBlogEntry" android:label="Create new post">
-		</activity>
-		<activity android:name="ca.ilanguage.aublog.ui.PreviewAndPublish" android:label="Preview and publish post">
-		</activity>
+	   			
 		<activity android:name="ca.ilanguage.aublog.ui.PublishActivity" android:label="Publish post"
 				android:theme="@style/Theme.Transparent">
 		</activity>
-		<activity android:name="ca.ilanguage.aublog.ui.Settings" android:label="Settings (login/password)">
-		</activity>
+		
 		
 		<provider android:name="ca.ilanguage.aublog.db.AuBlogHistoryProvider"
                   android:authorities="ca.ilanguage.aublog.provider.AuBlogHistory" />

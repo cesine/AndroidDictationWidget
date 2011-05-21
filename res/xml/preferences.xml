@@ -42,7 +42,6 @@
                 android:persistent="true"
                 />
     		<EditTextPreference 
-    			android:id="@+id/prefBloggerAccount"
     			android:title="Blogger Account Name"
 				android:key="bloggerAccount" 
 				android:summary="Enter Your Blogger account (generally your email address)" android:dialogTitle="Enter Your Blogger account"
@@ -50,7 +49,6 @@
 				android:persistent="true"/>
 			
 			<EditTextPreference 
-				
 				android:title="Blogger Account Password"
 				android:key="bloggerPassword"  android:password="true"
 				android:summary="Enter Your Password" android:dialogTitle="Enter Your password"

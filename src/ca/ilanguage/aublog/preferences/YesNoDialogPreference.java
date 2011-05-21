@@ -14,7 +14,7 @@
  * limitations under the License.
  */
  
-package ca.ilanguage.aublog.util;
+package ca.ilanguage.aublog.preferences;
 
 import android.content.Context;
 import android.preference.DialogPreference;

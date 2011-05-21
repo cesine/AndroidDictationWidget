@@ -39,11 +39,11 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.Toast;
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
-import ca.ilanguage.aublog.util.AuBlog;
-import ca.ilanguage.aublog.util.DebugLog;
-import ca.ilanguage.aublog.util.PreferenceConstants;
-import ca.ilanguage.aublog.util.SetPreferencesActivity;
+//import ca.ilanguage.aublog.util.DebugLog;
+import ca.ilanguage.aublog.preferences.PreferenceConstants;
+import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
 import ca.ilanguage.aublog.util.UIConstants;
 
 import com.google.gdata.data.Feed;
@@ -196,22 +196,6 @@ public class MainMenuActivity extends Activity {
 				R.anim.fade_out);
 		mFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
 
-		/*
-		 * preferences
-		 * http://developer.android.com/reference/android/preference/
-		 * PreferenceActivity.html
-		 * http://developer.android.com/guide/topics/data/data-storage.html
-		 */
-
-		SharedPreferences prefs = getSharedPreferences(
-				PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.putString(PreferenceConstants.PREFERENCE_ACCOUNT,
-				mBloggerAccount);
-		editor.putString(PreferenceConstants.PREFERENCE_PASSWORD,
-				mBloggerPassword);
-		editor.commit();
-
 		mTicker = findViewById(R.id.ticker);
 		if (mTicker != null) {
 			mTicker.setFocusable(true);
@@ -240,10 +224,7 @@ public class MainMenuActivity extends Activity {
 			// Change "start" to "continue" if there's a saved game.
 			SharedPreferences prefs = getSharedPreferences(
 					PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-			final int row = prefs.getInt(
-					PreferenceConstants.PREFERENCE_LEVEL_ROW, 0);
-			final int index = prefs.getInt(
-					PreferenceConstants.PREFERENCE_LEVEL_INDEX, 0);
+			
 
 			((ImageView) mStartButton).setImageDrawable(getResources()
 					.getDrawable(R.drawable.ui_button_start));
@@ -448,10 +429,10 @@ public class MainMenuActivity extends Activity {
 					+ '"'
 					+ ", {\n                onComplete: function(){\n                    bottom.disabled = right.disabled = left.disabled = top.disabled = false;\n                }\n            });\n        }\n    };\n    \n    top.onchange = left.onchange = bottom.onchange = right.onchange = changeHandler;\n    //end\n\n}\n";
 			fOut.write((begining).getBytes());
-			String id = "1";
+			String id = AuBlogHistoryDatabase.ROOT_ID_DEFAULT;
 			String data = "json = ";
-			data = data + "{id: \"" + "1" + "\",\nname: \"" + "root"
-					+ "\",\nhidden: \"" + "1" + "\",\ndata: {"
+			data = data + "{id: \"" + id + "\",\nname: \"" + "Root"
+					+ "\",\nhidden: \"" + id + "\",\ndata: {"
 					+ "},\nchildren: [";
 			fOut.write((data).getBytes());
 			fOut.write((getSubtree(id)).getBytes());
@@ -589,11 +570,11 @@ public class MainMenuActivity extends Activity {
 							MainMenuActivity.this, R.anim.activity_fade_in,
 							R.anim.activity_fade_out);
 				} catch (InvocationTargetException ite) {
-					DebugLog.d("Activity Transition",
-							"Invocation Target Exception");
+//					DebugLog.d("Activity Transition",
+//							"Invocation Target Exception");
 				} catch (IllegalAccessException ie) {
-					DebugLog.d("Activity Transition",
-							"Illegal Access Exception");
+//					DebugLog.d("Activity Transition",
+//							"Illegal Access Exception");
 				}
 			}
 		}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ca.ilanguage.aublog.util;
+package ca.ilanguage.aublog.preferences;
 
 public class PreferenceConstants {
 	public static final String PREFERENCE_LEVEL_ROW = "levelRow";

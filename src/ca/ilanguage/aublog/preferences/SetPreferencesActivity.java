@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ca.ilanguage.aublog.util;
+package ca.ilanguage.aublog.preferences;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -43,12 +43,6 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
         
-        SharedPreferences settings = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, 0);
-        mBloggerAccount = settings.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "create");
-        mBloggerPassword = settings.getString(PreferenceConstants.PREFERENCE_PASSWORD, "");
-        EditTextPreference acc = (EditTextPreference) getPreferenceScreen().findPreference(PreferenceConstants.PREFERENCE_ACCOUNT);
-        acc.setText(mBloggerAccount);
-        
         
         Preference eraseGameButton = getPreferenceManager().findPreference("erasegame");
         if (eraseGameButton != null) {
@@ -63,28 +57,6 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         }
         
     }
-	protected void onStop(){
-	       super.onStop();
-
-	      EditTextPreference acc = (EditTextPreference) getPreferenceScreen().findPreference(PreferenceConstants.PREFERENCE_ACCOUNT);
-	      mBloggerAccount = acc.getText();
-	      // We need an Editor object to make preference changes.
-	      // All objects are from android.context.Context
-	      SharedPreferences settings = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, 0);
-	      SharedPreferences.Editor editor = settings.edit();
-	      editor.putString(PreferenceConstants.PREFERENCE_ACCOUNT, mBloggerAccount);
-	      editor.putString(PreferenceConstants.PREFERENCE_PASSWORD, mBloggerPassword);
-	      // Commit the edits!
-	      editor.commit();
-	    }
-
-	@Override
-	protected void onResume(){
-	    super.onResume();
-	    SharedPreferences settings = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, 0);
-	    mBloggerAccount = settings.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "resume");
-        mBloggerPassword = settings.getString(PreferenceConstants.PREFERENCE_PASSWORD, "");
-	}
 
 	public void onDialogClosed(boolean positiveResult) {
 		if (positiveResult) {

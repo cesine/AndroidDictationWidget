@@ -41,8 +41,7 @@ import ca.ilanguage.aublog.db.AuBlogHistoryProvider;
 import ca.ilanguage.aublog.db.BlogEntry;
 import ca.ilanguage.aublog.db.DBAdapter;
 import ca.ilanguage.aublog.db.DBTextAdapter;
-import ca.ilanguage.aublog.util.AuBlog;
-import ca.ilanguage.aublog.util.PreferenceConstants;
+import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.util.SpannableBufferHelper;
 import ca.ilanguage.aublog.util.Alert;
 
@@ -91,7 +90,7 @@ public class PublishActivity extends Activity  {
 //		    mLevelIndex = prefs.getInt(PreferenceConstants.PREFERENCE_LEVEL_INDEX, 0);
 			//mBloggerAccount= "cesine.ca@gmail.com";
 		mBloggerAccount = prefs.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "see settings");
-		mBloggerPassword =prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
+		mBloggerPassword = prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
 		Toast.makeText(PublishActivity.this, "Account name is "+mBloggerAccount, Toast.LENGTH_LONG).show();
 		
 		/*
