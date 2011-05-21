@@ -62,15 +62,8 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 		if (positiveResult) {
 			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 			SharedPreferences.Editor editor = prefs.edit();
-			editor.remove(PreferenceConstants.PREFERENCE_LEVEL_ROW);
-			editor.remove(PreferenceConstants.PREFERENCE_LEVEL_INDEX);
-			editor.remove(PreferenceConstants.PREFERENCE_LEVEL_COMPLETED);
-			editor.remove(PreferenceConstants.PREFERENCE_LINEAR_MODE);
-			editor.remove(PreferenceConstants.PREFERENCE_TOTAL_GAME_TIME);
-			editor.remove(PreferenceConstants.PREFERENCE_PEARLS_COLLECTED);
-			editor.remove(PreferenceConstants.PREFERENCE_PEARLS_TOTAL);
-			editor.remove(PreferenceConstants.PREFERENCE_ROBOTS_DESTROYED);
-			editor.remove(PreferenceConstants.PREFERENCE_DIFFICULTY);
+			//editor.remove(PreferenceConstants.PREFERENCE_LEVEL_ROW);
+
 
 			editor.commit();
 			Toast.makeText(this, R.string.saved_game_erased_notification,

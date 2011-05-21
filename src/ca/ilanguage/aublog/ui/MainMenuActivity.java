@@ -264,12 +264,7 @@ public class MainMenuActivity extends Activity {
 				if (lastVersion > 0 && lastVersion < 14) {
 					// if the user has beat the game once, go ahead and unlock
 					// stuff for them.
-					if (prefs.getInt(
-							PreferenceConstants.PREFERENCE_LAST_ENDING, -1) != -1) {
-						editor.putBoolean(
-								PreferenceConstants.PREFERENCE_EXTRAS_UNLOCKED,
-								true);
-					}
+					
 				}
 
 				// show what's new message

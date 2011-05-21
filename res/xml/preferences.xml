@@ -64,7 +64,7 @@
      <PreferenceCategory
             android:title="@string/preference_save_game">
             
-       <ca.ilanguage.aublog.util.YesNoDialogPreference
+       <ca.ilanguage.aublog.preferences.YesNoDialogPreference
        			android:key="erasegame"
                 android:title="@string/preference_erase_save_game"
                 android:dialogMessage="@string/preference_erase_save_game_dialog" 
