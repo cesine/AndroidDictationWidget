@@ -20,6 +20,12 @@ public class AuBlogHistoryDatabase {
      * update time is unknown, usually when inserted from a local file source.
      */
     public static final long UPDATED_UNKNOWN = -1;
+    
+    /*
+     * The root node is id 1, it used to be 0 but the database doesnt count from zero, so added this 
+     * constant to be able to control it better
+     */
+    public static final String ROOT_ID_DEFAULT= "1";
 
     public interface SyncColumns {
     	String UPDATED = "updated";
@@ -41,6 +47,7 @@ public class AuBlogHistoryDatabase {
 	    String TIME_CREATED = "timecreated";
 	    String TIME_EDITED = "timeedited";
 	    String LAST_MODIFIED = "lastmodified";
+	    String ROOT_ID_DEFAULT= "1";
     }
     
     public static final String AUTHORITY = "ca.ilanguage.aublog.provider.AuBlogHistory";

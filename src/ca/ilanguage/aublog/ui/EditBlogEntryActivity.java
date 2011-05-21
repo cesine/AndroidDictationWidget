@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.db.DBTextAdapter;
 import ca.ilanguage.aublog.db.AuBlogHistoryProvider;
@@ -455,7 +456,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         			return;
         		}
         		//if the user blanked out the blog entry, probably they are restarting from scratch so set the parent to zero node
-        		daughterValues.put(AuBlogHistory.PARENT_ENTRY, 0);
+        		daughterValues.put(AuBlogHistory.PARENT_ENTRY, AuBlogHistoryDatabase.ROOT_ID_DEFAULT);
         		
     		}else{
     			daughterValues.put(AuBlogHistory.PARENT_ENTRY, mUri.getLastPathSegment());

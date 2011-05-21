@@ -448,10 +448,10 @@ public class MainMenuActivity extends Activity {
 					+ '"'
 					+ ", {\n                onComplete: function(){\n                    bottom.disabled = right.disabled = left.disabled = top.disabled = false;\n                }\n            });\n        }\n    };\n    \n    top.onchange = left.onchange = bottom.onchange = right.onchange = changeHandler;\n    //end\n\n}\n";
 			fOut.write((begining).getBytes());
-			String id = "0";
+			String id = "1";
 			String data = "json = ";
-			data = data + "{id: \"" + "0" + "\",\nname: \"" + "root"
-					+ "\",\nhidden: \"" + "0" + "\",\ndata: {"
+			data = data + "{id: \"" + "1" + "\",\nname: \"" + "root"
+					+ "\",\nhidden: \"" + "1" + "\",\ndata: {"
 					+ "},\nchildren: [";
 			fOut.write((data).getBytes());
 			fOut.write((getSubtree(id)).getBytes());

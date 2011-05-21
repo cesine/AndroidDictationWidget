@@ -193,7 +193,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
             values.put(AuBlogHistory.PUBLISHED, "0");
         }       
         if (values.containsKey(AuBlogHistory.PARENT_ENTRY) == false) {
-            values.put(AuBlogHistory.PARENT_ENTRY, "0");
+            values.put(AuBlogHistory.PARENT_ENTRY, AuBlogHistoryDatabase.ROOT_ID_DEFAULT);
         }  
         if (values.containsKey(AuBlogHistory.DELETED) == false) {
             values.put(AuBlogHistory.DELETED, "0");
@@ -371,6 +371,125 @@ public class AuBlogHistoryProvider extends ContentProvider {
             		+ AuBlogHistory.TIME_CREATED + " INTEGER,"
             		+ AuBlogHistory.TIME_EDITED + " INTEGER"
             		+ ");");
+        
+            /*
+             * Insert a root node that is null, 
+             * There are two options for the parent of the root: 
+             * 		1. have itself as its parent.. will this cause a problem later?
+             *		2. maybe put 0 as the parent of the root, there by marking it as special. (chose this option)
+             */
+			ContentValues values = new ContentValues();
+			Long now = Long.valueOf(System.currentTimeMillis());
+			// Make sure that the fields are all set
+			values.put(AuBlogHistory.TIME_CREATED, now);
+			values.put(AuBlogHistory.LAST_MODIFIED, now);
+			values.put(AuBlogHistory.TIME_EDITED, "0");
+			values.put(AuBlogHistory.PUBLISHED, "0");
+			values.put(AuBlogHistory.PARENT_ENTRY, "0");
+			values.put(AuBlogHistory.DELETED, "0");
+			values.put(AuBlogHistory.ENTRY_TITLE, "");
+			values.put(AuBlogHistory.ENTRY_CONTENT, "");
+			values.put(AuBlogHistory.ENTRY_LABELS, "");
+			values.put(AuBlogHistory.AUDIO_FILES, "");
+			values.put(AuBlogHistory.PUBLISHED_IN, "");
+			// it seems suspicious to only be the content of PARENT_ENTRY, ah its the nullcolumnhack
+			long saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			
+			
+			/*
+			 * Branch for sample Entry About Me
+			 * 			*
+			 * 			|
+			 * 			*
+			 * 			|
+			 * 			*
+			 */
+			values.put(AuBlogHistory.PARENT_ENTRY,saveRowId);
+			values.put(AuBlogHistory.ENTRY_TITLE, "About me");
+			values.put(AuBlogHistory.ENTRY_CONTENT, "Your blog's About Me page should not be overlooked. " +
+					"It's an essential tool to establish who you are as a blogger and help readers understand " +
+					"what your blog is about. Simply listing your name and contact information is not enough. " +
+					"Sell yourself and your blog on your About Me page, and make readers believe you're not only " +
+					"an expert in your blog's topic but your blog is also the place for people to find information " +
+					"about your topic on the web. From <a href='http://weblogs.about.com/od/partsofablog/qt/AboutPage.htm'>About.com</a>");
+			values.put(AuBlogHistory.ENTRY_LABELS, "about me");
+			saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			
+			values.put(AuBlogHistory.PARENT_ENTRY,saveRowId);
+			values.put(AuBlogHistory.ENTRY_TITLE, "About my blog");
+			values.put(AuBlogHistory.ENTRY_CONTENT, "<p>Your blog's About Me page should not be overlooked. " +
+					"It's an essential tool to establish who you are as a blogger and help readers understand " +
+					"what your blog is about. Simply listing your name and contact information is not enough. " +
+					"Sell yourself and your blog on your About Me page, and make readers believe you're not only " +
+					"an expert in your blog's topic but your blog is also the place for people to find information " +
+					"about your topic on the web. From <a href='http://weblogs.about.com/od/partsofablog/qt/AboutPage.htm'>About.com</a></p>" +
+					"Following are the three most important elements to include on your About Me page:" +
+					"Your experience and why you're the best person to blog about your subject matter" +
+					"Links to your other websites or blogs self promotion is critical to your success as a blogger" +
+					"Your contact information so interested readers can ask questions or reach out to you for other " +
+					"business opportunities (which happens often in the blogosphere)");
+			values.put(AuBlogHistory.ENTRY_LABELS, "about me");
+			Long terminalRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			
+			/*
+			 * Branch for sample job entry,
+			 * with branching daughters
+			 * 			 *
+			 * 			 |
+			 * 			 *
+			 * 			/ \
+			 * 		   *   *
+			 */
+			values.put(AuBlogHistory.PARENT_ENTRY,AuBlogHistoryDatabase.ROOT_ID_DEFAULT);
+			values.put(AuBlogHistory.ENTRY_TITLE, "Part Time Writer Wanted");
+			values.put(AuBlogHistory.ENTRY_CONTENT, "My Blog is looking for part-time writers who wish to put their journalism skills " +
+					"to work in the technology sector. BlogTechnical covers the latest happenings in the tech world," +
+					"focusing on topics in the science, social media, gaming, computing and mobile arena, among many others. " +
+					"If you have interests in any of the topics mentioned above or any others we have covered on the site, " +
+					"feel free to send in an application. Please note we are looking for journalists who actually do " +
+					"more than just copy and paste press releases or re-hash syndicated stories.");
+			values.put(AuBlogHistory.ENTRY_LABELS, "jobs");
+			saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			
+			values.put(AuBlogHistory.PARENT_ENTRY,saveRowId);
+			values.put(AuBlogHistory.ENTRY_TITLE, "Part Time Writer Wanted");
+			values.put(AuBlogHistory.ENTRY_CONTENT, "My Blog is looking for part-time writers who wish to put their journalism skills " +
+					"to work in the technology sector. BlogTechnical covers the latest happenings in the tech world," +
+					"focusing on topics in the science, social media, gaming, computing and mobile arena, among many others. " +
+					"If you have interests in any of the topics mentioned above or any others we have covered on the site, " +
+					"feel free to send in an application. Please note we are looking for journalists who actually do " +
+					"more than just copy and paste press releases or re-hash syndicated stories." +
+					"Requirements" +
+					"- Must be fluent in English." +
+					"- Must have a basic understanding of the WordPress posting interface." +
+					"- Must have some writing skills with focus on good spelling and grammar, sentence construction and post formatting." +
+					"- Must be able to fact check stories." +
+					"- Must be able to do a bit of self promotion." +
+					"- Must be able to output at least 5 posts per week. " +
+					"- You will be required to submit two written short stories on topics selected by us.");
+			values.put(AuBlogHistory.ENTRY_LABELS, "jobs");
+			terminalRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			
+			values.put(AuBlogHistory.PARENT_ENTRY,saveRowId);
+			values.put(AuBlogHistory.ENTRY_TITLE, "Part Time Writer Wanted Android");
+			values.put(AuBlogHistory.ENTRY_CONTENT, "My Blog is looking for part-time writers who wish to put their journalism skills " +
+					"to work in the technology sector. BlogTechnical covers the latest happenings in the tech world," +
+					"focusing on topics in the science, social media, gaming, computing and mobile arena, among many others. " +
+					"If you have interests in any of the topics mentioned above or any others we have covered on the site, " +
+					"feel free to send in an application. Please note we are looking for journalists who actually do " +
+					"more than just copy and paste press releases or re-hash syndicated stories." +
+					"Requirements " +
+					"- The goal is to write latest news and articles based around the mobile sector worldwide. Must be familiar with Android platform. " +
+					"- You must be creative. You must generate ideas for articles on your own, and take suggestions like a pro. " +
+					"- Excellent English language and grammar skills. " +
+					"- Knowledge of basic SEO " +
+					"- Good Internet Research Capabilities. " +
+					"- Knowledge of social networking in terms of facebook, twitter, etc. " +
+					"- Knowledge of article submission websites will be BIG PLUS. " +
+					"- Ability to manage multiple assignments and tasks while meeting deadlines.");
+			values.put(AuBlogHistory.ENTRY_LABELS, "jobs");
+			terminalRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			
         }
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

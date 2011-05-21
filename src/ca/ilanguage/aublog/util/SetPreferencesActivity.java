@@ -18,6 +18,7 @@ package ca.ilanguage.aublog.util;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
@@ -29,7 +30,8 @@ import ca.ilanguage.aublog.R;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
-	
+	String mBloggerAccount;
+	String mBloggerPassword;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,38 +43,46 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
         
+        SharedPreferences settings = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, 0);
+        mBloggerAccount = settings.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "create");
+        mBloggerPassword = settings.getString(PreferenceConstants.PREFERENCE_PASSWORD, "");
+        EditTextPreference acc = (EditTextPreference) getPreferenceScreen().findPreference(PreferenceConstants.PREFERENCE_ACCOUNT);
+        acc.setText(mBloggerAccount);
+        
+        
         Preference eraseGameButton = getPreferenceManager().findPreference("erasegame");
         if (eraseGameButton != null) {
         	YesNoDialogPreference yesNo = (YesNoDialogPreference)eraseGameButton;
         	yesNo.setListener(this);
         }
-        //Preference acc = getPreferenceManager().findPreference("bloggerAccount");
-        
-        
-        /*
-        Preference configureKeyboardPref = getPreferenceManager().findPreference("keyconfig");
-        if (configureKeyboardPref != null) {
-        	BlogAccountConfigDialogPreference config = (BlogAccountConfigDialogPreference)configureKeyboardPref;
-        	config.setPrefs(getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE));
-        	config.setContext(this);
-        }
-        
-        
-        addPreferencesFromResource(R.xml.preference);
-7
-        PreferenceManager.setDefaultValues(PreferenceExample.this, R.xml.preference, false);
-        
-        SharedPreferences myPreference=PreferenceManager.getDefaultSharedPreferences(this);
-
-        */
-        
         if (getIntent().getBooleanExtra("controlConfig", false)) {
         	PreferenceScreen controlConfig = (PreferenceScreen)getPreferenceManager().findPreference("controlConfigScreen");
         	if (controlConfig != null) {
         		setPreferenceScreen(controlConfig);
         	}
         }
+        
     }
+	protected void onStop(){
+	       super.onStop();
+
+	      // We need an Editor object to make preference changes.
+	      // All objects are from android.context.Context
+	      SharedPreferences settings = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, 0);
+	      SharedPreferences.Editor editor = settings.edit();
+	      editor.putString(PreferenceConstants.PREFERENCE_ACCOUNT, mBloggerAccount);
+	      editor.putString(PreferenceConstants.PREFERENCE_PASSWORD, mBloggerPassword);
+	      // Commit the edits!
+	      editor.commit();
+	    }
+
+	@Override
+	protected void onResume(){
+	    super.onResume();
+	    SharedPreferences settings = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, 0);
+	    mBloggerAccount = settings.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "resume");
+        mBloggerPassword = settings.getString(PreferenceConstants.PREFERENCE_PASSWORD, "");
+	}
 
 	public void onDialogClosed(boolean positiveResult) {
 		if (positiveResult) {
