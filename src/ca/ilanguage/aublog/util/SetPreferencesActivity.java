@@ -66,6 +66,8 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	protected void onStop(){
 	       super.onStop();
 
+	      EditTextPreference acc = (EditTextPreference) getPreferenceScreen().findPreference(PreferenceConstants.PREFERENCE_ACCOUNT);
+	      mBloggerAccount = acc.getText();
 	      // We need an Editor object to make preference changes.
 	      // All objects are from android.context.Context
 	      SharedPreferences settings = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, 0);
