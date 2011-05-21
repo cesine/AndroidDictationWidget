@@ -402,7 +402,7 @@ public class MainMenuActivity extends Activity {
 					+ '"'
 					+ ")'/>"
 					+ '"'
-					+ ");\n        },\n        \n        //This method is called on DOM label creation.\n        //Use this method to add event handlers and styles to\n        //your node.\n        onCreateLabel: function(label, node){\n            label.id = node.id;            \n            label.innerHTML = node.name;\n            label.onclick = function(){\n            	if(normal.checked) {\n            	  st.onClick(node.id);\n            	} else {\n                st.setRoot(node.id, 'animate');\n            	}\n            };\n            //set label styles\n            var style = label.style;\n            style.width = 40 + 'px';\n            style.height = 17 + 'px';            \n            style.cursor = 'pointer';\n            style.color = '#333';\n            style.fontSize = '0.8em';\n            style.textAlign= 'center';\n            style.paddingTop = '8px';\n        },\n        \n        //This method is called right before plotting\n        //a node. It's useful for changing an individual node\n        //style properties before plotting it.\n        //The data properties prefixed with a dollar\n        //sign will override the global node style properties.\n        onBeforePlotNode: function(node){\n            //add some color to the nodes in the path between the\n            //root node and the selected node.\n            if (node.selected) {\n                node.data.$color = "
+					+ ");\n        },\n        \n        //This method is called on DOM label creation.\n        //Use this method to add event handlers and styles to\n        //your node.\n        onCreateLabel: function(label, node){\n            label.id = node.id;            \n            label.innerHTML = node.name;\n            label.onclick = function(){\n            	//if(normal.checked) {\n            	  st.onClick(node.id);\n            	//} else {\n                //st.setRoot(node.id, 'animate');\n            	//}\n            };\n            //set label styles\n            var style = label.style;\n            style.width = 40 + 'px';\n            style.height = 17 + 'px';            \n            style.cursor = 'pointer';\n            style.color = '#333';\n            style.fontSize = '0.8em';\n            style.textAlign= 'center';\n            style.paddingTop = '8px';\n        },\n        \n        //This method is called right before plotting\n        //a node. It's useful for changing an individual node\n        //style properties before plotting it.\n        //The data properties prefixed with a dollar\n        //sign will override the global node style properties.\n        onBeforePlotNode: function(node){\n            //add some color to the nodes in the path between the\n            //root node and the selected node.\n            if (node.selected) {\n                node.data.$color = "
 					+ '"'
 					+ "#ff7"
 					+ '"'
@@ -410,7 +410,7 @@ public class MainMenuActivity extends Activity {
 					+ '"'
 					+ "exist"
 					+ '"'
-					+ ")) {\n                    //count children number\n                    var count = 0;\n                    node.eachSubnode(function(n) { count++; });\n                    //assign a node color based on\n                    //how many children it has\n                    node.data.$color = ['#aaa', '#abb', '#acc', '#add', '#aee', '#aff'][count];                    \n                }\n            }\n        },\n        \n        //This method is called right before plotting\n        //an edge. It's useful for changing an individual edge\n        //style properties before plotting it.\n        //Edge data proprties prefixed with a dollar sign will\n        //override the Edge global style properties.\n        onBeforePlotLine: function(adj){\n            if (adj.nodeFrom.selected && adj.nodeTo.selected) {\n                adj.data.$color = "
+					+ ")) {\n                    //count children number\n                    var count = 0;\n                    node.eachSubnode(function(n) { count++; });\n                    //assign a node color based on\n                    //how many children it has\n                    node.data.$color = ['#aff', '#aee', '#add', '#acc', '#abb', '#acb'][count];                    \n                }\n            }\n        },\n        \n        //This method is called right before plotting\n        //an edge. It's useful for changing an individual edge\n        //style properties before plotting it.\n        //Edge data proprties prefixed with a dollar sign will\n        //override the Edge global style properties.\n        onBeforePlotLine: function(adj){\n            if (adj.nodeFrom.selected && adj.nodeTo.selected) {\n                adj.data.$color = "
 					+ '"'
 					+ "#eed"
 					+ '"'
@@ -427,7 +427,8 @@ public class MainMenuActivity extends Activity {
 			String id = AuBlogHistoryDatabase.ROOT_ID_DEFAULT;
 			String data = "json = ";
 			data = data + "{id: \"" + id + "\",\nname: \"" + "Root"
-					+ "\",\nhidden: \"" + id + "\",\ndata: {"
+					+ "\",\nhidden: \"" + "0" 
+					+ "\",\ndata: {"
 					+ "},\nchildren: [";
 			fOut.write((data).getBytes());
 			fOut.write((getSubtree(id)).getBytes());
