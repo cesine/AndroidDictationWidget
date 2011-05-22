@@ -31,9 +31,15 @@ function init(){
     //init data
 json = {id: "1",
 name: "Root",
-hidden: "1",
+hidden: "0",
 data: {},
 children: [{
+id: "8",
+name: "biking and fun",
+hidden: "0",
+data: {},
+children: []
+} ,{
 id: "2",
 name: "About me",
 hidden: "0",
@@ -51,6 +57,12 @@ name: "Part Time Writer Wanted",
 hidden: "0",
 data: {},
 children: [{
+id: "7",
+name: "Part Time Writer Wanted",
+hidden: "0",
+data: {},
+children: []
+} ,{
 id: "5",
 name: "Part Time Writer Wanted",
 hidden: "0",
@@ -115,11 +127,11 @@ children: []
             label.id = node.id;            
             label.innerHTML = node.name;
             label.onclick = function(){
-//            	if(normal.checked) {
+            	//if(normal.checked) {
             	  st.onClick(node.id);
-//            	} else {
-//                st.setRoot(node.id, 'animate');
-//            	}
+            	//} else {
+                //st.setRoot(node.id, 'animate');
+            	//}
             };
             //set label styles
             var style = label.style;

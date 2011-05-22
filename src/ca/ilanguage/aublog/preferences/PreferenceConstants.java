@@ -31,6 +31,7 @@ public class PreferenceConstants {
     public static final String PREFERENCE_ACCOUNT = "bloggerAccount";
     public static final String PREFERENCE_PASSWORD = "bloggerPassword";
 	
+    public static final String PREFERENCE_DRAFT_TREE_IS_FRESH = "draftTreeIsFresh";
 	
 	
 	

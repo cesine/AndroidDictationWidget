@@ -2,16 +2,22 @@ package ca.ilanguage.aublog.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.Locale;
 
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.net.NetworkInfo.DetailedState;
@@ -34,6 +40,7 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.db.DBTextAdapter;
 import ca.ilanguage.aublog.db.AuBlogHistoryProvider;
+import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.util.Alert;
 
 /**
@@ -341,6 +348,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	if(mDeleted == true){
     		return;
     	}
+    	if (!(mPostTitle.equals(strTitle)) ){
+    		flagDraftTreeAsNeedingToBeReGenerated();
+    	}
     	mPostContent= strContent;
     	mPostTitle=strTitle;
     	mPostLabels=strLabels;
@@ -387,6 +397,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
 		getContentResolver().update(uri, values,null, null);
 //		getContentResolver().delete(uri, null, null);
+		flagDraftTreeAsNeedingToBeReGenerated();
 		Toast.makeText(EditBlogEntryActivity.this, "Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
 		finish();
 	}
@@ -429,6 +440,38 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	   	mRecorder.stop();
 	   	mRecorder.release();
 	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
+	   	
+	    // Keep the volume control type consistent across all activities.
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+//        Uri uri = new Uri();
+//        uri.fromFile(new File(mAudioResultsFile));
+//        MediaPlayer mp = MediaPlayer.create(this, uri);
+//        mp.start();
+        
+        /*
+         * Transcription possibilities:
+         * 1. using googles not published speech API
+         * 	http://src.chromium.org/viewvc/chrome/trunk/src/content/browser/speech/speech_recognition_request.cc?view=markup
+         *  Perl example: http://mikepultz.com/2011/03/accessing-google-speech-api-chrome-11/
+         *  Java example: ?
+         * 2. using the Voice Recognition sample app, tweeked to automate the button to cut up audio chunks
+         *   http://developer.android.com/resources/samples/ApiDemos/src/com/example/android/apis/app/VoiceRecognition.html
+         *   http://developer.android.com/resources/articles/speech-input.html
+         * 3. Sphinx project
+         * 	http://cmusphinx.sourceforge.net/
+         * 
+         * Audio splitting based on silence
+         * 1. c: https://github.com/taf2/audiosplit/graphs/languages
+         */
+        try {
+			URL url = new URL("https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=en-US");
+			
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			Toast.makeText(EditBlogEntryActivity.this, "The App cannot transcribe audio, maybe the Android has no network connection?"+e, Toast.LENGTH_SHORT).show();
+
+		}
 		return "Saved."+mTimeAudioWasRecorded/100+"sec";
 	}
 	public String pauseTheRecording(){
@@ -490,7 +533,17 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		// Log.e(TAG, "Exception: " + e.getMessage());
     		Toast.makeText(EditBlogEntryActivity.this, "Exception "+e, Toast.LENGTH_LONG).show();
     	}
-		
+    	flagDraftTreeAsNeedingToBeReGenerated();
+
+	}
+	private void flagDraftTreeAsNeedingToBeReGenerated(){
+		/*
+    	 * Flag the draft tree as needing to be regenerated
+    	 */
+    	SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+    	SharedPreferences.Editor editor = prefs.edit();
+    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false);
+    	editor.commit();
 	}
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {

@@ -107,9 +107,7 @@ public class MainMenuActivity extends Activity {
 	private View.OnClickListener sDraftsButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
 
-			Toast.makeText(MainMenuActivity.this,
-					"Creating drafts tree, this may take a few moments. ",
-					Toast.LENGTH_LONG).show();
+			
 			generateDraftTree();
 			// Intent i = new Intent(getBaseContext(), Settings.class);
 			Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
@@ -344,6 +342,17 @@ public class MainMenuActivity extends Activity {
 		 */
 		// BufferedWriter mOut;
 
+		
+		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		if  (true == prefs.getBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false) ){
+			Toast.makeText(MainMenuActivity.this,
+					"Not re-creating drafts tree, using cached. ",
+					Toast.LENGTH_LONG).show();
+			return "no tree created, it is already fresh";
+		}
+		Toast.makeText(MainMenuActivity.this,
+				"Creating drafts tree, this may take a few moments. ",
+				Toast.LENGTH_LONG).show();
 		String mResultsFile = "draft_space_tree.js";
 		// FileWriter fstream;
 		/*
@@ -362,6 +371,7 @@ public class MainMenuActivity extends Activity {
 		// "/Android/data/ca.ilanguage.aublog/files/";
 
 		String fname = mResultsFile;
+//		File file = new File(getCacheDir(), mResultsFile);
 		File file = new File(getExternalFilesDir(null), mResultsFile);
 
 		try {
@@ -445,10 +455,11 @@ public class MainMenuActivity extends Activity {
 
 		}
 
-		// MediaScannerConnection mediaScanner = new
-		// MediaScannerConnection(MainMenuActivity.this, );
-		// .scanFile(file.toString(), null);
-		return "file created";
+		
+		SharedPreferences.Editor editor = prefs.edit();
+    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,true);
+    	editor.commit();
+		return "drafts tree file created";
 	}
 
 	public String getSubtree(String id) {
