@@ -41,6 +41,7 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.db.DBTextAdapter;
 import ca.ilanguage.aublog.db.AuBlogHistoryProvider;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
+import ca.ilanguage.aublog.service.AudioToText;
 import ca.ilanguage.aublog.util.Alert;
 
 /**
@@ -72,6 +73,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private String mAudioResultsFile;
     private String mAuBlogDirectory = "/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
+    private Boolean mReadBlog;
     //TDDO adde recording logic 
     //TODO figure out the problems with the account database,decoup0le the account database with the blog entry screen
     
@@ -140,14 +142,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
-        //TODO add some logic to turn this message on and off using defaults and preferences
         
-//        mTts.speak("The text to speech is working. This means I can talk to you so that you don't have to look at the screen.",
-//        TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
-//        null);
         mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
 	    mDateString = mDateString.replaceAll("/","_").replaceAll(" ","_");
      
+	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
      
         
         setContentView(R.layout.main_webview);
@@ -225,7 +225,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
         }
         public void readToTTS(String message){
-        	readTTS(message);
+        	if(mReadBlog){
+        		readTTS(message);
+        	}
         }
         /*
          * methods to record and manage recording of blog entry
@@ -472,6 +474,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			Toast.makeText(EditBlogEntryActivity.this, "The App cannot transcribe audio, maybe the Android has no network connection?"+e, Toast.LENGTH_SHORT).show();
 
 		}
+		Intent i = new Intent(EditBlogEntryActivity.this, AudioToText.class);
+		//tell the i the mUri that is supposed to be published
+		/*
+		 * start activity for result and put the text into the blog content
+		 */
+		startActivity(i);
+		
+		
 		return "Saved."+mTimeAudioWasRecorded/100+"sec";
 	}
 	public String pauseTheRecording(){
@@ -522,9 +532,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		saveStateToActivity(strTitle, strContent, strLabels);
     		mDeleted=false;
     		mPostId=mUri.getLastPathSegment();
-    		mTts.speak("The text to speech is working. This means I can talk to you so that you don't have to look at the screen.",
-    		        TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
-    		        null);
+    		
+//    		mTts.speak("The text to speech is working. This means I can talk to you so that you don't have to look at the screen.",
+//    		        TextToSpeech.QUEUE_FLUSH,  // Drop all pending entries in the playback queue.
+//    		        null);
+    		
     		Log.d(TAG, "Post saved to database.");
     		    	} catch (SQLException e) {
     		// Log.e(TAG,"SQLException (createPost(title, content))");

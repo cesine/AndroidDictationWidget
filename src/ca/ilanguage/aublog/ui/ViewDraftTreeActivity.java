@@ -114,6 +114,7 @@ public class ViewDraftTreeActivity extends Activity {
         	Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
         	i.setData( AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build() );
         	startActivity(i);
+        	finish();
         }
 
 	    public void deleteId(String id){

@@ -82,13 +82,10 @@ public class PublishActivity extends Activity  {
 		
 
 		/*
-		 * TODO get blogger infomation out of the preferences
+		 * get blogger infomation out of the preferences
 		 */
 			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		    
-//		    mLevelRow = prefs.getInt(PreferenceConstants.PREFERENCE_LEVEL_ROW, 0);
-//		    mLevelIndex = prefs.getInt(PreferenceConstants.PREFERENCE_LEVEL_INDEX, 0);
-			//mBloggerAccount= "cesine.ca@gmail.com";
 		mBloggerAccount = prefs.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "see settings");
 		mBloggerPassword = prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
 		Toast.makeText(PublishActivity.this, "Account name is "+mBloggerAccount, Toast.LENGTH_LONG).show();
@@ -117,7 +114,7 @@ public class PublishActivity extends Activity  {
 				Toast.makeText(PublishActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
 			}
 			myEntry = new BlogEntry();
-			myEntry.setBlogEntry(mContent);
+			myEntry.setBlogEntry(mContent+"<p>"+prefs.getString(PreferenceConstants.PREFERENCE_BLOG_SIGNATURE, "")+"</p>");
 			myEntry.setTitle(mTitle);
 			myEntry.setCreated(new Date(System.currentTimeMillis()));
 			publishBlogEntry();

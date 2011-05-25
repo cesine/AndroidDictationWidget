@@ -55,7 +55,12 @@
 				android:defaultValue=""
 				android:persistent="true"/>
 			
-                   
+            <EditTextPreference 
+				android:title="Blog Signature"
+				android:key="blogSignature"  
+				android:summary="You can add a signature if you want" android:dialogTitle="Enter Your blog signature"
+				android:defaultValue="Posted using my Android"
+				android:persistent="true"/>
         </PreferenceScreen>
             
                 

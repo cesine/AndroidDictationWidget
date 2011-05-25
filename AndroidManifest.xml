@@ -72,7 +72,9 @@
 		</activity>
 	    <activity android:name="ca.ilanguage.aublog.ui.AboutActivity" android:label="About AuBlog">
 		</activity>
-	   			
+	   	<activity android:name="ca.ilanguage.aublog.service.AudioToText" android:label="Record for speech recognition"
+			android:theme="@style/Theme.Transparent">
+		</activity>
 		<activity android:name="ca.ilanguage.aublog.ui.PublishActivity" android:label="Publish post"
 				android:theme="@style/Theme.Transparent">
 		</activity>
