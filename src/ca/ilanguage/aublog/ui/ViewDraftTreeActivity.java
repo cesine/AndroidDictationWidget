@@ -131,7 +131,11 @@ public class ViewDraftTreeActivity extends Activity {
 			refreshTree();
 		}
 	    public void refreshTree(){
-
+	    	/*
+	    	 * TODO figure out why the javascript is not loading well every two loads
+	    	 */
+	    	Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
+	    	startActivity(i);
 	    	finish();
 	    }
         
