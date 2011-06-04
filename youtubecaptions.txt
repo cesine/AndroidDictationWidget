@@ -1,0 +1,180 @@
+gadet from streamtext.net
+
+real time feed from streamtext, transcriptionists
+
+2sec delay on video streams
+
+
+wait 35 charactersfor translations in teh gadget
+
+running on app engine
+
+viewership problems
+
+250thousand viewers 
+
+how to use gadget, code availible 
+
+io-captions-gadget
+
+youtube live partner can use for next event
+
+
+
+web vtt
+
+timed text, not just captioning
+
+blind video description new script taht includes teh video elements, eg wont get the slide that had a graph, or teh demo of the "the slide on screen shows a pie chart" 
+
+use for music lyrics, navication markers like dvd chapters
+
+HTML5 has track, and Text Track, format called webvtt
+
+cue (start, end like srt)
+can set positionson the screen
+
+to identify who is pseaking on TV the use this
+
+want to offer all that tv does, maybe more
+
+c.arduino css can style it too
+colors for personalities, in britan is the style
+
+with css can create 1 captions and style it differently depending on the viewrs locale
+
+<video controls>
+<source src type>
+<track label kind srclang src>
+
+
+use tts for video description in  demo code in chromium
+
+chromevox extension (screenreader)
+
+kind=description, doestn render on screen, but play using tts
+
+_audesc
+
+much easier than doing post production
+
+kind ="chapters"
+
+use for navigation, hasnt been built into webkit yet, instead using javascript to doit 
+
+navigation pane! nice...
+
+jumps to video
+
+ctl+alt+down to move through
+
+awesome example
+
+javascript examples to turn on french subtitles etc
+
+register event handlers to pop up when cues happen
+
+video on WebVTT
+
+now youtube captions api
+
+Youtueb Data API, objects info etc and captions subset
+RESTFULL API
+
+using HTP requests
+
+Authent 
+	modify
+	
+video owner and developers key
+
+support conversions 
+
+and support chunk of text :) good for transcriptions of experiements
+
+
+
+formats to get them back srt, sbv
+
+english and japanese at the moment for audio sync
+
+another thing 
+
+auito speech rec tracks
+
+identified as yt:derived tag in response entry
+
+support ASR on english and japanese
+
+input:video ID, 
+get ASR, translate into pig latin, and upload
+
+has a Python, and Java example
+
+using google authentication librariy to make it easier to 
+
+use client library for langauge you're programming in
+
+OAuth 2 Authentication (client libary will cache the token) can be revoked at any time
+
+reccomend using OAuth 2 
+
+demo code
+
+http://code.google.com/p/gdata-samples/source/browse/trunk/gdata/captions_demo.py
+
+GetAsrTrackUrl
+
+requires video id
+
+returns a URL, then make an HTPP request
+
+has a python library to deal with srt files
+
+ get to rerieve the dtat
+
+post requst to send headers and body  
+
+java app engine example
+
+http://code.google.com/p/youtube-captions-uploader
+
+http://yt-captions-uploader.appspot.com
+
+to automate the upload of the google captions
+
+authsub grant access 
+
+
+tracks are named with video id _ underscrore_ langauge code
+
+that way it can be a bunch of different videos
+
+note formating errors and actions etc
+
+
+email captioning@google.com
+
+auto-captioning, 
+
+another way to do it text files from transcriptions, esier task for computer
+
+blog post about word error rate
+
+youtueb is avast corpus, hard and interesting problem 
+
+leave auto captions on , and owner cant turn it off. for all channels 
+
+google tv youtube tv newtorks
+
+creating content hav eto see value, how easy it is to do
+
+htmlf5 making it easier
+
+more global and more international
+
+university profesors, keep in th edoc section of google
+
+video for business getting redding to launch new hotness, can do private and hosted in cloud, will later upload a video in google docs, and you can share with people you want to shre with
+
+standards for screen readers, jaws windows eyes browser should know how to do that
