@@ -278,7 +278,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		//tell the i the mUri that is supposed to be published
         		i.setData(mUri);
         		startActivity(i);
-//        		finish();
+        		finish();
         	}
         }
     }
