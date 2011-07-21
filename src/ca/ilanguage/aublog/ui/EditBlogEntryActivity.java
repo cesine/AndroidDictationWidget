@@ -3,7 +3,6 @@ package ca.ilanguage.aublog.ui;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.util.Locale;
 
@@ -15,34 +14,25 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.graphics.Color;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.net.NetworkInfo.DetailedState;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
-import ca.ilanguage.aublog.db.DBTextAdapter;
-import ca.ilanguage.aublog.db.AuBlogHistoryProvider;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.service.AudioToText;
-import ca.ilanguage.aublog.util.Alert;
 
 /**
  * Demonstrates how to embed a WebView in your activity. Also demonstrates how
@@ -288,7 +278,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		//tell the i the mUri that is supposed to be published
         		i.setData(mUri);
         		startActivity(i);
-//        		finish();
+        		finish();
         	}
         }
     }

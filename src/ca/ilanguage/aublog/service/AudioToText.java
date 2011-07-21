@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ca.ilanguage.aublog.R;
-import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -14,8 +12,6 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 public class AudioToText extends Activity{
