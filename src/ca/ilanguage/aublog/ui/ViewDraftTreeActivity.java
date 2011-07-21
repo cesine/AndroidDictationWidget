@@ -1,41 +1,22 @@
 package ca.ilanguage.aublog.ui;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-
-
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.database.Cursor;
-import android.database.SQLException;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
-import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
-import ca.ilanguage.aublog.db.DBTextAdapter;
-import ca.ilanguage.aublog.db.AuBlogHistoryProvider;
-import ca.ilanguage.aublog.util.Alert;
 
 /**
  * Demonstrates how to embed a WebView in your activity. Also demonstrates how

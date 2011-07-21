@@ -1,7 +1,6 @@
 package ca.ilanguage.aublog.ui;
 
 import ca.ilanguage.aublog.R;
-import ca.ilanguage.aublog.ui.EditBlogEntryActivity.JavaScriptInterface;
 import android.app.Activity;
 import android.os.Bundle;
 import android.webkit.WebSettings;
