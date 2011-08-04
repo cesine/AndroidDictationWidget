@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -107,6 +108,25 @@ public class MainMenuActivity extends Activity {
 
 		}
 	};
+	public class GenerateTreeTask extends AsyncTask<String, Void, Object>{
+
+		
+		@Override
+		protected Void doInBackground(String... params) {
+			generateDraftTree();
+			return null;
+		}
+		protected void onPostExecute(){
+			/*
+			 * Just before control is returned to the UI thread (?) launch an intent to open the 
+			 * drafts tree activity
+			 */
+			Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
+			startActivity(i);
+			MainMenuActivity.this.m_ProgressDialog.dismiss();
+		}
+		
+	}
 	private View.OnClickListener sDraftsButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
 
@@ -122,18 +142,21 @@ public class MainMenuActivity extends Activity {
 			}
 
 			/*
-			 * Else if the drafts tree is not fresh, create a new Runnable to generate the drafts tree
+			 * Else if the drafts tree is not fresh, create a new Async task to generate the drafts tree
 			 */
-			generateDraftsTree = new Runnable(){
-				@Override
-				public void run() {
-					generateDraftTree();
-				}
-			};
-			Thread thread =  new Thread(null, generateDraftsTree, "MagentoBackground");
-			thread.start();
+//			generateDraftsTree = new Runnable(){
+//				@Override
+//				public void run() {
+//					generateDraftTree();
+//				}
+//			};
+//			Thread thread =  new Thread(null, generateDraftsTree, "MagentoBackground");
+//			thread.start();
 			m_ProgressDialog = ProgressDialog.show(MainMenuActivity.this,    
 					"Please wait...", "Re-generating drafts tree ...", true);
+			new GenerateTreeTask().execute("no params");
+			
+			
 			
 			/*
 			 * Mean while set the flag that the draft tree is fresh
@@ -142,17 +165,7 @@ public class MainMenuActivity extends Activity {
 	    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,true);
 	    	editor.commit();
 			
-			/*
-			 * Once control is returned to the UI thread (?) launch an intent to open the 
-			 * drafts tree activity
-			 */
-	    	
-			// Intent i = new Intent(getBaseContext(), Settings.class);
-			Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
-
-			v.startAnimation(mButtonFlickerAnimation);
-			mButtonFlickerAnimation
-					.setAnimationListener(new StartActivityAfterAnimation(i));
+			
 
 		}
 	};
@@ -372,6 +385,7 @@ public class MainMenuActivity extends Activity {
 		return dialog;
 	}
 
+
 	public String generateDraftTree() {
 
 		
@@ -490,25 +504,25 @@ public class MainMenuActivity extends Activity {
 
 		
 		
-    	try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//    	try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
     	//from retrieving experiments which was original from where?
-    	runOnUiThread(returnRes);
+//    	runOnUiThread(returnRes);
 		return "drafts tree file created";
 	}
-	private Runnable returnRes = new Runnable() {
-
-		@Override
-		public void run() {
-			
-			m_ProgressDialog.dismiss();
-			
-		}
-	};
+//	private Runnable returnRes = new Runnable() {
+//
+//		@Override
+//		public void run() {
+//			
+//			m_ProgressDialog.dismiss();
+//			
+//		}
+//	};
 
 	public String getSubtree(String id) {
 		String[] PROJECTION = new String[] { AuBlogHistory._ID, // 0
