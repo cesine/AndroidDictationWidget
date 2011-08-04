@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -63,7 +64,9 @@ public class MainMenuActivity extends Activity {
 	private boolean mJustCreated;
 	private String mBloggerAccount;
 	private String mBloggerPassword;
-
+	private Runnable generateDraftsTree;
+	private ProgressDialog m_ProgressDialog = null; 
+	
 	private final String MSG_KEY = "value";
 	public static Feed resultFeed = null;
 
@@ -108,7 +111,19 @@ public class MainMenuActivity extends Activity {
 		public void onClick(View v) {
 
 			
-			generateDraftTree();
+
+			generateDraftsTree = new Runnable(){
+				@Override
+				public void run() {
+					generateDraftTree();
+				}
+			};
+			Thread thread =  new Thread(null, generateDraftsTree, "MagentoBackground");
+			thread.start();
+			m_ProgressDialog = ProgressDialog.show(MainMenuActivity.this,    
+					"Please wait...", "Re-generating drafts tree ...", true);
+			
+			
 			// Intent i = new Intent(getBaseContext(), Settings.class);
 			Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 
@@ -336,12 +351,15 @@ public class MainMenuActivity extends Activity {
 
 	public String generateDraftTree() {
 
+		
+		
 		/*
 		 * TODO: use the appl cache for the drafts tree
 		 * http://developer.android.com/guide/topics/data/data-storage.html
 		 */
 		// BufferedWriter mOut;
 
+		
 		
 		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		if  (true == prefs.getBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false) ){
@@ -459,8 +477,25 @@ public class MainMenuActivity extends Activity {
 		SharedPreferences.Editor editor = prefs.edit();
     	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,true);
     	editor.commit();
+    	try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	//from retrieving experiments which was original from where?
+    	runOnUiThread(returnRes);
 		return "drafts tree file created";
 	}
+	private Runnable returnRes = new Runnable() {
+
+		@Override
+		public void run() {
+			
+			m_ProgressDialog.dismiss();
+			
+		}
+	};
 
 	public String getSubtree(String id) {
 		String[] PROJECTION = new String[] { AuBlogHistory._ID, // 0

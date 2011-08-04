@@ -33,7 +33,7 @@
 	    	        	
 	    <ImageView 
 	        android:id="@+id/draftsButton"
-	        android:src="@drawable/ui_button_resume"
+	        android:src="@drawable/ui_button_drafts"
 	        android:layout_width="wrap_content" 
 	        android:layout_height="wrap_content" 
 	        android:layout_gravity="center_horizontal"
