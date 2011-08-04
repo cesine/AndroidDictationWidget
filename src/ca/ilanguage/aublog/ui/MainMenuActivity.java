@@ -110,8 +110,20 @@ public class MainMenuActivity extends Activity {
 	private View.OnClickListener sDraftsButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
 
-			
+			/*
+			 * If the drafts tree is fresh (no new changes) return.
+			 */
+			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+			if  (true == prefs.getBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false) ){
+				Toast.makeText(MainMenuActivity.this,
+						"Not re-creating drafts tree, using cached. ",
+						Toast.LENGTH_LONG).show();
+				return ;// "no tree created, it is already fresh";
+			}
 
+			/*
+			 * Else if the drafts tree is not fresh, create a new Runnable to generate the drafts tree
+			 */
 			generateDraftsTree = new Runnable(){
 				@Override
 				public void run() {
@@ -123,7 +135,18 @@ public class MainMenuActivity extends Activity {
 			m_ProgressDialog = ProgressDialog.show(MainMenuActivity.this,    
 					"Please wait...", "Re-generating drafts tree ...", true);
 			
+			/*
+			 * Mean while set the flag that the draft tree is fresh
+			 */
+			SharedPreferences.Editor editor = prefs.edit();
+	    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,true);
+	    	editor.commit();
 			
+			/*
+			 * Once control is returned to the UI thread (?) launch an intent to open the 
+			 * drafts tree activity
+			 */
+	    	
 			// Intent i = new Intent(getBaseContext(), Settings.class);
 			Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 
@@ -361,16 +384,8 @@ public class MainMenuActivity extends Activity {
 
 		
 		
-		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		if  (true == prefs.getBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false) ){
-			Toast.makeText(MainMenuActivity.this,
-					"Not re-creating drafts tree, using cached. ",
-					Toast.LENGTH_LONG).show();
-			return "no tree created, it is already fresh";
-		}
-		Toast.makeText(MainMenuActivity.this,
-				"Creating drafts tree, this may take a few moments. ",
-				Toast.LENGTH_LONG).show();
+		
+		
 		String mResultsFile = "draft_space_tree.js";
 		// FileWriter fstream;
 		/*
@@ -474,9 +489,7 @@ public class MainMenuActivity extends Activity {
 		}
 
 		
-		SharedPreferences.Editor editor = prefs.edit();
-    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,true);
-    	editor.commit();
+		
     	try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
