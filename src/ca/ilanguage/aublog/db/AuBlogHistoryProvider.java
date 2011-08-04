@@ -440,53 +440,26 @@ public class AuBlogHistoryProvider extends ContentProvider {
 			 * 		   *   *
 			 */
 			values.put(AuBlogHistory.PARENT_ENTRY,AuBlogHistoryDatabase.ROOT_ID_DEFAULT);
-			values.put(AuBlogHistory.ENTRY_TITLE, "Part Time Writer Wanted");
-			values.put(AuBlogHistory.ENTRY_CONTENT, "My Blog is looking for part-time writers who wish to put their journalism skills " +
-					"to work in the technology sector. BlogTechnical covers the latest happenings in the tech world," +
-					"focusing on topics in the science, social media, gaming, computing and mobile arena, among many others. " +
-					"If you have interests in any of the topics mentioned above or any others we have covered on the site, " +
-					"feel free to send in an application. Please note we are looking for journalists who actually do " +
-					"more than just copy and paste press releases or re-hash syndicated stories.");
-			values.put(AuBlogHistory.ENTRY_LABELS, "jobs");
+			values.put(AuBlogHistory.ENTRY_TITLE, "How to use the drafts tree");
+			values.put(AuBlogHistory.ENTRY_CONTENT, "The drafts tree lets you visualize/listen to blog entries, " +
+					"and re-draft or re-wind until you are ready to publish. Each time you hit the save button, " +
+					"a new node is created. ");
+			values.put(AuBlogHistory.ENTRY_LABELS, "howto");
 			saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
 			values.put(AuBlogHistory.PARENT_ENTRY,saveRowId);
-			values.put(AuBlogHistory.ENTRY_TITLE, "Part Time Writer Wanted");
-			values.put(AuBlogHistory.ENTRY_CONTENT, "My Blog is looking for part-time writers who wish to put their journalism skills " +
-					"to work in the technology sector. BlogTechnical covers the latest happenings in the tech world," +
-					"focusing on topics in the science, social media, gaming, computing and mobile arena, among many others. " +
-					"If you have interests in any of the topics mentioned above or any others we have covered on the site, " +
-					"feel free to send in an application. Please note we are looking for journalists who actually do " +
-					"more than just copy and paste press releases or re-hash syndicated stories." +
-					"Requirements" +
-					"- Must be fluent in English." +
-					"- Must have a basic understanding of the WordPress posting interface." +
-					"- Must have some writing skills with focus on good spelling and grammar, sentence construction and post formatting." +
-					"- Must be able to fact check stories." +
-					"- Must be able to do a bit of self promotion." +
-					"- Must be able to output at least 5 posts per week. " +
-					"- You will be required to submit two written short stories on topics selected by us.");
-			values.put(AuBlogHistory.ENTRY_LABELS, "jobs");
+			values.put(AuBlogHistory.ENTRY_TITLE, "Use via recording...");
+			values.put(AuBlogHistory.ENTRY_CONTENT, "You can brainstorm and build your blog entry by recording your voice, " +
+					"and listening to it. Once you have a blog entry that you are satisfied with you can send it for transcription. " +
+					"Then you can edit it in text form and publish it. Alternatively, you can use AuBlog as a traditional blog " +
+					"client by just typing in the Edit Entry page.");
+			values.put(AuBlogHistory.ENTRY_LABELS, "howto, record");
 			terminalRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
 			values.put(AuBlogHistory.PARENT_ENTRY,saveRowId);
-			values.put(AuBlogHistory.ENTRY_TITLE, "Part Time Writer Wanted Android");
-			values.put(AuBlogHistory.ENTRY_CONTENT, "My Blog is looking for part-time writers who wish to put their journalism skills " +
-					"to work in the technology sector. BlogTechnical covers the latest happenings in the tech world," +
-					"focusing on topics in the science, social media, gaming, computing and mobile arena, among many others. " +
-					"If you have interests in any of the topics mentioned above or any others we have covered on the site, " +
-					"feel free to send in an application. Please note we are looking for journalists who actually do " +
-					"more than just copy and paste press releases or re-hash syndicated stories." +
-					"Requirements " +
-					"- The goal is to write latest news and articles based around the mobile sector worldwide. Must be familiar with Android platform. " +
-					"- You must be creative. You must generate ideas for articles on your own, and take suggestions like a pro. " +
-					"- Excellent English language and grammar skills. " +
-					"- Knowledge of basic SEO " +
-					"- Good Internet Research Capabilities. " +
-					"- Knowledge of social networking in terms of facebook, twitter, etc. " +
-					"- Knowledge of article submission websites will be BIG PLUS. " +
-					"- Ability to manage multiple assignments and tasks while meeting deadlines.");
-			values.put(AuBlogHistory.ENTRY_LABELS, "jobs");
+			values.put(AuBlogHistory.ENTRY_TITLE, "Use via typing...");
+			values.put(AuBlogHistory.ENTRY_CONTENT, "You can also simply type your blog entry by clicking on the Edit button.");
+			values.put(AuBlogHistory.ENTRY_LABELS, "howto, type");
 			terminalRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
         }
