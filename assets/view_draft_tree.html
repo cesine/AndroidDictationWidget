@@ -43,16 +43,19 @@
 	    function refreshTree(){
 	    	Android.refreshTree();
 	    }
+	    function exportTree(){
+	    	Android.exportTree();
+	    }
 		//addJavascript('/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js','head');
 		//http://stackoverflow.com/questions/950087/include-javascript-file-inside-javascript-file
 		$.getScript("/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js", function(){
-			   alert("Inside Aublog: Draft tree loaded.");
+			   alert("Draft tree loaded in Native Android App mode.");
 			   // here you can use anything you defined in the loaded script
 				init();
 			});
 	}else{
 		$.getScript("draft_space_tree.js", function(){
-			   alert("Not in Aublog: Draft tree loaded.");
+			   alert("Draft tree loaded in Browser mode.");
 			   // here you can use anything you defined in the loaded script
 				init();
 			});
@@ -71,7 +74,7 @@
  <h3>Draft Tree</h3>
  
 <input type="button" value="Refresh" onClick="refreshTree()" />
-
+<input type="button" value="Export..." onClick="exportTree()" />
 <h4>Tree Orientation</h4> 
 <table> 
     <tr> 

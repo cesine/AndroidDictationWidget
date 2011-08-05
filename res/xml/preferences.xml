@@ -67,7 +67,7 @@
     </PreferenceCategory>
     
      <PreferenceCategory
-            android:title="@string/preference_save_game">
+            android:title="@string/preference_manage_data">
             
        <ca.ilanguage.aublog.preferences.YesNoDialogPreference
        			android:key="erasegame"
@@ -77,6 +77,11 @@
                 android:negativeButtonText="@string/preference_erase_save_game_dialog_cancel"
                 android:positiveButtonText="@string/preference_erase_save_game_dialog_ok"
                 />
+        <Preference
+                android:title="@string/preference_export_data"
+				android:key="exportDraftsTree">
+				
+        </Preference>
         
         <CheckBoxPreference
        			android:key="enableStats"

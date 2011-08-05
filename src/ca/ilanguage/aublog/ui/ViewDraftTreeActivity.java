@@ -1,5 +1,7 @@
 package ca.ilanguage.aublog.ui;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
@@ -103,7 +105,7 @@ public class ViewDraftTreeActivity extends Activity {
           {  
               new AlertDialog.Builder(ViewDraftTreeActivity.this) 
               	  
-                  .setTitle("Info")  
+                  .setTitle("Draft Tree")  
                   .setMessage(message)  
                   .setPositiveButton(android.R.string.ok,  
                           new AlertDialog.OnClickListener()  
@@ -158,12 +160,26 @@ public class ViewDraftTreeActivity extends Activity {
 			refreshTree();
 		}
 	    public void refreshTree(){
-	    	/*
-	    	 * TODO figure out why the javascript is not loading well every two loads
-	    	 */
+	    	
 	    	Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 	    	startActivity(i);
 	    	finish();
+	    }
+	    public void exportTree(){
+//	    	Intent intent = new Intent();
+//	    	intent.setAction(android.content.Intent.ACTION_VIEW);
+//	    	intent.setDataAndType(Uri.fromFile(file), "text/*");
+//	    	startActivity(intent); 
+	    	
+	    	File file = new File("/sdcard/Android/data/ca.ilanguage.aublog/files/json_only_draft_space_tree.js");
+
+	    	Intent mailto = new Intent(Intent.ACTION_SEND); 
+	        mailto.setType("message/rfc822") ; // use from live device
+	        mailto.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
+	        mailto.putExtra(Intent.EXTRA_SUBJECT,"Backup of AuBlog Drafts");
+	        mailto.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+	        mailto.putExtra(Intent.EXTRA_TEXT,"Attached is a backup of the Blog drafts, exported in json format.");
+	        startActivity(Intent.createChooser(mailto, "Select email application."));
 	    }
         
         

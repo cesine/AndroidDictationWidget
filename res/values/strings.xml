@@ -16,6 +16,8 @@
 <string name = "untitled_blog_title">Untitled</string>
 <string name = "title_or_content_empty_error">The title or content are empty, please be sure to fill them in.</string>
 <string name="user_agent_suffix">AuBlog/1.0</string>
+<string name="preference_manage_data">AuBlog Data</string>
+<string name="preference_export_data">Export Saved AuBlog Drafts</string>
 
 <!-- UI -->
 <string name="preference_save_game">AuBlog Data</string>
@@ -66,7 +68,7 @@
 <string name="preference_key_config_attack">Attack</string>
 
 
-<string name="preference_enable_statistics">Report my edit Statistics</string>
+<string name="preference_enable_statistics">Report my edit statistics</string>
 <string name="preference_enable_statistics_summary">Sends anonymous edit statistics to a server to help us make this app more useful and adaptive.</string>
 
 

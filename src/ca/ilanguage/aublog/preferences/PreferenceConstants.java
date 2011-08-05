@@ -33,7 +33,7 @@ public class PreferenceConstants {
 	
     public static final String PREFERENCE_DRAFT_TREE_IS_FRESH = "draftTreeIsFresh";
     public static final String PREFERENCE_BLOG_SIGNATURE = "blogSignature";
-	
+    public static final String PREFERENCE_EXPORT_DRAFTS_TREE = "exportDraftsTree";
 	
 	
 }

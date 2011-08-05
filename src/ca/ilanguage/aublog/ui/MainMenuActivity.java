@@ -444,6 +444,7 @@ public class MainMenuActivity extends Activity {
 		String fname = mResultsFile;
 //		File file = new File(getCacheDir(), mResultsFile);
 		File file = new File(getExternalFilesDir(null), mResultsFile);
+		File jsonOnlyFile =  new File(getExternalFilesDir(null), "json_only_"+mResultsFile);
 
 		try {
 			// // Make sure the Pictures directory exists.
@@ -451,6 +452,8 @@ public class MainMenuActivity extends Activity {
 			// if (!exists){ new File(path).mkdirs(); }
 			// Open output stream
 			FileOutputStream fOut = new FileOutputStream(file);
+			FileOutputStream exportJSonOnly = new FileOutputStream(jsonOnlyFile);
+			
 			// fstream = new FileWriter(mResultsFile,true);
 			// mOut = new BufferedWriter(fstream);
 			String begining = "var labelType, useGradients, nativeTextSupport, animate;\n\n(function() {\n  var ua = navigator.userAgent,\n      iStuff = ua.match(/iPhone/i) || ua.match(/iPad/i),\n      typeOfCanvas = typeof HTMLCanvasElement,\n      nativeCanvasSupport = (typeOfCanvas == 'object' || typeOfCanvas == 'function'),\n      textSupport = nativeCanvasSupport \n        && (typeof document.createElement('canvas').getContext('2d').fillText == 'function');\n  //I'm setting this based on the fact that ExCanvas provides text support for IE\n  //and that as of today iPhone/iPad current text support is lame\n  labelType = (!nativeCanvasSupport || (textSupport && !iStuff))? 'Native' : 'HTML';\n  nativeTextSupport = labelType == 'Native';\n  useGradients = nativeCanvasSupport;\n  animate = !(iStuff || !nativeCanvasSupport);\n})();\n\nvar Log = {\n  elem: false,\n  write: function(text){\n    if (!this.elem) \n      this.elem = document.getElementById('log');\n    this.elem.innerHTML = text;\n    this.elem.style.left = (200 - this.elem.offsetWidth / 2) + 'px';\n  }\n};\n\n\n\nfunction init(){\n    //init data\n";
@@ -512,11 +515,16 @@ public class MainMenuActivity extends Activity {
 					+ "\",\ndata: {"
 					+ "},\nchildren: [";
 			fOut.write((data).getBytes());
+			exportJSonOnly.write((data).getBytes());
 			fOut.write((getSubtree(id)).getBytes());
+			exportJSonOnly.write((getSubtree(id)).getBytes());
 			fOut.write(("]\n};").getBytes());
+			exportJSonOnly.write(("]\n};").getBytes());
 			fOut.write((end).getBytes());
 			fOut.flush();
 			fOut.close();
+			exportJSonOnly.flush();
+			exportJSonOnly.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Toast.makeText(
