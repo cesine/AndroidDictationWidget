@@ -74,6 +74,8 @@ public class MainMenuActivity extends Activity {
 	int viewStatus = 0;
 
 	private final static int WHATS_NEW_DIALOG = 0;
+	private final static int GENERATING_TREE_DIALOG = 1;
+	
 	protected static final String TAG = "MainMenuActivity";
 
 	// Create an anonymous implementation of OnClickListener
@@ -108,22 +110,35 @@ public class MainMenuActivity extends Activity {
 
 		}
 	};
-	public class GenerateTreeTask extends AsyncTask<String, Void, Object>{
+	/*
+	 * http://stackoverflow.com/questions/1979524/android-splashscreen
+	 */
+	public class GenerateTreeTask extends AsyncTask<Void, Void, Boolean>{
 
 		
 		@Override
-		protected Void doInBackground(String... params) {
+		protected Boolean doInBackground(Void... params) {
 			generateDraftTree();
-			return null;
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return true;
 		}
-		protected void onPostExecute(){
+		protected void onPreExecute(){
+			showDialog(GENERATING_TREE_DIALOG);
+			
+		}
+		protected void onPostExecute(Boolean result){
 			/*
 			 * Just before control is returned to the UI thread (?) launch an intent to open the 
 			 * drafts tree activity
 			 */
 			Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 			startActivity(i);
-			MainMenuActivity.this.m_ProgressDialog.dismiss();
+			dismissDialog(GENERATING_TREE_DIALOG);
 		}
 		
 	}
@@ -138,6 +153,11 @@ public class MainMenuActivity extends Activity {
 				Toast.makeText(MainMenuActivity.this,
 						"Not re-creating drafts tree, using cached. ",
 						Toast.LENGTH_LONG).show();
+				Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
+
+				v.startAnimation(mButtonFlickerAnimation);
+				mButtonFlickerAnimation
+						.setAnimationListener(new StartActivityAfterAnimation(i));
 				return ;// "no tree created, it is already fresh";
 			}
 
@@ -152,9 +172,7 @@ public class MainMenuActivity extends Activity {
 //			};
 //			Thread thread =  new Thread(null, generateDraftsTree, "MagentoBackground");
 //			thread.start();
-			m_ProgressDialog = ProgressDialog.show(MainMenuActivity.this,    
-					"Please wait...", "Re-generating drafts tree ...", true);
-			new GenerateTreeTask().execute("no params");
+			new GenerateTreeTask().execute();
 			
 			
 			
@@ -379,6 +397,12 @@ public class MainMenuActivity extends Activity {
 					.setTitle(R.string.whats_new_dialog_title)
 					.setPositiveButton(R.string.whats_new_dialog_ok, null)
 					.setMessage(R.string.whats_new_dialog_message).create();
+		} 
+		else if (id == GENERATING_TREE_DIALOG) {
+			dialog = new ProgressDialog.Builder(this)
+            		.setCancelable(true)
+					.setTitle("Please wait")
+					.setMessage("Generating the drafts tree, this may take a moment.").create();
 		} else {
 			dialog = super.onCreateDialog(id);
 		}
