@@ -170,7 +170,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				}
 				mPostParent = mCursor.getString(6);
                 String nodeAsString="id:"+mCursor.getString(0)+":\ntitle:"+mCursor.getString(1)+":\ncontent:"+mCursor.getString(2)+":\nlabels:"+mCursor.getString(3)+":\npublished:"+mCursor.getString(4)+":\ndeleted:"+mCursor.getString(5)+":\nparent:"+mCursor.getString(6)+":";
-                Toast.makeText(EditBlogEntryActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
+                //Toast.makeText(EditBlogEntryActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
 
 			} catch (IllegalArgumentException e) {
 				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
@@ -257,7 +257,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 //        	mPostLabels=strLabels;
 //        	saveState(strTitle, strContent, strLabels);//dont save the post to this entry, instead it should only go in the next entry.
         	saveAsDaughterToDB(strTitle, strContent, strLabels);
-    		Toast.makeText(EditBlogEntryActivity.this, "Saved \n\""+mPostTitle+"\"", Toast.LENGTH_LONG).show();
+    		//Toast.makeText(EditBlogEntryActivity.this, "Saved \n\""+mPostTitle+"\"", Toast.LENGTH_LONG).show();
 
         }
         public void deletePost(String strTitle, String strContent, String strLabels){
@@ -370,7 +370,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 //	        	values.put(AuBlogHistory.USER_TOUCHED, "true"); TODO maybe make a field to indicate that the user never touched the entry, that way wont loose branches in the tree? 
 	    		getContentResolver().update(mUri, values,null, null);
 	    		Log.d(TAG, "Post saved to database.");
-	    		Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
+	    		//Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
     		}
     		    	} catch (SQLException e) {
     		// Log.e(TAG,"SQLException (createPost(title, content))");
@@ -516,7 +516,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		 * Set the daughter to the active mUri, and reinitialize the state values to the daughers values
     		 */
     		mPostParent=mUri.getLastPathSegment();
-    		Toast.makeText(EditBlogEntryActivity.this, "Post "+daughterUri.getLastPathSegment()+" saved as daugher of: " +mUri.getLastPathSegment()+" to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
+    		//Toast.makeText(EditBlogEntryActivity.this, "Post "+daughterUri.getLastPathSegment()+" saved as daugher of: " +mUri.getLastPathSegment()+" to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
     		mUri=daughterUri;
     		getIntent().setData(mUri);
     		saveStateToActivity(strTitle, strContent, strLabels);
