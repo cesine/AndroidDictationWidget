@@ -17,13 +17,7 @@
 
 <!-- Include different space trees depending on viewing frome Chrome or from Android WebView with Aublog appended to the user Agent -->
 <script language="javascript" type="text/javascript" >
-	function addJavascript(jsname,pos) {
-		var th = document.getElementsByTagName(pos)[0];
-		var s = document.createElement('script');
-		s.setAttribute('type','text/javascript');
-		s.setAttribute('src',jsname);
-		th.appendChild(s);
-		}
+
 	function isNativeApp() {
 	    return /AuBlog\/[0-9\.]+$/.test(navigator.userAgent);
 	}
@@ -57,8 +51,6 @@
 				init();
 			});
 	}else{
-		alert("5: Is a native app detected:"+isNativeApp()+"in the else, this should not run in the AuBlog app.");
-		//addJavascript('draft_space_tree.js','head');
 		$.getScript("draft_space_tree.js", function(){
 			   alert("Not in Aublog: Draft tree loaded.");
 			   // here you can use anything you defined in the loaded script
@@ -71,9 +63,7 @@
 </head> 
  
 <body > 
- <script language="javascript" type="text/javascript" >
- alert("6: Is a native app detected:"+isNativeApp());
- </script>
+
 
 <div id="container">
  
