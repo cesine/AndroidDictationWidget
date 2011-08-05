@@ -67,6 +67,15 @@ public class ViewDraftTreeActivity extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.main_webview);
+        
+        //http://stackoverflow.com/questions/2465432/android-webview-completely-clear-the-cache
+        /*
+         * Errors in the javascript not loading the json. so trying to clear cache. 
+         
+        ViewDraftTreeActivity.this.deleteDatabase("webview.db");
+        ViewDraftTreeActivity.this.deleteDatabase("webviewCache.db");
+        */
+        
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
         WebSettings webSettings = mWebView.getSettings();
@@ -75,7 +84,11 @@ public class ViewDraftTreeActivity extends Activity {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);
-        
+        webSettings.setUserAgentString(
+        	    webSettings.getUserAgentString() 
+        	    + " "
+        	    + getString(R.string.user_agent_suffix)
+        	);
         
 		mWebView.loadUrl("file:///android_asset/view_draft_tree.html");
     }

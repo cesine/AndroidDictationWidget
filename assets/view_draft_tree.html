@@ -14,39 +14,47 @@
 
 <!-- JIT Library File --> 
 <script language="javascript" type="text/javascript" src="jit/jit-yc.js"></script> 
- 
+
 <script language="javascript" type="text/javascript" src="/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js"></script> 
+ <script language="javascript" type="text/javascript" >
+	function addJavascript(jsname,pos) {
+		var th = document.getElementsByTagName(pos)[0];
+		var s = document.createElement('script');
+		s.setAttribute('type','text/javascript');
+		s.setAttribute('src',jsname);
+		th.appendChild(s);
+		}
+	function isNativeApp() {
+	    return /AuBlog\/[0-9\.]+$/.test(navigator.userAgent);
+	}
+	if( isNativeApp() ) {
+	    function showAndroidToast(toast) {
+			Android.showToast("1: Is a native app detected:"+isNativeApp()+"Toast:"+toast);
+	    }
+	    function editId(id){
+	    	Android.editId(id);
+	    }
+	    function deleteId(id){
+	    	Android.deleteId(id);
+	    }
+	    function loadJsonData(){
+	    	 Android.loadData();
+	    }
+	    function refreshTree(){
+	    	Android.refreshTree();
+	    }
+		 addJavascript('/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js','head');
+	}else{
+		showAndroidToast("5: Is a native app detected:"+isNativeApp()+"in the else, this should not run in the AuBlog app.");
+		addJavascript('draft_space_tree.js','head');
+	}
+	
+</script>
  
 </head> 
  
 <body onload="init();"> 
 
-
-<script type="text/javascript">
-<!--
-///data/data/ca.ilanguage.aublog/cache/draft_space_tree.js
-///mnt/sdcard/Android/data/ca.ilanguage.aublog/files/
-    function showAndroidToast(toast) {
-        //Android.showToast(toast);
-    	Android.showToast(toast);
-    }
-    function editId(id){
-    	Android.editId(id);
-    	// /mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js
-    }
-    function deleteId(id){
-    	Android.deleteId(id);
-    	// /mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js
-    }
-    function loadJsonData(){
-    	 Android.loadData();
-
-    }
-    function refreshTree(){
-    	Android.refreshTree();
-    }
-    -->
-</script>
 <div id="container">
  
 <div id="left-container"> 

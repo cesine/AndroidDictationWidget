@@ -34,8 +34,32 @@ name: "Root",
 hidden: "0",
 data: {},
 children: [{
+id: "12",
+name: "ggg",
+hidden: "0",
+data: {},
+children: []
+} ,{
+id: "10",
+name: "uet",
+hidden: "0",
+data: {},
+children: [{
+id: "11",
+name: "ooouet",
+hidden: "0",
+data: {},
+children: []
+} ]
+} ,{
+id: "9",
+name: "another",
+hidden: "0",
+data: {},
+children: []
+} ,{
 id: "8",
-name: "biking and fun",
+name: "",
 hidden: "0",
 data: {},
 children: []
@@ -53,27 +77,27 @@ children: []
 } ]
 } ,{
 id: "4",
-name: "Part Time Writer Wanted",
+name: "How to use the drafts tree",
 hidden: "0",
 data: {},
 children: [{
-id: "7",
-name: "Part Time Writer Wanted",
-hidden: "0",
-data: {},
-children: []
-} ,{
 id: "5",
-name: "Part Time Writer Wanted",
+name: "Use via recording...",
 hidden: "0",
 data: {},
 children: []
 } ,{
 id: "6",
-name: "Part Time Writer Wanted Android",
+name: "Use via typing...",
+hidden: "0",
+data: {},
+children: [{
+id: "7",
+name: "new Use via typing...",
 hidden: "0",
 data: {},
 children: []
+} ]
 } ]
 } ]
 };
