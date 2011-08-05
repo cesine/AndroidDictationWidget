@@ -81,12 +81,10 @@ $(document).ready(function()	{
 <a href="#" class="toggle">this one to <span>remove markItUp!</span></a></p>-->
 <p>
 <input type="button" value="Delete" onClick="deletePost()" />
-<input type="button" value="Preview" onClick="savePostToDB()" />
 <input type="button" value="Save" onClick="savePostToDB()" />
 <input type="button" value="Save and Publish" onClick="publishPostToDB()" />
 
 <input type="button" value="Record" onClick="startRecording()" />
-<input type="button" value="Pause" onClick="pauseRecording()" />
 <input type="button" value="Stop" onClick="stopRecording()" />
 
 <script type="text/javascript">
@@ -94,9 +92,7 @@ $(document).ready(function()	{
     function startRecording() {
     	document.getElementById('debugbox').value=Android.startToRecord();
     }
-    function pauseRecording() {
-    	document.getElementById('debugbox').value=Android.pauseRecord();
-    }
+   
     function stopRecording() {
     	document.getElementById('debugbox').value=Android.stopRecord();
     }
@@ -139,7 +135,7 @@ $(document).ready(function()	{
 
 <div id="container">
 
-<input type="text" name="debug" value="" id="debugbox" >
+<input type="text" name="debug" value="" id="debugbox" hidden="true">
 
 <table  id="titles"  >
 <tbody><tr><td><label for="f-title">Title:</label></td>

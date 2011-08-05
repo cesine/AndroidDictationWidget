@@ -229,9 +229,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public String stopRecord(){
         	return stopSaveRecording();
         }
-        public String pauseRecord(){
-        	return pauseTheRecording();
-        }
+        
         public String getTimeRecording(){
         	return returnTimeRecording();
         }
@@ -474,9 +472,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 		return "Saved."+mTimeAudioWasRecorded/100+"sec";
 	}
-	public String pauseTheRecording(){
-		return "Paused.";
-	}
+	
 	public String returnTimeRecording(){
 		Long timePassed = (System.currentTimeMillis()-mStartTime)/1000;
 		return timePassed+"min";
