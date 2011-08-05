@@ -15,16 +15,8 @@
 <!-- JIT Library File --> 
 <script language="javascript" type="text/javascript" src="jit/jit-yc.js"></script> 
 
-<script language="javascript" type="text/javascript" src="/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js"></script> 
- <script language="javascript" type="text/javascript" >
- 
- //http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
-	 console.error('1');
-	 console.info('2');
-	 console.log('3');
-	 console.warn('4');
-
- 
+<!-- Include different space trees depending on viewing frome Chrome or from Android WebView with Aublog appended to the user Agent -->
+<script language="javascript" type="text/javascript" >
 	function addJavascript(jsname,pos) {
 		var th = document.getElementsByTagName(pos)[0];
 		var s = document.createElement('script');
@@ -36,6 +28,12 @@
 	    return /AuBlog\/[0-9\.]+$/.test(navigator.userAgent);
 	}
 	if( isNativeApp() ) {
+		//http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
+		console.error('1');
+		console.info('2');
+		console.log('3');
+	 	console.warn('4');
+		 
 	    function showAndroidToast(toast) {
 			Android.showToast("Toast:"+toast);
 	    }
@@ -51,17 +49,28 @@
 	    function refreshTree(){
 	    	Android.refreshTree();
 	    }
-		 addJavascript('/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js','head');
+		//addJavascript('/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js','head');
+		//http://stackoverflow.com/questions/950087/include-javascript-file-inside-javascript-file
+		$.getScript("/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js", function(){
+			   alert("Inside Aublog: Draft tree loaded.");
+			   // here you can use anything you defined in the loaded script
+				init();
+			});
 	}else{
-		showAndroidToast("5: Is a native app detected:"+isNativeApp()+"in the else, this should not run in the AuBlog app.");
-		addJavascript('draft_space_tree.js','head');
+		alert("5: Is a native app detected:"+isNativeApp()+"in the else, this should not run in the AuBlog app.");
+		//addJavascript('draft_space_tree.js','head');
+		$.getScript("draft_space_tree.js", function(){
+			   alert("Not in Aublog: Draft tree loaded.");
+			   // here you can use anything you defined in the loaded script
+				init();
+			});
 	}
 	
 </script>
  
 </head> 
  
-<body onload="init();"> 
+<body > 
  <script language="javascript" type="text/javascript" >
  alert("6: Is a native app detected:"+isNativeApp());
  </script>
