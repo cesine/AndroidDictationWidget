@@ -103,7 +103,7 @@ public class ViewDraftTreeActivity extends Activity {
           {  
               new AlertDialog.Builder(ViewDraftTreeActivity.this) 
               	  
-                  .setTitle("javaScript dialog")  
+                  .setTitle("Info")  
                   .setMessage(message)  
                   .setPositiveButton(android.R.string.ok,  
                           new AlertDialog.OnClickListener()  
