@@ -1,14 +1,17 @@
 package ca.ilanguage.aublog.ui;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Window;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -89,6 +92,36 @@ public class ViewDraftTreeActivity extends Activity {
         	    + " "
         	    + getString(R.string.user_agent_suffix)
         	);
+        
+        
+        /*
+         * Add some debuging info
+         */
+        mWebView.setWebChromeClient(new WebChromeClient() {
+          
+          public boolean onJsAlert(WebView view, String url, String message, final android.webkit.JsResult result)  
+          {  
+              new AlertDialog.Builder(ViewDraftTreeActivity.this) 
+              	  
+                  .setTitle("javaScript dialog")  
+                  .setMessage(message)  
+                  .setPositiveButton(android.R.string.ok,  
+                          new AlertDialog.OnClickListener()  
+                          {  
+                              public void onClick(DialogInterface dialog, int which)  
+                              {  
+                                  result.confirm();  
+                              }  
+                          })  
+                  .setCancelable(false)  
+                  .create()  
+                  .show();  
+        
+              return true;  
+          };  
+        });
+        
+
         
 		mWebView.loadUrl("file:///android_asset/view_draft_tree.html");
     }

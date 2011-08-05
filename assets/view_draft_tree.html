@@ -17,6 +17,14 @@
 
 <script language="javascript" type="text/javascript" src="/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js"></script> 
  <script language="javascript" type="text/javascript" >
+ 
+ //http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
+	 console.error('1');
+	 console.info('2');
+	 console.log('3');
+	 console.warn('4');
+
+ 
 	function addJavascript(jsname,pos) {
 		var th = document.getElementsByTagName(pos)[0];
 		var s = document.createElement('script');
@@ -29,7 +37,7 @@
 	}
 	if( isNativeApp() ) {
 	    function showAndroidToast(toast) {
-			Android.showToast("1: Is a native app detected:"+isNativeApp()+"Toast:"+toast);
+			Android.showToast("Toast:"+toast);
 	    }
 	    function editId(id){
 	    	Android.editId(id);
@@ -54,6 +62,9 @@
 </head> 
  
 <body onload="init();"> 
+ <script language="javascript" type="text/javascript" >
+ alert("6: Is a native app detected:"+isNativeApp());
+ </script>
 
 <div id="container">
  
