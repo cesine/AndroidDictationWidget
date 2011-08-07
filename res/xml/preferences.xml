@@ -69,6 +69,22 @@
      <PreferenceCategory
             android:title="@string/preference_manage_data">
             
+        <Preference
+                android:title="@string/preference_email_data"
+				android:key="emailDraftsTree">
+				
+        </Preference>
+        <PreferenceScreen
+                android:title="@string/preference_export_data">
+            <intent android:action="org.openintents.action.PICK_FILE"
+                    android:data="/sdcard/Android/data/ca.ilanguage.aublog/files/json_only_draft_space_tree.js.txt" />
+        </PreferenceScreen>
+        <PreferenceScreen
+                android:title="@string/preference_view_recorded_audio_data">
+            <intent android:action="org.openintents.action.PICK_FILE"
+                    android:data="file:///sdcard/AuBlog/Audio" />
+        </PreferenceScreen>
+        
        <ca.ilanguage.aublog.preferences.YesNoDialogPreference
        			android:key="erasegame"
                 android:title="@string/preference_erase_save_game"
@@ -77,19 +93,6 @@
                 android:negativeButtonText="@string/preference_erase_save_game_dialog_cancel"
                 android:positiveButtonText="@string/preference_erase_save_game_dialog_ok"
                 />
-        <Preference
-                android:title="@string/preference_export_data"
-				android:key="exportDraftsTree">
-				
-        </Preference>
-         <PreferenceScreen
-                android:title="@string/preference_view_recorded_audio_data">
-
-            <intent android:action="org.openintents.action.PICK_FILE"
-                    android:data="file:///sdcard/AuBlog/Audio" />
-
-        </PreferenceScreen>
-        
         <CheckBoxPreference
        			android:key="enableStats"
                 android:title="@string/preference_enable_statistics"

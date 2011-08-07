@@ -44,12 +44,12 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
         
-        Preference exportTree = findPreference(PreferenceConstants.PREFERENCE_EXPORT_DRAFTS_TREE);
+        Preference exportTree = findPreference(PreferenceConstants.PREFERENCE_EMAIL_DRAFTS_TREE);
         exportTree.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 			
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				File file = new File("/sdcard/Android/data/ca.ilanguage.aublog/files/json_only_draft_space_tree.js");
+				File file = new File("/sdcard/Android/data/ca.ilanguage.aublog/files/json_only_draft_space_tree.js.txt");
 
 		    	Intent mailto = new Intent(Intent.ACTION_SEND); 
 		        mailto.setType("message/rfc822") ; // use from live device

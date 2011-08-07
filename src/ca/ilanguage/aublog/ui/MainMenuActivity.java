@@ -444,7 +444,7 @@ public class MainMenuActivity extends Activity {
 		String fname = mResultsFile;
 //		File file = new File(getCacheDir(), mResultsFile);
 		File file = new File(getExternalFilesDir(null), mResultsFile);
-		File jsonOnlyFile =  new File(getExternalFilesDir(null), "json_only_"+mResultsFile);
+		File jsonOnlyFile =  new File(getExternalFilesDir(null), "json_only_"+mResultsFile+".txt");
 
 		try {
 			// // Make sure the Pictures directory exists.

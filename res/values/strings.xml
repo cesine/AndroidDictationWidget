@@ -18,7 +18,8 @@
 <string name="user_agent_suffix">AuBlog/1.0</string>
 <string name="preference_manage_data">AuBlog Data</string>
 <string name="preference_export_data">Export blog drafts</string>
-<string name="preference_view_recorded_audio_data">Open audio folder to hear recorded blog drafts</string>
+<string name="preference_email_data">Email blog drafts</string>
+<string name="preference_view_recorded_audio_data">Open audio folder to hear recorded blog dictations</string>
 
 <!-- UI -->
 <string name="preference_save_game">AuBlog Data</string>
@@ -156,7 +157,7 @@ new On-Screen Controls instead, or stick with Tilt?
 \n<small>You can change this setting at any time by choosing Configure Controls under Options.</small>
 </string>
 
-<string name="whats_new_ticker">In this version: HTML markup blog editing, undo buttons and drafts tree. Blogger accounts supported.</string>
+<string name="whats_new_ticker">In this version: Publish to Blogger accounts. HTML markup blog editing, transcribe sentence by sentence dictation using Google Voice and navigate drafts tree. Full data export. Record long dictations. Future versions: speech recognition services for long dictations, publish to podcasts.</string>
 
 <string name="baby_description">No challenge at all.</string>
 <string name="kids_description">A comfortable ride to the end.</string>

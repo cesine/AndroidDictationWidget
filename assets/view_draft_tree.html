@@ -49,13 +49,13 @@
 		//addJavascript('/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js','head');
 		//http://stackoverflow.com/questions/950087/include-javascript-file-inside-javascript-file
 		$.getScript("/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js", function(){
-			   alert("Draft tree loaded in Native Android App mode.");
+			   //alert("Finished loading.");
 			   // here you can use anything you defined in the loaded script
 				init();
 			});
 	}else{
 		$.getScript("draft_space_tree.js", function(){
-			   alert("Draft tree loaded in Browser mode.");
+			   //alert("Loaded in Browser mode.");
 			   // here you can use anything you defined in the loaded script
 				init();
 			});
