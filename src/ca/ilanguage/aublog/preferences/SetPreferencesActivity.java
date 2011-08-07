@@ -17,9 +17,13 @@
 package ca.ilanguage.aublog.preferences;
 
 import java.io.File;
+import java.util.List;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -76,8 +80,61 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         	}
         }
         
-    }
+        
+        final boolean fileManagerAvailable = isIntentAvailable(this,
+        "org.openintents.action.PICK_FILE");
+        SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		Boolean fileManagerChecked = prefs.getBoolean(PreferenceConstants.PREFERENCE_FILE_MANAGER_INSTALLED, false);
+        if ( fileManagerChecked && ! fileManagerAvailable ){
+        	Toast.makeText(SetPreferencesActivity.this, "To open and export recorded files or " +
+        			"draft data you can install the OI File Manager, " +
+        			"it allows you to browse your SDCARD directly on your mobile device.", Toast.LENGTH_LONG).show();
+        	Intent goToMarket = new Intent(Intent.ACTION_VIEW)
+            .setData(Uri.parse("market://details?id=org.openintents.filemanager"));
+        	startActivity(goToMarket);
+        }
+        if ( ! fileManagerChecked &&  fileManagerAvailable){
+        	/*
+        	 * Enable the export and open possibilities
+        	 */
+			editor.putBoolean(PreferenceConstants.PREFERENCE_FILE_MANAGER_INSTALLED,
+					true);
+			editor.commit();
+        }
+		if (fileManagerAvailable){
+			editor.putBoolean(PreferenceConstants.PREFERENCE_FILE_MANAGER_INSTALLED,
+					true);
+			editor.commit();
+			Preference exportJson = getPreferenceManager().findPreference("openJsonTxt");
+			exportJson.setEnabled(true);
+			Preference openAudioDir = getPreferenceManager().findPreference("openAudioDir");
+			openAudioDir.setEnabled(true);
+		}
 
+        
+        
+    }
+	/**
+	 * Indicates whether the specified action can be used as an intent. This
+	 * method queries the package manager for installed packages that can
+	 * respond to an intent with the specified action. If no suitable package is
+	 * found, this method returns false.
+	 *
+	 * @param context The application's environment.
+	 * @param action The Intent action to check for availability.
+	 *
+	 * @return True if an Intent with the specified action can be sent and
+	 *         responded to, false otherwise.
+	 */
+	public static boolean isIntentAvailable(Context context, String action) {
+	    final PackageManager packageManager = context.getPackageManager();
+	    final Intent intent = new Intent(action);
+	    List<ResolveInfo> list =
+	            packageManager.queryIntentActivities(intent,
+	                    PackageManager.MATCH_DEFAULT_ONLY);
+	    return list.size() > 0;
+	}
 	public void onDialogClosed(boolean positiveResult) {
 		if (positiveResult) {
 			/*

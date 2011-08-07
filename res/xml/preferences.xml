@@ -74,13 +74,30 @@
 				android:key="emailDraftsTree">
 				
         </Preference>
+        
+         <CheckBoxPreference
+       			android:key="fileManagerInstalled"
+                android:title="File Manager Installed"
+                android:summaryOff="A file manager wasn't detected, a file manager is needed to view your exported files on your mobile device."
+                android:summaryOn=""
+                android:defaultValue="false"
+                android:persistent="true"
+                />
+        
         <PreferenceScreen
-                android:title="@string/preference_export_data">
+        		android:key="openJsonTxt"
+                android:title="@string/preference_export_data"
+                android:enabled="false"
+	            android:selectable="false">
             <intent android:action="org.openintents.action.PICK_FILE"
                     android:data="/sdcard/Android/data/ca.ilanguage.aublog/files/json_only_draft_space_tree.js.txt" />
         </PreferenceScreen>
+        
         <PreferenceScreen
-                android:title="@string/preference_view_recorded_audio_data">
+        		android:key="openAudioDir"
+                android:title="@string/preference_view_recorded_audio_data"
+                android:enabled="false"
+	            android:selectable="false">
             <intent android:action="org.openintents.action.PICK_FILE"
                     android:data="file:///sdcard/AuBlog/Audio" />
         </PreferenceScreen>

@@ -34,6 +34,7 @@ public class PreferenceConstants {
     public static final String PREFERENCE_DRAFT_TREE_IS_FRESH = "draftTreeIsFresh";
     public static final String PREFERENCE_BLOG_SIGNATURE = "blogSignature";
     public static final String PREFERENCE_EMAIL_DRAFTS_TREE = "emailDraftsTree";
-	
-	
+    public static final String PREFERENCE_FILE_MANAGER_INSTALLED ="fileManagerInstalled";
+    public static final String PREFERENCE_OPEN_AUDIO_DIR = "openAudioDir";
+    public static final String PREFERENCE_OPEN_JSON_TXT = "openJsonTxt";
 }
