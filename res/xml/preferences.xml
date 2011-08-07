@@ -82,6 +82,13 @@
 				android:key="exportDraftsTree">
 				
         </Preference>
+         <PreferenceScreen
+                android:title="@string/preference_view_recorded_audio_data">
+
+            <intent android:action="org.openintents.action.PICK_FILE"
+                    android:data="file:///sdcard/AuBlog/Audio" />
+
+        </PreferenceScreen>
         
         <CheckBoxPreference
        			android:key="enableStats"

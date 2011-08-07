@@ -17,11 +17,12 @@
 <string name = "title_or_content_empty_error">The title or content are empty, please be sure to fill them in.</string>
 <string name="user_agent_suffix">AuBlog/1.0</string>
 <string name="preference_manage_data">AuBlog Data</string>
-<string name="preference_export_data">Export Saved AuBlog Drafts</string>
+<string name="preference_export_data">Export blog drafts</string>
+<string name="preference_view_recorded_audio_data">Open audio folder to hear recorded blog drafts</string>
 
 <!-- UI -->
 <string name="preference_save_game">AuBlog Data</string>
-<string name="preference_erase_save_game">Erase Saved AuBlog Drafts</string>
+<string name="preference_erase_save_game">Erase all drafts</string>
 <string name="preference_erase_save_game_dialog">Really erase your saved drafts?  All of your drafts will be lost!</string>
 <string name="preference_erase_save_game_dialog_title">Now wait just a minute</string>
 <string name="preference_erase_save_game_dialog_ok">Erase Drafts</string>
