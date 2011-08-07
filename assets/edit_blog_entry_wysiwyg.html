@@ -90,14 +90,14 @@ $(document).ready(function()	{
 <script type="text/javascript">
 	
     function startRecording() {
-    	document.getElementById('debugbox').value=Android.startToRecord();
+    	Android.startToRecord();
     }
    
     function stopRecording() {
-    	document.getElementById('debugbox').value=Android.stopRecord();
+    	Android.stopRecord();
     }
     //function timeRecording() {
-    	//document.getElementById('debugbox').value=Android.getTimeRecording():
+    	//Android.getTimeRecording():
     //}
     
     function showAndroidToast(toast) {
@@ -110,17 +110,17 @@ $(document).ready(function()	{
     }
     function deletePost(){
     	Android.deletePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
-    	document.getElementById('debugbox').value=Android.fetchDebugInfo();
+    	
     }
     function savePostToDB(){
     	//showAndroidToast("Hi from the JavaScript.");
     	readTTSPost();
     	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
-    	document.getElementById('debugbox').value=Android.fetchDebugInfo();
+    	
     }
     function savePostToState(){
     	Android.saveState(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
-    	document.getElementById('debugbox').value=Android.fetchDebugInfo();
+    	
     }
     function publishPostToDB(){
     	Android.publishPost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
@@ -129,13 +129,11 @@ $(document).ready(function()	{
     	document.getElementById('f-title').value= Android.fetchPostTitle();
     	document.getElementById('markItUp').value= Android.fetchPostContent();
     	document.getElementById('post-labels').value= Android.fetchPostLabels();
-    	document.getElementById('debugbox').value=Android.fetchDebugInfo();
+    	
     }
 </script>
 
 <div id="container">
-
-<input type="text" name="debug" value="" id="debugbox" hidden="true">
 
 <table  id="titles"  >
 <tbody><tr><td><label for="f-title">Title:</label></td>
