@@ -398,6 +398,7 @@ public class MainMenuActivity extends Activity {
 					.setTitle(R.string.whats_new_dialog_title)
 					.setPositiveButton(R.string.whats_new_dialog_ok, null)
 					.setMessage(R.string.whats_new_dialog_message).create();
+			
 		} 
 		else if (id == GENERATING_TREE_DIALOG) {
 			dialog = new ProgressDialog.Builder(this)

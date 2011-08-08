@@ -286,6 +286,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       // This bundle will be passed to onCreate if the process is
       // killed and restarted.
     	mWebView.loadUrl("javascript:savePostToState()");
+    	/*THIS PUTS IN THE OLD STUFF, SEEMS TO WORK WITH OUT IT.
 	      savedInstanceState.putString("title", mPostTitle);
 	      savedInstanceState.putString("content", mPostContent);
 	      savedInstanceState.putString("labels", mPostLabels);
@@ -294,6 +295,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	      savedInstanceState.putString("parentid", mPostParent);
 	      savedInstanceState.putString("id",mPostId);
 //	      savedInstanceState.putString("uri", mUri.getPath());
+ * 
+ */
       
       // etc.
       super.onSaveInstanceState(savedInstanceState);
@@ -303,6 +306,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       super.onRestoreInstanceState(savedInstanceState);
       // Restore UI state from the savedInstanceState.
       // This bundle has also been passed to onCreate.
+      /*THIS PUTS UP THE OLD VERSION
       mPostTitle = savedInstanceState.getString("title");
       mPostContent = savedInstanceState.getString("content");
       mPostLabels = savedInstanceState.getString("labels");
@@ -310,6 +314,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       mDeleted = savedInstanceState.getBoolean("deleted");
       mPostParent = savedInstanceState.getString("parentid");
       mPostId = savedInstanceState.getString("id");
+      */
 //      mUri = new Uri(savedInstanceState.getString("uri"));
     }
     @Override
