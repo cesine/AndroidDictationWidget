@@ -151,11 +151,16 @@
 	                android:enabled="false"
 	                android:selectable="false" />
 	                
-	        <Preference
+	        <PreferenceScreen
 	                android:title="@string/preference_thanks_title"
 	                android:summary="@string/preference_thanks_summary"
-	                android:enabled="false"
-	                android:selectable="false" />
+	                 >
+	                 <!-- add share intent -->
+	                 <intent 
+	                 	android:action="android.intent.action.VIEW"
+                    	android:data="http://aublog.net" />
+                    
+	        </PreferenceScreen>
 	                
 	        <Preference
 	                android:title="@string/preference_licence_title"

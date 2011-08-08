@@ -54,14 +54,14 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				File file = new File("/sdcard/Android/data/ca.ilanguage.aublog/files/"+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
+				File file = new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
 
 		    	Intent mailto = new Intent(Intent.ACTION_SEND); 
 		        mailto.setType("message/rfc822") ; // use from live device
 		        mailto.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
 		        mailto.putExtra(Intent.EXTRA_SUBJECT,"Backup of AuBlog Drafts");
 		        mailto.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-		        mailto.putExtra(Intent.EXTRA_TEXT,"Attached is a backup of the Blog drafts, exported in json format.");
+		        mailto.putExtra(Intent.EXTRA_TEXT,getString(R.string.email_exported_json_text_content));
 		        startActivity(Intent.createChooser(mailto, "Select email application."));
 		   
 				return true;

@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
+import ca.ilanguage.aublog.preferences.PreferenceConstants;
 
 /**
  * Demonstrates how to embed a WebView in your activity. Also demonstrates how
@@ -171,14 +172,14 @@ public class ViewDraftTreeActivity extends Activity {
 //	    	intent.setDataAndType(Uri.fromFile(file), "text/*");
 //	    	startActivity(intent); 
 	    	
-	    	File file = new File("/sdcard/Android/data/ca.ilanguage.aublog/files/json_only_draft_space_tree.js");
+	    	File file = new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
 
 	    	Intent mailto = new Intent(Intent.ACTION_SEND); 
 	        mailto.setType("message/rfc822") ; // use from live device
 	        mailto.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
 	        mailto.putExtra(Intent.EXTRA_SUBJECT,"Backup of AuBlog Drafts");
 	        mailto.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-	        mailto.putExtra(Intent.EXTRA_TEXT,"Attached is a backup of the Blog drafts, exported in json format.");
+	        mailto.putExtra(Intent.EXTRA_TEXT,getString(R.string.email_exported_json_text_content));
 	        startActivity(Intent.createChooser(mailto, "Select email application."));
 	    }
         

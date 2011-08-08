@@ -61,7 +61,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     
     private String mDateString ="";
     private String mAudioResultsFile;
-    private String mAuBlogDirectory = "/sdcard/AuBlog/";
+    private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
     private Boolean mReadBlog;
     //TDDO adde recording logic 
