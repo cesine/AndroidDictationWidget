@@ -34,6 +34,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -67,7 +68,6 @@ public class MainMenuActivity extends Activity {
 	private String mBloggerPassword;
 	private Runnable generateDraftsTree;
 	private ProgressDialog m_ProgressDialog = null; 
-	private String mEntireBlogDBasString = null;
 	
 	private final String MSG_KEY = "value";
 	public static Feed resultFeed = null;
@@ -445,12 +445,7 @@ public class MainMenuActivity extends Activity {
 		String fname = mResultsFile;
 //		File file = new File(getCacheDir(), mResultsFile);
 		File file = new File(getExternalFilesDir(null), mResultsFile);
-		File jsonOnlyFile =  new File(getExternalFilesDir(null), PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
-		/*
-		 * initialize string mEntireBlogDBasString to null, it will be generated in the subtree method, and then write it to file and reset it to null to take less running memory in the main menu activity. 
-		 * this should be optimzed, only the new entries should be appended to the file etc rather than re-writing the file each time. 
-		 */
-		mEntireBlogDBasString = "";
+		
 		
 		try {
 			// // Make sure the Pictures directory exists.
@@ -458,6 +453,9 @@ public class MainMenuActivity extends Activity {
 			// if (!exists){ new File(path).mkdirs(); }
 			// Open output stream
 			FileOutputStream fOut = new FileOutputStream(file);
+			
+			new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY).mkdirs();
+			File jsonOnlyFile =  new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
 			FileOutputStream exportJSonOnly = new FileOutputStream(jsonOnlyFile);
 			
 			// fstream = new FileWriter(mResultsFile,true);
@@ -518,19 +516,23 @@ public class MainMenuActivity extends Activity {
 			String data = "json = ";
 			data = data + "{id: \"" + id + "\",\nname: \"" + "Root"
 					+ "\",\nhidden: \"" + "0" 
-					+ "\",\ndata: {"
-					+ "},\nchildren: [";
+					+ "\",\ndata: { content:\"empty"
+					+ "\"},\nchildren: [";
 			fOut.write((data).getBytes());
-			fOut.write((getSubtree(id)).getBytes());
+			
+			String tmp = getSubtree(id);
+			fOut.write(tmp.getBytes());
+			exportJSonOnly.write(tmp.getBytes());
+			
 			fOut.write(("]\n};").getBytes());
+			exportJSonOnly.write(("]\n};").getBytes());
+			
 			fOut.write((end).getBytes());
 			fOut.flush();
 			fOut.close();
-			
-			exportJSonOnly.write(mEntireBlogDBasString.getBytes());
+						
 			exportJSonOnly.flush();
 			exportJSonOnly.close();
-			mEntireBlogDBasString= "";
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Toast.makeText(
@@ -617,8 +619,12 @@ public class MainMenuActivity extends Activity {
 				}
 				/*
 				 * for each daughter, print the daughter and her subtree,
-				 * don't include the text in the data as it contains HTML markup and it bloats the json file unneccisarily for the draft tree visualization. 
+				 *  include the text in the data, even though it bloats the json file unneccisarily for the draft tree visualization. 
 				 * ideally though, clicking on a node could pop up its contents. 
+				 * how to access the array in the data element:answer, the data element is used for styling the node, so as long as you add a well formed array entry, its okay.
+				 * http://stackoverflow.com/questions/5519097/javascript-infovis-spacetree-individual-node-styling
+				 * 
+				 * use TextUtils.htmlEncode to make it safe to put in the json, must decode it in the javascript if want to display the info later. 
 				 */
 				while (cursor.isAfterLast() == false) {
 					if (!firstChild) {
@@ -630,8 +636,8 @@ public class MainMenuActivity extends Activity {
 						node = node + "*";
 					} // if the node is flagged as deleted write a star
 					node = node + cursor.getString(1) + "\",\nhidden: \""
-							+ cursor.getString(5) + "\",\ndata: {"
-							+ "},\nchildren: [";
+							+ cursor.getString(5) + "\",\ndata: { content:\""
+							+ TextUtils.htmlEncode(cursor.getString(2)) + "\"},\nchildren: [";
 
 					/*
 					 * find all nodes with this node as its parent
