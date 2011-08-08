@@ -20,7 +20,7 @@
 <string name="preference_export_data">Export blog drafts</string>
 <string name="preference_email_data">Email blog drafts</string>
 <string name="preference_view_recorded_audio_data">Open audio folder to hear recorded blog dictations</string>
-<string name="email_exported_json_text_content">Attached is a backup of the blog drafts. You can open it as text, and you can also open it as a Interactive Draft Tree on the AuBlog web interface at the http://aublog.net/view_draft_tree.html on the website.</string>
+<string name="email_exported_json_text_content">Attached is a backup of the blog drafts. You can open it as text, and you can also open it as a Interactive Draft Tree on the AuBlog web interface at the http://aublog.net/webinterface/view_draft_tree.html on the website.</string>
 <!-- UI -->
 <string name="preference_save_game">AuBlog Data</string>
 <string name="preference_erase_save_game">Erase all drafts</string>

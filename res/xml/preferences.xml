@@ -151,14 +151,15 @@
 	                android:enabled="false"
 	                android:selectable="false" />
 	                
+	                <!-- preference summaries are only 2 lines long, the full summaries below will only appear in horizontal mode or on tablets -->
 	        <PreferenceScreen
 	                android:title="@string/preference_thanks_title"
 	                android:summary="@string/preference_thanks_summary"
 	                 >
 	                 <!-- add share intent -->
 	                 <intent 
-	                 	android:action="android.intent.action.VIEW"
-                    	android:data="http://aublog.net" />
+	                 	android:action="android.content.Intent.VIEW"
+                    	android:data="https://market.android.com/details?id=ca.ilanguage.aublog" />
                     
 	        </PreferenceScreen>
 	                

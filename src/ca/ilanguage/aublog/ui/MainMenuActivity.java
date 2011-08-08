@@ -565,6 +565,9 @@ public class MainMenuActivity extends Activity {
 //	};
 
 	public String getSubtree(String id) {
+		/*
+		 * TODO get location of audio file so that can add a class to the space tree that indicates its playable, and a button to play it, requires adding to the projection?
+		 */
 		String[] PROJECTION = new String[] { AuBlogHistory._ID, // 0
 				AuBlogHistory.ENTRY_TITLE, AuBlogHistory.ENTRY_CONTENT, // 2
 				AuBlogHistory.ENTRY_LABELS, AuBlogHistory.PUBLISHED, // 4
