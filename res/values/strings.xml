@@ -97,7 +97,7 @@
 <string name="game_results_wanda_ending">GOOD ENDING - World Saved!</string>
 <string name="game_results_ok_button">Game Over!</string>
 
-<string name="saved_game_erased_notification">Saved AuBlog Erased</string>
+<string name="saved_game_erased_notification">Taking you to the Application Settings where you can select AuBlog and "Clear data"...</string>
 
 <string name="quit_game_dialog_title">Quit AuBlog?</string>
 <string name="quit_game_dialog_ok">Quit</string>

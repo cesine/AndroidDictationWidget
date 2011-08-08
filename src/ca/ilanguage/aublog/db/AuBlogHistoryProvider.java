@@ -470,6 +470,14 @@ public class AuBlogHistoryProvider extends ContentProvider {
         	db.execSQL("DROP TABLE IF EXISTS "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
         	onCreate(db);
         }
+        /*
+         * un used function to clear user's drafts, instead taking user to the manage application settings page. 
+         */
+        public void wipeUserData(SQLiteDatabase db) {
+        	Log.w(TAG, "Deleting database, and inserting original sample entries, which will destroy all old data");
+        	db.execSQL("DROP TABLE IF EXISTS "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
+        	onCreate(db);
+        }
     }//end databasehelper
 
 }

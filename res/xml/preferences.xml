@@ -90,7 +90,7 @@
                 android:enabled="false"
 	            android:selectable="false">
             <intent android:action="org.openintents.action.PICK_FILE"
-                    android:data="/sdcard/Android/data/ca.ilanguage.aublog/files/json_only_draft_space_tree.js.txt" />
+                    android:data="file:///sdcard/AuBlog/aublog_exported_drafts_json_format.txt" />
         </PreferenceScreen>
         
         <PreferenceScreen

@@ -32,6 +32,7 @@ import android.preference.PreferenceScreen;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
@@ -53,7 +54,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				File file = new File("/sdcard/Android/data/ca.ilanguage.aublog/files/json_only_draft_space_tree.js.txt");
+				File file = new File("/sdcard/Android/data/ca.ilanguage.aublog/files/"+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
 
 		    	Intent mailto = new Intent(Intent.ACTION_SEND); 
 		        mailto.setType("message/rfc822") ; // use from live device
@@ -102,6 +103,10 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 					true);
 			editor.commit();
         }
+        /*
+         * If the file manager is available ungrey the export/open settings. 
+         *  Only if there has been audio recorded, ungrey the audio open dir setting
+         */
 		if (fileManagerAvailable){
 			editor.putBoolean(PreferenceConstants.PREFERENCE_FILE_MANAGER_INSTALLED,
 					true);
@@ -110,8 +115,12 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			exportJson.setEnabled(true);
 			exportJson.setSelectable(true);
 			Preference openAudioDir = getPreferenceManager().findPreference("openAudioDir");
-			openAudioDir.setEnabled(true);
-			openAudioDir.setSelectable(true);
+			if (new  File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+"/audio").exists()){
+				openAudioDir.setEnabled(true);
+				openAudioDir.setSelectable(true);
+			}else{
+				openAudioDir.setSummary("No dictations found");
+			}
 		}
 
         
@@ -142,13 +151,9 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			/*
 			 * TODO open the database provider, delete database and recreate with the default entries
 			 */
+			startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS));
+			//wipeUserData
 			
-			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-			SharedPreferences.Editor editor = prefs.edit();
-			//editor.remove(PreferenceConstants.PREFERENCE_LEVEL_ROW);
-
-
-			editor.commit();
 			Toast.makeText(this, R.string.saved_game_erased_notification,
                     Toast.LENGTH_SHORT).show();
 		}
