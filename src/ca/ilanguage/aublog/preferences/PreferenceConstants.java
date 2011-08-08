@@ -37,4 +37,6 @@ public class PreferenceConstants {
     public static final String PREFERENCE_FILE_MANAGER_INSTALLED ="fileManagerInstalled";
     public static final String PREFERENCE_OPEN_AUDIO_DIR = "openAudioDir";
     public static final String PREFERENCE_OPEN_JSON_TXT = "openJsonTxt";
+    
+    public static final String OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT= "aublog_exported_drafts.txt";
 }

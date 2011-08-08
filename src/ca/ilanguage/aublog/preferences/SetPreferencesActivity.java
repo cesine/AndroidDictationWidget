@@ -108,8 +108,10 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			editor.commit();
 			Preference exportJson = getPreferenceManager().findPreference("openJsonTxt");
 			exportJson.setEnabled(true);
+			exportJson.setSelectable(true);
 			Preference openAudioDir = getPreferenceManager().findPreference("openAudioDir");
 			openAudioDir.setEnabled(true);
+			openAudioDir.setSelectable(true);
 		}
 
         

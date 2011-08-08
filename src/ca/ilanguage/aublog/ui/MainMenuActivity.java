@@ -67,6 +67,7 @@ public class MainMenuActivity extends Activity {
 	private String mBloggerPassword;
 	private Runnable generateDraftsTree;
 	private ProgressDialog m_ProgressDialog = null; 
+	private String mEntireBlogDBasString = null;
 	
 	private final String MSG_KEY = "value";
 	public static Feed resultFeed = null;
@@ -444,8 +445,13 @@ public class MainMenuActivity extends Activity {
 		String fname = mResultsFile;
 //		File file = new File(getCacheDir(), mResultsFile);
 		File file = new File(getExternalFilesDir(null), mResultsFile);
-		File jsonOnlyFile =  new File(getExternalFilesDir(null), "json_only_"+mResultsFile+".txt");
-
+		File jsonOnlyFile =  new File(getExternalFilesDir(null), PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
+		/*
+		 * initialize string mEntireBlogDBasString to null, it will be generated in the subtree method, and then write it to file and reset it to null to take less running memory in the main menu activity. 
+		 * this should be optimzed, only the new entries should be appended to the file etc rather than re-writing the file each time. 
+		 */
+		mEntireBlogDBasString = "";
+		
 		try {
 			// // Make sure the Pictures directory exists.
 			// boolean exists = (new File(path)).exists();
@@ -515,16 +521,16 @@ public class MainMenuActivity extends Activity {
 					+ "\",\ndata: {"
 					+ "},\nchildren: [";
 			fOut.write((data).getBytes());
-			exportJSonOnly.write((data).getBytes());
 			fOut.write((getSubtree(id)).getBytes());
-			exportJSonOnly.write((getSubtree(id)).getBytes());
 			fOut.write(("]\n};").getBytes());
-			exportJSonOnly.write(("]\n};").getBytes());
 			fOut.write((end).getBytes());
 			fOut.flush();
 			fOut.close();
+			
+			exportJSonOnly.write(mEntireBlogDBasString.getBytes());
 			exportJSonOnly.flush();
 			exportJSonOnly.close();
+			mEntireBlogDBasString= "";
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Toast.makeText(
@@ -593,6 +599,10 @@ public class MainMenuActivity extends Activity {
 						+ cursor.getString(6) + ":";
 				// Toast.makeText(MainMenuActivity.this,
 				// "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
+				/*
+				 * getting node as string here fails to retrieve all nodes, instead use json format with all info even though it bloats the json file. 
+				 */
+				//mEntireBlogDBasString=mEntireBlogDBasString+nodeAsString+"\n\n";
 
 				if ("1".equals(cursor.getString(5))) {
 					// Toast.makeText(MainMenuActivity.this,
@@ -606,7 +616,9 @@ public class MainMenuActivity extends Activity {
 
 				}
 				/*
-				 * for each daughter, print the daughter and her subtree
+				 * for each daughter, print the daughter and her subtree,
+				 * don't include the text in the data as it contains HTML markup and it bloats the json file unneccisarily for the draft tree visualization. 
+				 * ideally though, clicking on a node could pop up its contents. 
 				 */
 				while (cursor.isAfterLast() == false) {
 					if (!firstChild) {
@@ -616,7 +628,7 @@ public class MainMenuActivity extends Activity {
 					node = node + "{\nid: \"" + Id + "\",\nname: \"";
 					if ("1".equals(cursor.getString(5))) {
 						node = node + "*";
-					} // if the node is deleted write a star
+					} // if the node is flagged as deleted write a star
 					node = node + cursor.getString(1) + "\",\nhidden: \""
 							+ cursor.getString(5) + "\",\ndata: {"
 							+ "},\nchildren: [";
