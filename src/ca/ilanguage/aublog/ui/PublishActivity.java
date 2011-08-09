@@ -140,8 +140,9 @@ public class PublishActivity extends Activity  {
 			myEntry = new BlogEntry();
 			myEntry.setBlogEntry(mContent+"<p>"+prefs.getString(PreferenceConstants.PREFERENCE_BLOG_SIGNATURE, "")+"</p>");
 			myEntry.setTitle(mTitle);
+			myEntry.setLabels(mLabels);
 			/*
-			 * TODO add and publish labels
+			 * DONE add and publish labels
 			 */
 			myEntry.setCreated(new Date(System.currentTimeMillis()));
 			publishBlogEntry();

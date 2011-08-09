@@ -71,8 +71,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
     private Boolean mReadBlog;
-    //TDDO adde recording logic 
-    //TODO figure out the problems with the account database,decoup0le the account database with the blog entry screen
+    //DONE adde recording logic 
+    //DONE figure out the problems with the account database,decoup0le the account database with the blog entry screen
     
 	//uri of the entry being edited.
 	private Uri mUri;

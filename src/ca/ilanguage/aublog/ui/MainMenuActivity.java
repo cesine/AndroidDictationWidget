@@ -16,7 +16,7 @@
 
 package ca.ilanguage.aublog.ui;
 
-//TODO add a preferences activity, get rid of the old account logic and replace it with a proper database provider
+//DONE add a preferences activity, get rid of the old account logic and replace it with a proper database provider
 
 import java.io.File;
 import java.io.FileOutputStream;

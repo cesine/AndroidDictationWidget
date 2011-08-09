@@ -5,11 +5,12 @@ import java.util.Date;
 
 public class BlogEntry {
 
-	/*TODO add and publish with labels
+	/*DONE add and publish with labels
 	 * 
 	 */
 	private CharSequence blogEntry;
 	private String title;
+	private String labels;
 	private Date created;
 	private int id;
 	private int publishedIn;
@@ -26,6 +27,12 @@ public class BlogEntry {
 	}
 	public void setTitle(String title) {
 		this.title = title;
+	}
+	public String getLabels() {
+		return labels;
+	}
+	public void setLabels(String labels) {
+		this.labels = labels;
 	}
 	public Date getCreated() {
 		return created;
@@ -51,7 +58,7 @@ public class BlogEntry {
 
 	public String toString() {
 		SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");
-		return "" + getTitle() + " - " + df.format(created);
+		return "" + getTitle() +"; labels: " + getLabels() +"; content:" + getBlogEntry() + " - " + df.format(created);
 	}
 
 	public int getId() {
