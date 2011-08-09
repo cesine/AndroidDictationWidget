@@ -92,16 +92,16 @@ public class PublishActivity extends Activity  {
 		mBloggerPassword = prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
 		Toast.makeText(PublishActivity.this, "Account name is "+mBloggerAccount, Toast.LENGTH_LONG).show();
 		
-		if("see settings".equals(mBloggerAccount)|| "see settings".equals(mBloggerPassword)){
+		if( (!mBloggerAccount.contains("@") ) || mBloggerPassword.length()<4 ){
 			tracker.trackEvent(
 		            "Publish",  // Category
 		            "Error",  // Action
-		            "displayed Toast: Taking you to the settings to add a Blogger account.", // Label
-		            302);       // Value
-			Toast.makeText(PublishActivity.this, "Taking you to the settings to add a Blogger account.", Toast.LENGTH_LONG).show();
-			Intent i = new Intent(PublishActivity.this, SetPreferencesActivity.class);
+		            "In the publish activity but the blogger acount info isnt set, it should have been checked by the edit blog entry activity.", // Label
+		            6021);       // Value
+			//Toast.makeText(PublishActivity.this, "Taking you to the settings to add a Blogger account.", Toast.LENGTH_LONG).show();
+			//Intent i = new Intent(PublishActivity.this, SetPreferencesActivity.class);
     		//startActivityForResult(i, BLOGGER_ACCOUNT_ENTERED);
-			startActivity(i);
+			//startActivity(i);
 		}
 		
 		/*
