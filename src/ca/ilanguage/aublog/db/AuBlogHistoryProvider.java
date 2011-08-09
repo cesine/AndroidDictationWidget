@@ -114,7 +114,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 //		return update(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(rowId.toString()).build(), args, null, null) > 0;
 //    }
 //	public boolean deletePost(Long rowId) {
-//		//TODO might be broken, just included for compatability wiht existing code
+//		//DONE might be broken, just included for compatability wiht existing code
 //		return delete(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(rowId.toString()).build(), null, null) > 0;
 //	}
 	public Cursor fetchDaughters(Uri uri){
