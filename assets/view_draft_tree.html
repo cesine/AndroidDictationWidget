@@ -49,7 +49,11 @@
 		//addJavascript('/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js','head');
 		//http://stackoverflow.com/questions/950087/include-javascript-file-inside-javascript-file
 		$.getScript("/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js", function(){
-			   //alert("Finished loading.");
+			/*
+			TODO bug returned on motorla xoom running Android 3.x even with the finsihed loading dialog, it still cant load the javascript first. 
+			the webkit must running async tasks differently...
+			*/
+			//alert("Finished loading.");
 			   // here you can use anything you defined in the loaded script
 				init();
 			});
@@ -73,7 +77,8 @@
 <div id="left-container"> 
  <h3>Draft Tree</h3>
  
-<!-- Dont need anymore, javascript is loading in sequential order <input type="button" value="Refresh" onClick="refreshTree()" /> -->
+<!-- Didnt need anymore on 2.x, javascript was loading in sequential order but in 3.x it is not-->
+<input type="button" value="Refresh" onClick="refreshTree()" />
 <input type="button" value="Export/Email..." onClick="exportTree()" />
 <!-- TODO Itteration 3 add button "Hide Deleted Nodes" -->
 <h4>Tree Orientation</h4> 

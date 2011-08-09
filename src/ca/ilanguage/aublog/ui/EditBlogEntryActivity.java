@@ -88,6 +88,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	String mPostLabels ="";
 	String mPostParent ="";
 	String mPostId ="";
+	Boolean mFreshEditScreen = true;
 	private Boolean mDeleted = false;
 	String mLongestEverContent ="";
 	private static final String[] PROJECTION = new String[] {
@@ -181,18 +182,21 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             // Make sure we are at the one and only row in the cursor.
             mCursor.moveToFirst();
 			try {
-				mPostTitle = mCursor.getString(1);
-				mPostContent = mCursor.getString(2);
-				mPostLabels =mCursor.getString(3);
-				mPostId = mCursor.getString(0);
-				if("0".equals(mCursor.getString(5))){ 
-					mDeleted=false;
-				}else{
-					mDeleted=true;
-				}
-				mPostParent = mCursor.getString(6);
-                String nodeAsString="id:"+mCursor.getString(0)+":\ntitle:"+mCursor.getString(1)+":\ncontent:"+mCursor.getString(2)+":\nlabels:"+mCursor.getString(3)+":\npublished:"+mCursor.getString(4)+":\ndeleted:"+mCursor.getString(5)+":\nparent:"+mCursor.getString(6)+":";
-                //Toast.makeText(EditBlogEntryActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
+				//if the edit blog entry screen is fresh (ie, made from some external ativity not from an on puase or rotate screen, then get the values from the db
+				if(mFreshEditScreen){
+					mPostTitle = mCursor.getString(1);
+					mPostContent = mCursor.getString(2);
+					mPostLabels =mCursor.getString(3);
+					mPostId = mCursor.getString(0);
+					if("0".equals(mCursor.getString(5))){ 
+						mDeleted=false;
+					}else{
+						mDeleted=true;
+					}
+					mPostParent = mCursor.getString(6);
+	                String nodeAsString="id:"+mCursor.getString(0)+":\ntitle:"+mCursor.getString(1)+":\ncontent:"+mCursor.getString(2)+":\nlabels:"+mCursor.getString(3)+":\npublished:"+mCursor.getString(4)+":\ndeleted:"+mCursor.getString(5)+":\nparent:"+mCursor.getString(6)+":";
+	                //Toast.makeText(EditBlogEntryActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
+				}//else, use the saved state variables
 
 			} catch (IllegalArgumentException e) {
 				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
@@ -391,16 +395,24 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            "Pause",  // Action
 	            "event was paused", // Label
 	            38);       // Value
+    	mFreshEditScreen=false;
     	mWebView.loadUrl("javascript:savePostToState()");
     	/*
     	 * un-user-initiated saves do not create a new node in the draft tree (although, this can be changed
     	 * by just calling saveAsDaugher here)
+    	 * 1. asks javascript to put current values into state
+    	 * 2. saves state to database as self
+    	 * 
+    	 * Potential bug: this needs to operate syncronously, if operated async, then the changed values in the javascript will never be perserved unless the user hits save first (before hitting back button or rotating screen). 
+    	 * 
     	 */
+    	mWebView.loadUrl("javascript:savePostToState()");
     	saveAsSelfToDB();
+		//mWebView.loadUrl("javascript:savePostToDB()");
 		super.onPause();
 		
 //		saveOrUpdateToDB();
-//		mWebView.loadUrl("javascript:savePostToDB()");
+
 	}
 	@Override
 	protected void onDestroy() {
@@ -705,6 +717,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		return super.onKeyDown(keyCode, event);
 	}
     
+	
     /**
      * Provides a hook for calling "alert" from javascript. Useful for
      * debugging your javascript.
