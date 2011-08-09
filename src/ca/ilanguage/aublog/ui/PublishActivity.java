@@ -366,9 +366,12 @@ public class PublishActivity extends Activity  {
 			dlg.setOnDismissListener(new OnDismissListener() {
 				@Override
 				public void onDismiss(DialogInterface dialog) {
-					Intent i = new Intent(PublishActivity.this,
-							MainMenuActivity.class);
-					startActivity(i);
+					/*
+					 * Dont launch the main activity again, just finish it will return to main automatically
+					 */
+//					Intent i = new Intent(PublishActivity.this,
+//							MainMenuActivity.class);
+//					startActivity(i);
 					finish();
 				}
 			});

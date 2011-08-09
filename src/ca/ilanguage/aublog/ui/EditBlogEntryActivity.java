@@ -88,7 +88,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	String mPostLabels ="";
 	String mPostParent ="";
 	String mPostId ="";
-	Boolean mFreshEditScreen = true;
+	Boolean mFreshEditScreen;
 	private Boolean mDeleted = false;
 	String mLongestEverContent ="";
 	private static final String[] PROJECTION = new String[] {
@@ -183,7 +183,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             mCursor.moveToFirst();
 			try {
 				//if the edit blog entry screen is fresh (ie, made from some external ativity not from an on puase or rotate screen, then get the values from the db
-				if(mFreshEditScreen){
+				if(mPostId.equals("")|| mFreshEditScreen==true){
+					mFreshEditScreen = false;
 					mPostTitle = mCursor.getString(1);
 					mPostContent = mCursor.getString(2);
 					mPostLabels =mCursor.getString(3);
@@ -196,7 +197,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					mPostParent = mCursor.getString(6);
 	                String nodeAsString="id:"+mCursor.getString(0)+":\ntitle:"+mCursor.getString(1)+":\ncontent:"+mCursor.getString(2)+":\nlabels:"+mCursor.getString(3)+":\npublished:"+mCursor.getString(4)+":\ndeleted:"+mCursor.getString(5)+":\nparent:"+mCursor.getString(6)+":";
 	                //Toast.makeText(EditBlogEntryActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
-				}//else, use the saved state variables
+	                Toast.makeText(EditBlogEntryActivity.this, "First load of edit blog screen, all info came from db. ", Toast.LENGTH_LONG).show();
+				}else{//else, use the saved state variables
+					String tmp = "";
+					tmp = "dont look in the db for the values, get them from the state";
+					Toast.makeText(EditBlogEntryActivity.this, "Returning from rotate, no info should be lost. ", Toast.LENGTH_LONG).show();
+				}
 
 			} catch (IllegalArgumentException e) {
 				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
@@ -217,9 +223,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			}
 		}else{
 			//this should never be executed
-			mPostContent="";
+			//this is geting executed when click on a view drafts tree and edit !! not supposed to, the uri came in properly
+//			mPostContent="";
 			mPostLabels="";
-			mPostTitle="";
+//			mPostTitle="";
 		}
 		mWebView.loadUrl("file:///android_asset/edit_blog_entry_wysiwyg.html");
     }
