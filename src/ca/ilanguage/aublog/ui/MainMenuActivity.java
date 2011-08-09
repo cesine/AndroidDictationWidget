@@ -713,6 +713,14 @@ public class MainMenuActivity extends Activity {
 				 * http://stackoverflow.com/questions/5519097/javascript-infovis-spacetree-individual-node-styling
 				 * 
 				 * use TextUtils.htmlEncode to make it safe to put in the json, must decode it in the javascript if want to display the info later. 
+				 * 
+				 * Blog content
+				 * 1. replacing carriage returns with <p> tags
+				 * 2. running it through html encode to save it frmo breaking the json.
+				 * 
+				 * 
+				 * Blog title
+				 * 1. running it through the html encode to catch any french accents in the blog titles, not expecting any other html elements in a title however. 
 				 */
 				while (cursor.isAfterLast() == false) {
 					if (!firstChild) {
@@ -723,7 +731,7 @@ public class MainMenuActivity extends Activity {
 					if ("1".equals(cursor.getString(5))) {
 						node = node + "*";
 					} // if the node is flagged as deleted write a star
-					node = node + cursor.getString(1) + "\",\nhidden: \""
+					node = node + TextUtils.htmlEncode(cursor.getString(1)) + "\",\nhidden: \""
 							+ cursor.getString(5) + "\",\ndata: { content:\""
 							+ TextUtils.htmlEncode( cursor.getString(2).replaceAll("(\r\n|\r|\n|\n\r)", "<p>") ) + "\"},\nchildren: [";
 
