@@ -188,7 +188,7 @@ public class ViewDraftTreeActivity extends Activity {
 			values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
 			getContentResolver().update(uri, values,null, null);
 //			getContentResolver().delete(uri, null, null);
-			Toast.makeText(ViewDraftTreeActivity.this, "Will refresh here Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
+			//Toast.makeText(ViewDraftTreeActivity.this, "Will refresh here Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
 			refreshTree();
 		}
 	    public void refreshTree(){
