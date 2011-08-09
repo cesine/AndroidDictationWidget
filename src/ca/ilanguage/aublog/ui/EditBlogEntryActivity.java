@@ -35,6 +35,7 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
+import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
 import ca.ilanguage.aublog.service.AudioToText;
 
 /**
@@ -59,7 +60,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private static final String TAG = "CreateBlogEntryActivity";
     /** Talk to the user */
     private TextToSpeech mTts;
-    
+    private String mBloggerAccount;
+	private String mBloggerPassword;
     private Long mStartTime;
     private Long mEndTime;
     private Long mTimeAudioWasRecorded;
@@ -307,6 +309,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public void publishPost(String strTitle, String strContent, String strLabels){
         	//automaticallly saved using onPause...
 //        	savePost(strTitle, strContent, strLabels);
+        	mWebView.loadUrl("javascript:savePostToState()");
         	if ((mPostTitle.length() == 0)
         			|| (mPostTitle == null)
         			|| (mPostContent.length() == 0)
@@ -318,14 +321,29 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			            30);       // Value
         		Toast.makeText(EditBlogEntryActivity.this, R.string.title_or_content_empty_error, Toast.LENGTH_LONG).show();
         	} else {
-        		tracker.setCustomVar(1, "Navigation Type", "Button click", 22);
-    			tracker.trackPageView("/publishBlogEntryScreen");
-    			
-        		Intent i = new Intent(EditBlogEntryActivity.this, PublishActivity.class);
-        		//tell the i the mUri that is supposed to be published
-        		i.setData(mUri);
-        		startActivity(i);
-        		finish();
+        		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+    		    mBloggerAccount = prefs.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "see settings");
+        		mBloggerPassword = prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
+        		if( (!mBloggerAccount.contains("@") ) || mBloggerPassword.length()<4 ){
+        			tracker.trackEvent(
+    			            "Publish",  // Category
+    			            "Error",  // Action
+    			            "displayed Toast: Taking you to the settings to add a Blogger account.", // Label
+    			            302);       // Value
+        			Toast.makeText(EditBlogEntryActivity.this, "No Blogger account found.\n\nTaking you to the settings to \n\nConfigure a Blogger account.", Toast.LENGTH_LONG).show();
+        			Intent i = new Intent(EditBlogEntryActivity.this, SetPreferencesActivity.class);
+            		startActivity(i);
+        		}else{
+        		
+	        		tracker.setCustomVar(1, "Navigation Type", "Button click", 22);
+	    			tracker.trackPageView("/publishBlogEntryScreen");
+	    			
+	        		Intent i = new Intent(EditBlogEntryActivity.this, PublishActivity.class);
+	        		//tell the i the mUri that is supposed to be published
+	        		i.setData(mUri);
+	        		startActivity(i);
+	        		finish();
+        		}
         	}
         }
     }

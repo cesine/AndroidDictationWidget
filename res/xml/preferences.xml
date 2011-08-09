@@ -158,7 +158,7 @@
 	                 >
 	                 <!-- add share intent -->
 	                 <intent 
-	                 	android:action="android.content.Intent.VIEW"
+	                 	android:action="android.intent.action.VIEW"
                     	android:data="https://market.android.com/details?id=ca.ilanguage.aublog" />
                     
 	        </PreferenceScreen>

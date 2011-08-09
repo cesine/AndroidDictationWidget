@@ -28,6 +28,7 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.db.BlogEntry;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
+import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
 import ca.ilanguage.aublog.util.SpannableBufferHelper;
 import ca.ilanguage.aublog.util.Alert;
 
@@ -50,6 +51,7 @@ public class PublishActivity extends Activity  {
 	private int attempt = 0;
 	private String mBloggerAccount;
 	private String mBloggerPassword;
+	private static final int BLOGGER_ACCOUNT_ENTERED = 0;
 	
 	//	private DBTextAdapter mDbTextHelper;
 	private static Cursor mCursor = null;
@@ -90,13 +92,25 @@ public class PublishActivity extends Activity  {
 		mBloggerPassword = prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
 		Toast.makeText(PublishActivity.this, "Account name is "+mBloggerAccount, Toast.LENGTH_LONG).show();
 		
+		if("see settings".equals(mBloggerAccount)|| "see settings".equals(mBloggerPassword)){
+			tracker.trackEvent(
+		            "Publish",  // Category
+		            "Error",  // Action
+		            "displayed Toast: Taking you to the settings to add a Blogger account.", // Label
+		            302);       // Value
+			Toast.makeText(PublishActivity.this, "Taking you to the settings to add a Blogger account.", Toast.LENGTH_LONG).show();
+			Intent i = new Intent(PublishActivity.this, SetPreferencesActivity.class);
+    		//startActivityForResult(i, BLOGGER_ACCOUNT_ENTERED);
+			startActivity(i);
+		}
+		
 		/*
 		 * Get the data out of the database for the relevent blog post taht this activity was called on, display the information to the user.
 		 */
 		mUri = getIntent().getData();
-		Toast tellUser = Toast.makeText(this, 
-        		"The data in the uri is: \n"+mUri.toString(), Toast.LENGTH_LONG);
-        tellUser.show();
+//		Toast tellUser = Toast.makeText(this, 
+//        		"The data in the uri is: \n"+mUri.toString(), Toast.LENGTH_LONG);
+//        tellUser.show();
         mCursor = managedQuery(mUri, PROJECTION, null, null, null);
 		if (mCursor != null) {
 			// Requery in case something changed while paused (such as the title)
@@ -366,7 +380,7 @@ public class PublishActivity extends Activity  {
 		            "Publish",  // Action
 		            "failedto publish blog entry "+myEntry.toString()+" Error code "+ publishStatus, // Label
 		            610);       // Value
-			Alert.showAlert(this, "Publishing failed", "Error code "
+			Alert.showAlert(this, "Publishing failed, your Blogger account and/or password may be incorrectly entered in the Settings.", "Error code "
 					+ publishStatus, "Try again",
 					new DialogInterface.OnClickListener() {
 				@Override
