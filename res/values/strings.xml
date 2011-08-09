@@ -69,7 +69,7 @@
 
 
 <string name="preference_enable_statistics">Report my edit statistics</string>
-<string name="preference_enable_statistics_summary">Sends anonymous edit statistics to a server to help us make this app more useful and adaptive.</string>
+<string name="preference_enable_statistics_summary">Sends anonymous statistics to a server to help us make this app more useful and adaptive.</string>
 
 
 <string name="preference_about">About</string>
@@ -86,7 +86,7 @@
 
 
 
-<string name="saved_game_erased_notification">Taking you to the Application Settings where you can select AuBlog and "Clear data"...</string>
+<string name="saved_data_erased_notification">Taking you to the Application Settings where you can select AuBlog and "Clear data"...</string>
 
 <string name="quit_game_dialog_title">Quit AuBlog?</string>
 <string name="quit_game_dialog_ok">Quit</string>
@@ -109,12 +109,11 @@
 <string name="whats_new_dialog_ok">Let\'s get started!</string>
 <string name="whats_new_dialog_message">Thanks for downloading AuBlog.\n\n
 This is an open source project.  If you are interested in how it works, or would like to add your
-own modules, check out the source at our web site, aublog.net.</string>
-<!-- 
+own modules, check out the source at our web site, aublog.net.
 \n
 \n
-Also note the transcription module sends anonymous statistics back to a server to detect frequent user edits which should be automated.  If you’d rather not
-allow that, you can turn it off in the settings screen. -->
+Also note that the app sends anonymous statistics back to a server to detect frequent user functions which should be automated.  If you’d rather not
+allow that, you can turn it off in the settings screen. </string>
 
 <string name="control_setup_dialog_title">Control Setup</string>
 <string name="control_setup_dialog_ok">Leave it this way</string>
