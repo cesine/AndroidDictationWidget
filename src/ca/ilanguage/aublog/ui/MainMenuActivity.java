@@ -725,7 +725,7 @@ public class MainMenuActivity extends Activity {
 					} // if the node is flagged as deleted write a star
 					node = node + cursor.getString(1) + "\",\nhidden: \""
 							+ cursor.getString(5) + "\",\ndata: { content:\""
-							+ TextUtils.htmlEncode(cursor.getString(2)) + "\"},\nchildren: [";
+							+ TextUtils.htmlEncode( cursor.getString(2).replaceAll("(\r\n|\r|\n|\n\r)", "<p>") ) + "\"},\nchildren: [";
 
 					/*
 					 * find all nodes with this node as its parent
