@@ -19,6 +19,8 @@ package ca.ilanguage.aublog.preferences;
 import java.io.File;
 import java.util.List;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,13 +38,27 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
+	GoogleAnalyticsTracker tracker;
+	
 	String mBloggerAccount;
 	String mBloggerPassword;
 	
 	@Override
+	  protected void onDestroy() {
+	    super.onDestroy();
+	    // Stop the tracker when it is no longer needed.
+	    tracker.stop();
+	  }
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        tracker = GoogleAnalyticsTracker.getInstance();
+
+	    // Start the tracker in manual dispatch mode...
+	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
+
+	    
         getPreferenceManager().setSharedPreferencesMode(MODE_PRIVATE);
         getPreferenceManager().setSharedPreferencesName(PreferenceConstants.PREFERENCE_NAME);
         
@@ -54,6 +70,12 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
+				
+				tracker.trackEvent(
+			            "Clicks",  // Category
+			            "Button",  // Action
+			            "user clicked on email from the settings screen ", // Label
+			            65);       // Value
 				File file = new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
 
 		    	Intent mailto = new Intent(Intent.ACTION_SEND); 
@@ -93,9 +115,20 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         			"it allows you to browse your SDCARD directly on your mobile device.", Toast.LENGTH_LONG).show();
         	Intent goToMarket = new Intent(Intent.ACTION_VIEW)
             .setData(Uri.parse("market://details?id=org.openintents.filemanager"));
+        	tracker.trackEvent(
+		            "DependantPackages",  // Category
+		            "FileManager",  // Action
+		            "user doesnt have a filemanager so export is disnabled, took them to the market to install it.", // Label
+		            60);       // Value
         	startActivity(goToMarket);
         }
         if ( ! fileManagerChecked &&  fileManagerAvailable){
+        	tracker.trackEvent(
+		            "DependantPackages",  // Category
+		            "FileManager",  // Action
+		            "user has a filemanager so export is enabled", // Label
+		            61);       // Value
+        	
         	/*
         	 * Enable the export and open possibilities
         	 */
@@ -153,8 +186,13 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			 */
 			startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS));
 			//wipeUserData
+			tracker.trackEvent(
+		            "AuBlogLifeCycleEvent",  // Category
+		            "UserWipe",  // Action
+		            "user wants to wipe their draft data, taking them to the device settings where they can click clear data, but dont know if they really clicked it.", // Label
+		            63);       // Value
 			
-			Toast.makeText(this, R.string.saved_game_erased_notification,
+			Toast.makeText(this, R.string.saved_data_erased_notification,
                     Toast.LENGTH_SHORT).show();
 		}
 	}

@@ -17,7 +17,12 @@
 package ca.ilanguage.aublog.preferences;
 
 public class PreferenceConstants {
-	
+	/*
+	 * TODO consider having three values for sound enabled, 
+	 * 0 no TTS
+	 * 1 TTS always
+	 * 2 TTS only when head set (or blue tooth) is plugged in? (add a listener for this in the main menu activity as it is always present wen the app is running?
+	 */
     public static final String PREFERENCE_SOUND_ENABLED = "enableSound";
     public static final String PREFERENCE_SAFE_MODE = "safeMode";
     public static final String PREFERENCE_SESSION_ID = "session";

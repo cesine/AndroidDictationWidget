@@ -2,6 +2,8 @@ package ca.ilanguage.aublog.ui;
 
 import java.io.File;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
+import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 
 /**
@@ -41,6 +44,8 @@ import ca.ilanguage.aublog.preferences.PreferenceConstants;
  */
 public class ViewDraftTreeActivity extends Activity {
 
+	GoogleAnalyticsTracker tracker;
+	
     private static final String TAG = "CreateBlogEntryActivity";
 
 	//uri of the entry being edited.
@@ -73,6 +78,14 @@ public class ViewDraftTreeActivity extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.main_webview);
+        
+        tracker = GoogleAnalyticsTracker.getInstance();
+
+	    // Start the tracker in manual dispatch mode...
+	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
+
+	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
+	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
         
         //http://stackoverflow.com/questions/2465432/android-webview-completely-clear-the-cache
         /*
@@ -131,6 +144,11 @@ public class ViewDraftTreeActivity extends Activity {
     public class JavaScriptInterface {
         Context mContext;
 
+        /*
+         * TODO add some hooks in the javascript interface to the space tree to track user interaction with the tree, how often did they drag it, what is their prefered layout 
+         * can set tehir prefered layout in the settings if that is a popular change in the draft tree. 
+         */
+        
         /** Instantiate the interface and set the context */
         JavaScriptInterface(Context c) {
             mContext = c;
@@ -140,6 +158,13 @@ public class ViewDraftTreeActivity extends Activity {
             Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
         }
         public void editId(String id){
+        	tracker.setCustomVar(1, "Navigation Type", "Button click", 21);
+			tracker.trackPageView("/editBlogEntryScreen");
+        	tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "user clicked on edit, Toasted: Editing post number "+id, // Label
+		            21);       // Value
         	Toast.makeText(mContext, "Editing post number "+id, Toast.LENGTH_SHORT).show();
         	Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
         	i.setData( AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build() );
@@ -148,6 +173,12 @@ public class ViewDraftTreeActivity extends Activity {
         }
 
 	    public void deleteId(String id){
+	    	tracker.trackEvent(
+		            "AuBlogLifeCycleEvent",  // Category
+		            "Delete",  // Action
+		            "user clicked on delete, Toasted: Are you sure you want to delete post number "+id, // Label
+		            23);       // Value
+	    	
 	    	Toast.makeText(mContext, "Are you sure you want to delete post number "+id, Toast.LENGTH_SHORT).show();
 	    	Uri uri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
 			/*
@@ -161,7 +192,14 @@ public class ViewDraftTreeActivity extends Activity {
 			refreshTree();
 		}
 	    public void refreshTree(){
-	    	
+	    	tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "refreshing tree ", // Label
+		            24);       // Value
+	    	/*
+	    	 * TODO get the javascript to be regenerated, or simply open the json file and change the deleted flag on that entry?
+	    	 */
 	    	Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 	    	startActivity(i);
 	    	finish();
@@ -171,6 +209,12 @@ public class ViewDraftTreeActivity extends Activity {
 //	    	intent.setAction(android.content.Intent.ACTION_VIEW);
 //	    	intent.setDataAndType(Uri.fromFile(file), "text/*");
 //	    	startActivity(intent); 
+	    	
+	    	tracker.trackEvent(
+		            "AuBlogLifeCycleEvent",  // Category
+		            "Export",  // Action
+		            "user clicked on email/export from the view drafts tree layout ", // Label
+		            25);       // Value
 	    	
 	    	File file = new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
 
@@ -206,6 +250,7 @@ public class ViewDraftTreeActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		tracker.stop();
 
 	}
 

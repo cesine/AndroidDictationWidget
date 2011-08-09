@@ -5,6 +5,9 @@ import java.util.Date;
 
 public class BlogEntry {
 
+	/*TODO add and publish with labels
+	 * 
+	 */
 	private CharSequence blogEntry;
 	private String title;
 	private Date created;

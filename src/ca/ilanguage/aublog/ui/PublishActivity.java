@@ -20,10 +20,13 @@ import android.os.Message;
 import android.text.Spannable; //import android.util.Log;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.google.gdata.util.ServiceException;
 
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.db.BlogEntry;
+import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.util.SpannableBufferHelper;
 import ca.ilanguage.aublog.util.Alert;
@@ -34,7 +37,8 @@ import ca.ilanguage.aublog.service.*;
 
 
 public class PublishActivity extends Activity  {
-
+	GoogleAnalyticsTracker tracker;
+	
 	// private static final String TAG = "PreviewAndPublish";
 	private String mTitle;
 	private String mContent;
@@ -57,17 +61,30 @@ public class PublishActivity extends Activity  {
 		AuBlogHistory.PUBLISHED,
 		AuBlogHistory.PUBLISHED_IN
 	};
-
+	@Override
+	  protected void onDestroy() {
+	    super.onDestroy();
+	    // Stop the tracker when it is no longer needed.
+	    tracker.stop();
+	  }
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.transparent_activity);
 		
+		tracker = GoogleAnalyticsTracker.getInstance();
 
+	    // Start the tracker in manual dispatch mode...
+	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
+
+	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
+	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
+	    
 		/*
 		 * get blogger infomation out of the preferences
 		 */
-			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		    
 		mBloggerAccount = prefs.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "see settings");
 		mBloggerPassword = prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
@@ -91,14 +108,27 @@ public class PublishActivity extends Activity  {
 				mContent = mCursor.getString(1);
 			} catch (IllegalArgumentException e) {
 				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
+				tracker.trackEvent(
+			            "Database",  // Category
+			            "Bug",  // Action
+			            "Retrieval from DB failed with an illegal argument exception "+e, // Label
+			            601);       // Value
 				Toast.makeText(PublishActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
 			} catch (Exception e) {
+				tracker.trackEvent(
+			            "Database",  // Category
+			            "Bug",  // Action
+			            "The cursor returned is "+e, // Label
+			            602);       // Value
 				// Log.e(TAG, "Exception (DataBase failed)");
 				Toast.makeText(PublishActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
 			}
 			myEntry = new BlogEntry();
 			myEntry.setBlogEntry(mContent+"<p>"+prefs.getString(PreferenceConstants.PREFERENCE_BLOG_SIGNATURE, "")+"</p>");
 			myEntry.setTitle(mTitle);
+			/*
+			 * TODO add and publish labels
+			 */
 			myEntry.setCreated(new Date(System.currentTimeMillis()));
 			publishBlogEntry();
 		}else{
@@ -110,6 +140,11 @@ public class PublishActivity extends Activity  {
 		final Activity thread_parent = this;
 		publishProgress = ProgressDialog.show(this, "Publishing blog entry",
 		"Starting to publish blog entry...");
+		tracker.trackEvent(
+	            "AuBlogLifeCycleEvent",  // Category
+	            "Publish",  // Action
+	            "starting to publish blog entry "+myEntry.toString(), // Label
+	            61);       // Value
 		Thread publish = new Thread() {
 			@SuppressWarnings("static-access")
 			public void run() {
@@ -145,10 +180,20 @@ public class PublishActivity extends Activity  {
 						attempt++;
 						// Log.e(TAG, "AuthenticationException " +
 						// e.getMessage());
+						tracker.trackEvent(
+					            "Blogger",  // Category
+					            "Bug",  // Action
+					            "AuthenticationException " +e.getMessage(), // Label
+					            603);       // Value
 					}  catch (Exception e) {
 						// Log.e(TAG, "Exception: " + e.getMessage());
 						Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
 						//stop the thread and go back to publish activity
+						tracker.trackEvent(
+					            "Internet",  // Category
+					            "Bug",  // Action
+					            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e, // Label
+					            604);       // Value
 						finish();
 					}
 
@@ -180,6 +225,11 @@ public class PublishActivity extends Activity  {
 						} catch (Exception e) {
 							// Log.e(TAG, "Exception: " + e.getMessage());
 							Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
+							tracker.trackEvent(
+						            "Internet",  // Category
+						            "Bug",  // Action
+						            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e, // Label
+						            605);       // Value
 							finish();
 						}
 					}
@@ -227,6 +277,11 @@ public class PublishActivity extends Activity  {
 							// Log.e(TAG, "Exception: " + e.getMessage());
 							Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
 							//finish thread?
+							tracker.trackEvent(
+						            "Internet",  // Category
+						            "Bug",  // Action
+						            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e, // Label
+						            606);       // Value
 							finish();
 						}
 					}
@@ -284,6 +339,11 @@ public class PublishActivity extends Activity  {
 			/*
 			 * Update mUri to have a published flag
 			 */
+			tracker.trackEvent(
+		            "AuBlogLifeCycleEvent",  // Category
+		            "Publish",  // Action
+		            "successfully published blog entry "+myEntry.toString(), // Label
+		            612);       // Value
 
 			final Dialog dlg = new AlertDialog.Builder(PublishActivity.this)
 			//					.setIcon(ca.ilanguage.aublog.R.drawable.ic_dialog_alert)
@@ -301,17 +361,32 @@ public class PublishActivity extends Activity  {
 			dlg.show();
 		} else {
 			attempt = 0;
+			tracker.trackEvent(
+		            "AuBlogLifeCycleEvent",  // Category
+		            "Publish",  // Action
+		            "failedto publish blog entry "+myEntry.toString()+" Error code "+ publishStatus, // Label
+		            610);       // Value
 			Alert.showAlert(this, "Publishing failed", "Error code "
 					+ publishStatus, "Try again",
 					new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.dismiss();
+					tracker.trackEvent(
+				            "Click",  // Category
+				            "Button",  // Action
+				            "user clicked on Try again button "+myEntry.toString()+" Error code "+ publishStatus, // Label
+				            612);       // Value
 					publishBlogEntry();
 				}
 			}, "Cancel", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
+					tracker.trackEvent(
+				            "Click",  // Category
+				            "Button",  // Action
+				            "user clicked on cancel button "+myEntry.toString()+" Error code "+ publishStatus, // Label
+				            613);       // Value
 					dialog.cancel();
 				}
 			});

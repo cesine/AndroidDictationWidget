@@ -1,3 +1,8 @@
+# private constants #
+NonPublicConstants.java
+assets/analytics_website_script.html
+
+
 .project
 .settings
 #.classpath

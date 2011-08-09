@@ -45,14 +45,33 @@ import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 //import ca.ilanguage.aublog.util.DebugLog;
+import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
 import ca.ilanguage.aublog.util.UIConstants;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.google.gdata.data.Feed;
 
 public class MainMenuActivity extends Activity {
 
+	/*
+	 * Tracker heirarchy
+	 * 1x = main menu activity
+	 * 11 = click on drafts
+	 * 12 = click on new entry
+	 * 13 = click on user guide
+	 * 14 = click on settings
+	 * 2x = view drafts tree activity
+	 * 3x = edit blog entry activity
+	 * 4x = settings activity
+	 * 5x = about activity (ie user guide)
+	 * 6x = publish activity
+	 * 
+	 * bugs/errors have a 0 in them
+	 */
+	GoogleAnalyticsTracker tracker;
+	
 	private View mStartButton;
 	private View mOptionsButton;
 	private View mExtrasButton;
@@ -78,11 +97,26 @@ public class MainMenuActivity extends Activity {
 	private final static int GENERATING_TREE_DIALOG = 1;
 	
 	protected static final String TAG = "MainMenuActivity";
+	
+	@Override
+	  protected void onDestroy() {
+	    super.onDestroy();
+	    // Stop the tracker when it is no longer needed.
+	    tracker.stop();
+	  }
 
 	// Create an anonymous implementation of OnClickListener
 
 	private View.OnClickListener sOptionButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
+
+			tracker.setCustomVar(1, "Navigation Type", "Button click", 14);
+			tracker.trackPageView("/settingsScreen");
+			tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "clicked settings", // Label
+		            14);       // Value
 
 			Intent i = new Intent(getBaseContext(),
 					SetPreferencesActivity.class);
@@ -102,6 +136,14 @@ public class MainMenuActivity extends Activity {
 	private View.OnClickListener sExtrasButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
 
+			tracker.setCustomVar(1, "Navigation Type", "Button click", 13);
+			tracker.trackPageView("/userGuideScreen");
+			tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "clicked user guide", // Label
+		            13);       // Value
+			
 			// Intent i = new Intent(getBaseContext(), Settings.class);
 			Intent i = new Intent(getBaseContext(), AboutActivity.class);
 
@@ -145,6 +187,13 @@ public class MainMenuActivity extends Activity {
 	}
 	private View.OnClickListener sDraftsButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
+			tracker.setCustomVar(1, "Navigation Type", "Button click", 11);
+			tracker.trackPageView("/viewDraftsTreeScreen");
+			tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "clicked drafts", // Label
+		            11);       // Value
 
 			/*
 			 * If the drafts tree is fresh (no new changes) return.
@@ -154,6 +203,11 @@ public class MainMenuActivity extends Activity {
 				Toast.makeText(MainMenuActivity.this,
 						"Not re-creating drafts tree, using cached. ",
 						Toast.LENGTH_LONG).show();
+				tracker.trackEvent(
+			            "CPU",  // Category
+			            "Use",  // Action
+			            "not creating new drafts tree", // Label
+			            111);   
 				Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 
 				v.startAnimation(mButtonFlickerAnimation);
@@ -173,6 +227,11 @@ public class MainMenuActivity extends Activity {
 //			};
 //			Thread thread =  new Thread(null, generateDraftsTree, "MagentoBackground");
 //			thread.start();
+			tracker.trackEvent(
+		            "CPU",  // Category
+		            "Use",  // Action
+		            "creating new drafts tree", // Label
+		            112);  
 			new GenerateTreeTask().execute();
 			
 			
@@ -211,6 +270,14 @@ public class MainMenuActivity extends Activity {
 			// .showAlert(MainMenuActivity.this,
 			// "Profile is not created",
 			// "Please, input 'login/password' in settings");
+			
+			tracker.setCustomVar(1, "Navigation Type", "Button click", 12);
+			tracker.trackPageView("/editBlogEntryScreen");
+			tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "clicked new entry", // Label
+		            12);       // Value
 
 			Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
 
@@ -224,10 +291,15 @@ public class MainMenuActivity extends Activity {
 						+ getIntent().getData());
 				Toast.makeText(
 						MainMenuActivity.this,
-						"Failed to insert new blog entry into "
+						"Failed to insert new blog entry into the database, got to your devices settings, choose Aublog and click Clear data to re-create the database"
 								+ getIntent().getData() + " with this uri"
 								+ AuBlogHistory.CONTENT_URI, Toast.LENGTH_LONG)
 						.show();
+				tracker.trackEvent(
+			            "Database",  // Category
+			            "Bug",  // Action
+			            "cannot create new entry", // Label
+			            10);       // Value
 
 			} else {
 				i.setData(uri);
@@ -241,6 +313,15 @@ public class MainMenuActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		tracker = GoogleAnalyticsTracker.getInstance();
+
+	    // Start the tracker in manual dispatch mode...
+	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
+
+	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
+	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
+		
 		setContentView(R.layout.mainmenu);
 
 		mStartButton = findViewById(R.id.startButton);
@@ -304,6 +385,9 @@ public class MainMenuActivity extends Activity {
 			if (Math.abs(lastVersion) < Math.abs(AuBlog.VERSION)) {
 				// This is a new install or an upgrade.
 
+				/* This code checks for device compatibility
+				 *
+				 *
 				// Check the safe mode option.
 				// Useful reference:
 				// http://en.wikipedia.org/wiki/List_of_Android_devices
@@ -326,12 +410,12 @@ public class MainMenuActivity extends Activity {
 							true);
 					editor.commit();
 				}
+				*/
 
 				SharedPreferences.Editor editor = prefs.edit();
 
 				if (lastVersion > 0 && lastVersion < 14) {
-					// if the user has beat the game once, go ahead and unlock
-					// stuff for them.
+					// if the user has updated the app at specific versions can do something here
 					
 				}
 

@@ -6,6 +6,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
@@ -31,6 +33,7 @@ import android.widget.Toast;
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
+import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.service.AudioToText;
 
@@ -51,6 +54,8 @@ import ca.ilanguage.aublog.service.AudioToText;
  */
 public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnInitListener {
 
+	GoogleAnalyticsTracker tracker;
+	
     private static final String TAG = "CreateBlogEntryActivity";
     /** Talk to the user */
     private TextToSpeech mTts;
@@ -58,7 +63,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private Long mStartTime;
     private Long mEndTime;
     private Long mTimeAudioWasRecorded;
-    
+    private String mAudioSource;
     private String mDateString ="";
     private String mAudioResultsFile;
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
@@ -116,6 +121,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			}
 		} else {
 			// Initialization failed.
+			tracker.trackEvent(
+		            "DependantPackages",  // Category
+		            "FileManager",  // Action
+		            "user doesnt have TTS, in the init failed section, didnt take them to package manager", // Label
+		            301);       // Value
+        	
 			Log.e(TAG, "Sorry, I can't talk to you because I could not initialize TextToSpeech.");
 		}
 	}
@@ -132,6 +143,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
+        
+        tracker = GoogleAnalyticsTracker.getInstance();
+
+	    // Start the tracker in manual dispatch mode...
+	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
+
+	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
+	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
+		
         
         mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
 	    mDateString = mDateString.replaceAll("/","_").replaceAll(" ","_");
@@ -174,10 +194,20 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
 			} catch (IllegalArgumentException e) {
 				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
+				tracker.trackEvent(
+			            "Database",  // Category
+			            "Bug",  // Action
+			            "Retrieval from DB failed with an illegal argument exception "+e, // Label
+			            301);       // Value
 				Toast.makeText(EditBlogEntryActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
 			} catch (Exception e) {
 				// Log.e(TAG, "Exception (DataBase failed)");
-				Toast.makeText(EditBlogEntryActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
+				tracker.trackEvent(
+			            "Database",  // Category
+			            "Bug",  // Action
+			            "The cursor returned is "+e, // Label
+			            302);       // Value
+				//Toast.makeText(EditBlogEntryActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
 			}
 		}else{
 			//this should never be executed
@@ -217,6 +247,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public void readToTTS(String message){
         	if(mReadBlog){
         		readTTS(message);
+        	}else{
+        		tracker.trackEvent(
+        	            "TTS",  // Category
+        	            "notUsed",  // Action
+        	            "there was a message that was not read via TTS because it is off in the settings: "+message, // Label
+        	            362);       // Value
         	}
         }
         /*
@@ -247,6 +283,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	return "Id: "+mPostId+" Parent: "+mPostParent+" Deleted: "+mDeleted.toString()+" LongestEverString:"+mLongestEverContent;
         }
         public void saveState(String strTitle, String strContent, String strLabels){
+        	tracker.trackEvent(
+    	            "AuBlogLifeCycleEvent",  // Category
+    	            "saveSTate",  // Action
+    	            "state was saved via javascript "+strTitle+" : "+strLabels+" : "+strContent, // Label
+    	            34);       // Value
         	saveStateToActivity(strTitle, strContent, strLabels);
         }
         public void savePost(String strTitle, String strContent, String strLabels){
@@ -270,8 +311,16 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         			|| (mPostTitle == null)
         			|| (mPostContent.length() == 0)
         			|| (mPostContent == null)) {
+        		tracker.trackEvent(
+			            "Publish",  // Category
+			            "Error",  // Action
+			            "displayed Toast:"+R.string.title_or_content_empty_error, // Label
+			            30);       // Value
         		Toast.makeText(EditBlogEntryActivity.this, R.string.title_or_content_empty_error, Toast.LENGTH_LONG).show();
         	} else {
+        		tracker.setCustomVar(1, "Navigation Type", "Button click", 22);
+    			tracker.trackPageView("/publishBlogEntryScreen");
+    			
         		Intent i = new Intent(EditBlogEntryActivity.this, PublishActivity.class);
         		//tell the i the mUri that is supposed to be published
         		i.setData(mUri);
@@ -319,6 +368,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }
     @Override
 	protected void onPause() {
+    	tracker.trackEvent(
+	            "Event",  // Category
+	            "Pause",  // Action
+	            "event was paused", // Label
+	            38);       // Value
     	mWebView.loadUrl("javascript:savePostToState()");
     	/*
     	 * un-user-initiated saves do not create a new node in the draft tree (although, this can be changed
@@ -334,7 +388,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	protected void onDestroy() {
 		super.onDestroy();
 		// Log.i(TAG, "Method 'onDestroy()' launched");
-//		tracker.stop();
+		tracker.stop();
 		//saveOrUpdateToDB();
 //		mWebView.loadUrl("javascript:savePostToDB()");
 
@@ -375,11 +429,21 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    		Log.d(TAG, "Post saved to database.");
 	    		//Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
     		}
-    		    	} catch (SQLException e) {
+    	} catch (SQLException e) {
     		// Log.e(TAG,"SQLException (createPost(title, content))");
+    		tracker.trackEvent(
+    	            "Database",  // Category
+    	            "Bug",  // Action
+    	            "Database connection problem "+e, // Label
+    	            3201);       // Value
     		Toast.makeText(EditBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
     	} catch (Exception e) {
     		// Log.e(TAG, "Exception: " + e.getMessage());
+    		tracker.trackEvent(
+    	            "Database",  // Category
+    	            "Bug",  // Action
+    	            "exception "+e, // Label
+    	            3202);       // Value
     		Toast.makeText(EditBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
     	}
 	}
@@ -388,6 +452,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	/*
 		 * Flag entry as deleted
 		 */
+    	
+    	tracker.trackEvent(
+	            "AuBlogLifeCycleEvent",  // Category
+	            "Delete",  // Action
+	            "entry was flagged as deleted in the database"+uri.getLastPathSegment(), // Label
+	            39);       // Value
 		ContentValues values = new ContentValues();
 		values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
 		getContentResolver().update(uri, values,null, null);
@@ -396,15 +466,30 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		Toast.makeText(EditBlogEntryActivity.this, "Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
 		finish();
 	}
+	/*
+	 * An android method to wrap a call to the TTS engine, the logic of if the app should use text to speech (based on settings check box) is handled in the javascript interface. 
+	 */
 	public void readTTS(String message){
+		tracker.trackEvent(
+	            "TTS",  // Category
+	            "Use",  // Action
+	            "spoke message: "+message, // Label
+	            361);       // Value
 		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);
-		//TODO change other flush to queue add 
+		
 	}
 	
 	public String beginRecording(){
+		mAudioSource= "microphone";
+		tracker.trackEvent(
+	            "Clicks",  // Category
+	            "Button",  // Action
+	            "record audio via "+mAudioSource, // Label
+	            34);       // Value
 		/*
 		 * TODO get audio from blue tooth or mic or usb mic?
 		 */
+		
 		mStartTime=System.currentTimeMillis();
 		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
 		mDateString = mDateString.replaceAll("/","_").replaceAll(" ","_");
@@ -423,18 +508,34 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		} catch (IllegalStateException e) {
 			// TODO Auto-generated catch block
 			Toast.makeText(EditBlogEntryActivity.this, "The App cannot save audio, maybe the Android is attached to a computer?", Toast.LENGTH_SHORT).show();
-
+			tracker.trackEvent(
+    	            "Record",  // Category
+    	            "Bug",  // Action
+    	            "The App cannot save audio, maybe the Android is attached to a computer?" +e, // Label
+    	            3301);       // Value
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			Toast.makeText(EditBlogEntryActivity.this, "The App cannot save audio, maybe the Android is attached to a computer?", Toast.LENGTH_SHORT).show();
+			tracker.trackEvent(
+    	            "Record",  // Category
+    	            "Bug",  // Action
+    	            "The App cannot save audio, maybe the Android is attached to a computer?" +e, // Label
+    	            3302);       // Value
 		}
 		return "Recording...";
 	}
 	public String stopSaveRecording(){
+		
 		mEndTime=System.currentTimeMillis();
 	   	mRecorder.stop();
 	   	mRecorder.release();
 	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
+	   	
+	   	tracker.trackEvent(
+	            "AuBlogLifeCycleEvent",  // Category
+	            "Dictation",  // Action
+	            "stop audio recording "+mTimeAudioWasRecorded/100+"sec", // Label
+	            35);       // Value
 	   	
 	    // Keep the volume control type consistent across all activities.
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -458,6 +559,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * Audio splitting based on silence
          * 1. c: https://github.com/taf2/audiosplit/graphs/languages
          */
+        /* Code to do a voice recognition via google voice:
         try {
 			URL url = new URL("https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=en-US");
 			
@@ -470,9 +572,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		Intent i = new Intent(EditBlogEntryActivity.this, AudioToText.class);
 		//tell the i the mUri that is supposed to be published
 		/*
-		 * start activity for result and put the text into the blog content
-		 */
+		 * TODO, start activity for result 
+		 * get the array of results, use some internal aublog logic to determine which is most likely and append the text into the blog content
+		 
 		startActivity(i);
+		*/
 		
 		
 		return "Saved."+mTimeAudioWasRecorded/100+"sec";
@@ -497,6 +601,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		if (mLongestEverContent.length() <= 0 ){
         			saveStateToActivity(strTitle, strContent, strLabels);
         			saveAsSelfToDB();
+        			tracker.trackEvent(
+            	            "AuBlogLifeCycleEvent",  // Category
+            	            "Save",  // Action
+            	            "save as self:no new text", // Label
+            	            311);       // Value
         			return;
         		}
         		//if the user blanked out the blog entry, probably they are restarting from scratch so set the parent to zero node
@@ -506,6 +615,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     			daughterValues.put(AuBlogHistory.PARENT_ENTRY, mUri.getLastPathSegment());
     		}
     		Uri daughterUri = getContentResolver().insert(AuBlogHistory.CONTENT_URI, daughterValues);
+    		tracker.trackEvent(
+    	            "AuBlogLifeCycleEvent",  // Category
+    	            "Save",  // Action
+    	            "save as daughter", // Label
+    	            312);       // Value
     		/*
     		 * Save parent but just tell it has a daughter, dont put the new values into its entry.
     		 * It should stay the way it was last saved when the user pushed the save button.
@@ -529,12 +643,23 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 //    		        null);
     		
     		Log.d(TAG, "Post saved to database.");
-    		    	} catch (SQLException e) {
+    	} catch (SQLException e) {
+    		tracker.trackEvent(
+    	            "Database",  // Category
+    	            "Bug",  // Action
+    	            "Database connection problem "+e, // Label
+    	            3101);       // Value
     		// Log.e(TAG,"SQLException (createPost(title, content))");
     		Toast.makeText(EditBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
     	} catch (Exception e) {
     		// Log.e(TAG, "Exception: " + e.getMessage());
-    		Toast.makeText(EditBlogEntryActivity.this, "Exception "+e, Toast.LENGTH_LONG).show();
+    		
+    		//Toast.makeText(EditBlogEntryActivity.this, "Exception "+e, Toast.LENGTH_LONG).show();
+    		tracker.trackEvent(
+    	            "Database",  // Category
+    	            "Bug",  // Action
+    	            "Unknown exception "+e, // Label
+    	            3102);       // Value
     	}
     	flagDraftTreeAsNeedingToBeReGenerated();
 
@@ -565,7 +690,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     /**
      * Provides a hook for calling "alert" from javascript. Useful for
      * debugging your javascript.
-     */
+     
     final class MyWebChromeClient extends WebChromeClient {
         @Override
         public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
@@ -573,5 +698,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             result.confirm();
             return true;
         }
-    }
+        
+    }*/
+    
 }
