@@ -311,9 +311,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	finish();
         }
         public void publishPost(String strTitle, String strContent, String strLabels){
-        	//automaticallly saved using onPause...
-//        	savePost(strTitle, strContent, strLabels);
-        	mWebView.loadUrl("javascript:savePostToState()");
+        	//act like publish is both save+publish
+        	saveAsDaughterToDB(strTitle, strContent, strLabels);
         	if ((mPostTitle.length() == 0)
         			|| (mPostTitle == null)
         			|| (mPostContent.length() == 0)
