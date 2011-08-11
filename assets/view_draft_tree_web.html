@@ -35,7 +35,7 @@
 		nonstringdata= nonstringdata.replace(/ ]/g,']');
 		nonstringdata= nonstringdata.replace(/} ,{/g,'},{');
 		nonstringdata= nonstringdata.replace(/^ /g,'');
-		nonstringdata='{"id":"1","name":"Root","hidden":"0","data":{"content":"empty"},"children":['+nonstringdata;
+		nonstringdata='{"id":"1","name":"Root","hidden":"0","data":{"content":"empty"},"children":['+nonstringdata+']}';
 		document.getElementById('dataarea').value = nonstringdata;
 		//A JSON parser will recognize only JSON text, rejecting all scripts. 		
 		var tempdata = JSON.parse(nonstringdata);

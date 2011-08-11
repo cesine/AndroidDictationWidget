@@ -536,7 +536,7 @@ public class MainMenuActivity extends Activity {
 		
 		
 		
-		String mResultsFile = "draft_space_tree.js";
+		String mResultsFile = "draft_tree_data.js";
 		// FileWriter fstream;
 		/*
 		 * If you're using API Level 8 or greater, use getExternalFilesDir() to
@@ -553,7 +553,7 @@ public class MainMenuActivity extends Activity {
 		// Environment.getExternalStorageDirectory().getAbsolutePath() +
 		// "/Android/data/ca.ilanguage.aublog/files/";
 
-		String fname = mResultsFile;
+		
 //		File file = new File(getCacheDir(), mResultsFile);
 		File file = new File(getExternalFilesDir(null), mResultsFile);
 		
@@ -571,74 +571,22 @@ public class MainMenuActivity extends Activity {
 			
 			// fstream = new FileWriter(mResultsFile,true);
 			// mOut = new BufferedWriter(fstream);
-			String begining = "var labelType, useGradients, nativeTextSupport, animate;\n\n(function() {\n  var ua = navigator.userAgent,\n      iStuff = ua.match(/iPhone/i) || ua.match(/iPad/i),\n      typeOfCanvas = typeof HTMLCanvasElement,\n      nativeCanvasSupport = (typeOfCanvas == 'object' || typeOfCanvas == 'function'),\n      textSupport = nativeCanvasSupport \n        && (typeof document.createElement('canvas').getContext('2d').fillText == 'function');\n  //I'm setting this based on the fact that ExCanvas provides text support for IE\n  //and that as of today iPhone/iPad current text support is lame\n  labelType = (!nativeCanvasSupport || (textSupport && !iStuff))? 'Native' : 'HTML';\n  nativeTextSupport = labelType == 'Native';\n  useGradients = nativeCanvasSupport;\n  animate = !(iStuff || !nativeCanvasSupport);\n})();\n\nvar Log = {\n  elem: false,\n  write: function(text){\n    if (!this.elem) \n      this.elem = document.getElementById('log');\n    this.elem.innerHTML = text;\n    this.elem.style.left = (200 - this.elem.offsetWidth / 2) + 'px';\n  }\n};\n\n\n\nfunction init(){\n    //init data\n";
-
-			String end = "\n    //end\n    //init Spacetree\n    //Create a new ST instance\n    var st = new $jit.ST({\n    	orientation: "
-					+ '"'
-					+ "top"
-					+ '"'
-					+ ",\n    	indent:10,\n        //id of viz container element\n        injectInto: 'infovis',\n        //set duration for the animation\n        duration: 800,\n        //set animation transition type\n        transition: $jit.Trans.Quart.easeInOut,\n        //set distance between node and its children\n        levelDistance: 50,\n        //enable panning\n        Navigation: {\n          enable:true,\n          panning:true\n        },\n        //set node and edge styles\n        //set overridable=true for styling individual\n        //nodes or edges\n        Node: {\n            height: 30,\n            width: 40,\n            type: 'ellipse',\n            color: '#aaa',\n            overridable: true\n        },\n        \n        Edge: {\n            type: 'bezier',\n            overridable: true\n        },\n        \n        onBeforeCompute: function(node){\n            Log.write("
-					+ '"'
-					+ "loading "
-					+ '"'
-					+ " + node.name);\n        },\n        \n        onAfterCompute: function(node){\n            Log.write("
-					+ '"'
-					+ "<input type='button' value='Edit "
-					+ '"'
-					+ "+node.name+"
-					+ '"'
-					+ "' onClick='editId("
-					+ '"'
-					+ "+node.id+"
-					+ '"'
-					+ ")'/><br /><input type='button' value='Delete "
-					+ '"'
-					+ "+node.name+"
-					+ '"'
-					+ "' onClick='deleteId("
-					+ '"'
-					+ "+node.id+"
-					+ '"'
-					+ ")'/>"
-					+ '"'
-					+ ");\n        },\n        \n        //This method is called on DOM label creation.\n        //Use this method to add event handlers and styles to\n        //your node.\n        onCreateLabel: function(label, node){\n            label.id = node.id;            \n            label.innerHTML = node.name;\n            label.onclick = function(){\n            	//if(normal.checked) {\n            	  st.onClick(node.id);\n            	//} else {\n                //st.setRoot(node.id, 'animate');\n            	//}\n            };\n            //set label styles\n            var style = label.style;\n            style.width = 40 + 'px';\n            style.height = 17 + 'px';            \n            style.cursor = 'pointer';\n            style.color = '#333';\n            style.fontSize = '0.8em';\n            style.textAlign= 'center';\n            style.paddingTop = '8px';\n        },\n        \n        //This method is called right before plotting\n        //a node. It's useful for changing an individual node\n        //style properties before plotting it.\n        //The data properties prefixed with a dollar\n        //sign will override the global node style properties.\n        onBeforePlotNode: function(node){\n            //add some color to the nodes in the path between the\n            //root node and the selected node.\n            if (node.selected) {\n                node.data.$color = "
-					+ '"'
-					+ "#ff7"
-					+ '"'
-					+ ";\n            }\n            else {\n                delete node.data.$color;\n                //if the node belongs to the last plotted level\n                if(!node.anySubnode("
-					+ '"'
-					+ "exist"
-					+ '"'
-					+ ")) {\n                    //count children number\n                    var count = 0;\n                    node.eachSubnode(function(n) { count++; });\n                    //assign a node color based on\n                    //how many children it has\n                    node.data.$color = ['#aff', '#aee', '#add', '#acc', '#abb', '#acb'][count];                    \n                }\n            }\n        },\n        \n        //This method is called right before plotting\n        //an edge. It's useful for changing an individual edge\n        //style properties before plotting it.\n        //Edge data proprties prefixed with a dollar sign will\n        //override the Edge global style properties.\n        onBeforePlotLine: function(adj){\n            if (adj.nodeFrom.selected && adj.nodeTo.selected) {\n                adj.data.$color = "
-					+ '"'
-					+ "#eed"
-					+ '"'
-					+ ";\n                adj.data.$lineWidth = 3;\n            }\n            else {\n                delete adj.data.$color;\n                delete adj.data.$lineWidth;\n            }\n        }\n    });\n    //load json data\n    st.loadJSON(json);\n\n    //compute node positions and layout\n    st.compute();\n    //optional: make a translation of the tree\n    st.geom.translate(new $jit.Complex(-200, 0), "
-					+ '"'
-					+ "current"
-					+ '"'
-					+ ");\n    //emulate a click on the root node.\n    st.onClick(st.root);\n    //end\n    \n    //Add event handlers to switch spacetree orientation.\n    var top = $jit.id('r-top'), \n        left = $jit.id('r-left'), \n        bottom = $jit.id('r-bottom'), \n        right = $jit.id('r-right'),\n        normal = $jit.id('s-normal');\n        \n    \n    function changeHandler() {\n        if(this.checked) {\n             bottom.disabled = right.disabled = left.disabled = top.disabled = true;\n            st.switchPosition(this.value, "
-					+ '"'
-					+ "animate"
-					+ '"'
-					+ ", {\n                onComplete: function(){\n                    bottom.disabled = right.disabled = left.disabled = top.disabled = false;\n                }\n            });\n        }\n    };\n    \n    top.onchange = left.onchange = bottom.onchange = right.onchange = changeHandler;\n    //end\n\n}\n";
+			String begining = "var draftTreeData=";
 			fOut.write((begining).getBytes());
+			
 			String id = AuBlogHistoryDatabase.ROOT_ID_DEFAULT;
-			String data = "json = ";
-			data = data + "{id: \"" + id + "\",\nname: \"" + "Root"
+			String root = "{id: \"" + id + "\",\nname: \"" + "Root"
 					+ "\",\nhidden: \"" + "0" 
 					+ "\",\ndata: { content:\"empty"
 					+ "\"},\nchildren: [";
-			fOut.write((data).getBytes());
+			fOut.write((root).getBytes());
 			
-			String tmp = getSubtree(id);
-			fOut.write(tmp.getBytes());
-			exportJSonOnly.write(tmp.getBytes());
+			String recursiveSubTree = getSubtree(id);
+			fOut.write(recursiveSubTree.getBytes());
+			exportJSonOnly.write(recursiveSubTree.getBytes());
 			
-			fOut.write(("]\n};").getBytes());
-			exportJSonOnly.write(("]\n};").getBytes());
-			
-			fOut.write((end).getBytes());
+			String endRoot = "]\n};";
+			fOut.write((endRoot).getBytes());
 			fOut.flush();
 			fOut.close();
 						

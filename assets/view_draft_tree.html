@@ -14,6 +14,7 @@
 
 <!-- JIT Library File --> 
 <script language="javascript" type="text/javascript" src="jit/jit-yc.js"></script> 
+<script language="javascript" type="text/javascript" src="jit/draft_tree.js"></script> 
 
 <!-- Include different space trees depending on viewing frome Chrome or from Android WebView with Aublog appended to the user Agent -->
 <script language="javascript" type="text/javascript" >
@@ -48,20 +49,20 @@
 	    }
 		//addJavascript('/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js','head');
 		//http://stackoverflow.com/questions/950087/include-javascript-file-inside-javascript-file
-		$.getScript("/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_space_tree.js", function(){
+		$.getScript("/mnt/sdcard/Android/data/ca.ilanguage.aublog/files/draft_tree_data.js", function(){
 			/*
 			TODO bug returned on motorla xoom running Android 3.x even with the finsihed loading dialog, it still cant load the javascript first. 
 			the webkit must running async tasks differently...
 			*/
 			//alert("Finished loading.");
 			   // here you can use anything you defined in the loaded script
-				init();
+				init(draftTreeData);
 			});
 	}else{
-		$.getScript("draft_space_tree.js", function(){
+		$.getScript("draft_tree_data.js", function(){
 			   //alert("Loaded in Browser mode.");
 			   // here you can use anything you defined in the loaded script
-				init();
+				init(draftTreeData);
 			});
 	}
 	
