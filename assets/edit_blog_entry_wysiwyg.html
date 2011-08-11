@@ -95,18 +95,24 @@ $(document).ready(function()	{
     function startStopRecording() {
     	
     	if(document.getElementById('recordButton').value=="Stop Dictation"){
-    		Android.stopRecord();
-    		document.getElementById('recordButton').value="Record Dictation";
+    		var message = Android.stopRecord();
+    		document.getElementById('markItUp').value = message + document.getElementById('markItUp').value
+    		document.getElementById('recordButton').value="Play";
+    		savePostToDB();
+    	}else if(document.getElementById('recordButton').value=="Play"){
+    		Android.playAudio():
     	}else{
-    		Android.startToRecord();
+    	 	Android.startToRecord();
 	    	document.getElementById('recordButton').value="Stop Dictation";
     	}
     }
-   
+    function playAudio() {
+    	return Android.playAudio():
+    }
     
-    //function timeRecording() {
-    	//Android.getTimeRecording():
-    //}
+    function timeRecorded() {
+    	return Android.getTimeRecorded():
+    }
     
     function showAndroidToast(toast) {
         //Android.readTTS(toast);
@@ -121,7 +127,6 @@ $(document).ready(function()	{
     	
     }
     function savePostToDB(){
-    	//showAndroidToast("Hi from the JavaScript.");
     	readTTSPost();
     	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }

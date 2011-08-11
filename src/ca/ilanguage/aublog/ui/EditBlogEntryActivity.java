@@ -17,6 +17,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -67,7 +68,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private Long mTimeAudioWasRecorded;
     private String mAudioSource;
     private String mDateString ="";
-    private String mAudioResultsFile;
+    
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
     private Boolean mReadBlog;
@@ -88,6 +89,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	String mPostLabels ="";
 	String mPostParent ="";
 	String mPostId ="";
+	String mAudioResultsFile;
 	Boolean mFreshEditScreen;
 	private Boolean mDeleted = false;
 	String mLongestEverContent ="";
@@ -98,8 +100,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		AuBlogHistory.ENTRY_LABELS,
 		AuBlogHistory.PUBLISHED, //4
 		AuBlogHistory.DELETED,
-		AuBlogHistory.PARENT_ENTRY //6
+		AuBlogHistory.PARENT_ENTRY, //6
+		AuBlogHistory.PUBLISHED_IN,
+		AuBlogHistory.TIME_CREATED,//8
+		AuBlogHistory.LAST_MODIFIED,
+		AuBlogHistory.AUDIO_FILES//10
 	};
+	
 	
 	private WebView mWebView;
     private Handler mHandler = new Handler();
@@ -189,16 +196,18 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				//if the edit blog entry screen is fresh (ie, made from some external ativity not from an on puase or rotate screen, then get the values from the db
 				if(mPostId.equals("")|| mFreshEditScreen==true){
 					mFreshEditScreen = false;
+					mPostId = mCursor.getString(0);
 					mPostTitle = mCursor.getString(1);
 					mPostContent = mCursor.getString(2);
 					mPostLabels =mCursor.getString(3);
-					mPostId = mCursor.getString(0);
+					mPostParent = mCursor.getString(6);
+					mAudioResultsFile = mCursor.getString(10);
 					if("0".equals(mCursor.getString(5))){ 
 						mDeleted=false;
 					}else{
 						mDeleted=true;
 					}
-					mPostParent = mCursor.getString(6);
+					
 	                String nodeAsString="id:"+mCursor.getString(0)+":\ntitle:"+mCursor.getString(1)+":\ncontent:"+mCursor.getString(2)+":\nlabels:"+mCursor.getString(3)+":\npublished:"+mCursor.getString(4)+":\ndeleted:"+mCursor.getString(5)+":\nparent:"+mCursor.getString(6)+":";
 	                //Toast.makeText(EditBlogEntryActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
 	                //Toast.makeText(EditBlogEntryActivity.this, "First load of edit blog screen, all info came from db. ", Toast.LENGTH_LONG).show();
@@ -283,8 +292,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	return stopSaveRecording();
         }
         
-        public String getTimeRecording(){
-        	return returnTimeRecording();
+        public String playAudio(){
+        	return playAudioFile();
+        }
+        
+        public Long getTimeRecorded(){
+        	return returnTimeRecorded();
         }
         
         public String fetchPostContent(){
@@ -464,6 +477,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	        	values.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
 	        	values.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
 	        	values.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
+	        	values.put(AuBlogHistory.LAST_MODIFIED, Long.valueOf(System.currentTimeMillis()));
+	        	values.put(AuBlogHistory.AUDIO_FILES, mAudioResultsFile);
 //	        	values.put(AuBlogHistory.USER_TOUCHED, "true"); TODO maybe make a field to indicate that the user never touched the entry, that way wont loose branches in the tree? 
 	    		getContentResolver().update(mUri, values,null, null);
 	    		Log.d(TAG, "Post saved to database.");
@@ -564,12 +579,17 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 		return "Recording...";
 	}
+	public String playAudioFile(){
+		return "played audio file";
+	}
 	public String stopSaveRecording(){
 		
 		mEndTime=System.currentTimeMillis();
 	   	mRecorder.stop();
 	   	mRecorder.release();
 	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
+	   	//Javascript changes the blog content to add the length of the recording 
+	   	//Javascript simpulates a click on the save button, so most likely it will be saved as a daughter. 
 	   	
 	   	tracker.trackEvent(
 	            "AuBlogLifeCycleEvent",  // Category
@@ -619,12 +639,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		*/
 		
 		
-		return "Saved."+mTimeAudioWasRecorded/100+"sec";
+		return "Attached "+mTimeAudioWasRecorded/100+"sec Recording.\n";
 	}
 	
-	public String returnTimeRecording(){
-		Long timePassed = (System.currentTimeMillis()-mStartTime)/1000;
-		return timePassed+"min";
+	public Long returnTimeRecorded(){
+		//Long timePassed = (System.currentTimeMillis()-mStartTime)/1000;
+		
+		return mTimeAudioWasRecorded;//timePassed+"min";
 	}
 	
 	
@@ -637,6 +658,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	daughterValues.put(AuBlogHistory.ENTRY_TITLE, strTitle);
         	daughterValues.put(AuBlogHistory.ENTRY_CONTENT, strContent);
         	daughterValues.put(AuBlogHistory.ENTRY_LABELS, strLabels);
+        	daughterValues.put(AuBlogHistory.LAST_MODIFIED, Long.valueOf(System.currentTimeMillis()));
+        	daughterValues.put(AuBlogHistory.AUDIO_FILES, mAudioResultsFile);
         	if ( (mPostTitle+mPostContent+mPostLabels).length() <= 0 ){
         		if (mLongestEverContent.length() <= 0 ){
         			saveStateToActivity(strTitle, strContent, strLabels);
