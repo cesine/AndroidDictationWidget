@@ -25,11 +25,7 @@ var Log = {
   }
 };
 
-
-
-function init(){
-    //init data
-json = {id: "1",
+var draftData = {id: "1",
 name: "Root",
 hidden: "0",
 data: { content:"empty"},
@@ -65,6 +61,10 @@ children: []
 } ]
 } ]
 };
+
+function init(data){
+    //init data
+var json = data;
     //end
     //init Spacetree
     //Create a new ST instance
