@@ -71,6 +71,7 @@ public class MainMenuActivity extends Activity {
 	 * bugs/errors have a 0 in them
 	 */
 	GoogleAnalyticsTracker tracker;
+	private String mAuBlogInstallId;
 	
 	private View mStartButton;
 	private View mOptionsButton;
@@ -115,7 +116,7 @@ public class MainMenuActivity extends Activity {
 			tracker.trackEvent(
 		            "Clicks",  // Category
 		            "Button",  // Action
-		            "clicked settings", // Label
+		            "clicked settings: "+mAuBlogInstallId, // Label
 		            14);       // Value
 
 			Intent i = new Intent(getBaseContext(),
@@ -141,7 +142,7 @@ public class MainMenuActivity extends Activity {
 			tracker.trackEvent(
 		            "Clicks",  // Category
 		            "Button",  // Action
-		            "clicked user guide", // Label
+		            "clicked user guide: "+mAuBlogInstallId, // Label
 		            13);       // Value
 			
 			// Intent i = new Intent(getBaseContext(), Settings.class);
@@ -192,7 +193,7 @@ public class MainMenuActivity extends Activity {
 			tracker.trackEvent(
 		            "Clicks",  // Category
 		            "Button",  // Action
-		            "clicked drafts", // Label
+		            "clicked drafts: "+mAuBlogInstallId, // Label
 		            11);       // Value
 
 			/*
@@ -206,7 +207,7 @@ public class MainMenuActivity extends Activity {
 				tracker.trackEvent(
 			            "CPU",  // Category
 			            "Use",  // Action
-			            "not creating new drafts tree", // Label
+			            "not creating new drafts tree: "+mAuBlogInstallId, // Label
 			            111);   
 				Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 
@@ -230,7 +231,7 @@ public class MainMenuActivity extends Activity {
 			tracker.trackEvent(
 		            "CPU",  // Category
 		            "Use",  // Action
-		            "creating new drafts tree", // Label
+		            "creating new drafts tree: "+mAuBlogInstallId, // Label
 		            112);  
 			new GenerateTreeTask().execute();
 			
@@ -276,7 +277,7 @@ public class MainMenuActivity extends Activity {
 			tracker.trackEvent(
 		            "Clicks",  // Category
 		            "Button",  // Action
-		            "clicked new entry", // Label
+		            "clicked new entry: "+mAuBlogInstallId, // Label
 		            12);       // Value
 
 			Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
@@ -298,7 +299,7 @@ public class MainMenuActivity extends Activity {
 				tracker.trackEvent(
 			            "Database",  // Category
 			            "Bug",  // Action
-			            "cannot create new entry", // Label
+			            "cannot create new entry: "+mAuBlogInstallId, // Label
 			            10);       // Value
 
 			} else {
@@ -321,6 +322,10 @@ public class MainMenuActivity extends Activity {
 
 	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
 	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
+	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+		
 		
 		setContentView(R.layout.mainmenu);
 
@@ -370,9 +375,9 @@ public class MainMenuActivity extends Activity {
 
 		if (mStartButton != null) {
 
-			// Change "start" to "continue" if there's a saved game.
-			SharedPreferences prefs = getSharedPreferences(
-					PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+			
+			// Change "start" to "continue" if its in a resume.
+			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 			
 
 			((ImageView) mStartButton).setImageDrawable(getResources()
@@ -384,7 +389,28 @@ public class MainMenuActivity extends Activity {
 
 			if (Math.abs(lastVersion) < Math.abs(AuBlog.VERSION)) {
 				// This is a new install or an upgrade.
-
+				SharedPreferences.Editor editor = prefs.edit();
+				
+				/*
+				 * If the install id isn't set, it's a new install so set the current timestamp appended with a 
+				 *  a random number. 
+				 *  
+				 *  If the install id is set its an upgrade and don't need to set the install id
+				 *  
+				 *  Note:
+				 *  If the user wipes the aublog data using the device settings, it counts as a new install. 
+				 *  
+				 *  A user may have many installIds. InstallIDs are attached to server calls to anonymously identify the transcription files 
+				 *  so that users can connect them to their aublog accounts at a later date. 
+				 */
+				final String installID = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+				if (installID.length()< 5){
+					Long currentTimeStamp = System.currentTimeMillis();
+					Long randomNumberToAvoidSameSecondInstallsClash = (Math.round(Math.random()*10000));
+					String newInstallID = currentTimeStamp.toString()+randomNumberToAvoidSameSecondInstallsClash.toString();
+					editor.putString(PreferenceConstants.AUBLOG_INSTALL_ID, newInstallID);
+				}
+				
 				/* This code checks for device compatibility
 				 *
 				 *
@@ -412,7 +438,7 @@ public class MainMenuActivity extends Activity {
 				}
 				*/
 
-				SharedPreferences.Editor editor = prefs.edit();
+				
 
 				if (lastVersion > 0 && lastVersion < 14) {
 					// if the user has updated the app at specific versions can do something here

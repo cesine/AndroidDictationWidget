@@ -42,6 +42,11 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	
 	String mBloggerAccount;
 	String mBloggerPassword;
+	/*
+	 * The Aublog Install ID is a timestamp generated on install in the Main Menu what's new logic with 10 random digits appended to it.
+	 * It is used to identify anonymously the install to the aublog webserver. It can be tied to an Aublog user id, if aublog user ids logic is added to the server side logic.
+	 */
+	private String mAuBlogInstallId;
 	
 	@Override
 	  protected void onDestroy() {
@@ -65,6 +70,14 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
         
+        SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+		/*
+		 * set the installid for appending to the labels
+		 */
+		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+		
+        
         Preference exportTree = findPreference(PreferenceConstants.PREFERENCE_EMAIL_DRAFTS_TREE);
         exportTree.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 			
@@ -74,7 +87,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 				tracker.trackEvent(
 			            "Clicks",  // Category
 			            "Button",  // Action
-			            "user clicked on email from the settings screen ", // Label
+			            "user clicked on email from the settings screen : "+mAuBlogInstallId, // Label
 			            65);       // Value
 				File file = new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
 
@@ -103,11 +116,16 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         	}
         }
         
-        
+       
+		/*
+		 * Find out if user has a file manager (specifically org.openintents.filemanager) to be able to open files in the settings
+		 * 
+		 * if they have it, activate those settings (they were greyed out)
+		 * If they don't have it, they can click on the checkbox, it will take them to the market to get it.
+		 * 
+		 */
         final boolean fileManagerAvailable = isIntentAvailable(this,
         "org.openintents.action.PICK_FILE");
-        SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		SharedPreferences.Editor editor = prefs.edit();
 		Boolean fileManagerChecked = prefs.getBoolean(PreferenceConstants.PREFERENCE_FILE_MANAGER_INSTALLED, false);
         if ( fileManagerChecked && ! fileManagerAvailable ){
         	Toast.makeText(SetPreferencesActivity.this, "To open and export recorded files or " +
@@ -118,7 +136,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         	tracker.trackEvent(
 		            "DependantPackages",  // Category
 		            "FileManager",  // Action
-		            "user doesnt have a filemanager so export is disnabled, took them to the market to install it.", // Label
+		            "user doesnt have a filemanager so export is disnabled, took them to the market to install it.: "+mAuBlogInstallId, // Label
 		            60);       // Value
         	startActivity(goToMarket);
         }
@@ -126,7 +144,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         	tracker.trackEvent(
 		            "DependantPackages",  // Category
 		            "FileManager",  // Action
-		            "user has a filemanager so export is enabled", // Label
+		            "user has a filemanager so export is enabled: "+mAuBlogInstallId, // Label
 		            61);       // Value
         	
         	/*
@@ -156,6 +174,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			}
 		}
 
+		
         
         
     }
@@ -189,7 +208,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			tracker.trackEvent(
 		            "AuBlogLifeCycleEvent",  // Category
 		            "UserWipe",  // Action
-		            "user wants to wipe their draft data, taking them to the device settings where they can click clear data, but dont know if they really clicked it.", // Label
+		            "user wants to wipe their draft data, taking them to the device settings where they can click clear data, but dont know if they really clicked it.: "+mAuBlogInstallId, // Label
 		            63);       // Value
 			
 			Toast.makeText(this, R.string.saved_data_erased_notification,

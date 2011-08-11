@@ -39,7 +39,7 @@ import ca.ilanguage.aublog.service.*;
 
 public class PublishActivity extends Activity  {
 	GoogleAnalyticsTracker tracker;
-	
+	private String mAuBlogInstallId;
 	// private static final String TAG = "PreviewAndPublish";
 	private String mTitle;
 	private String mContent;
@@ -83,20 +83,24 @@ public class PublishActivity extends Activity  {
 	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
 	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
 	    
+		
+		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		/*
+		 * set the installid for appending to the labels
+		 */
+		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		/*
 		 * get blogger infomation out of the preferences
 		 */
-		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		    
 		mBloggerAccount = prefs.getString(PreferenceConstants.PREFERENCE_ACCOUNT, "see settings");
 		mBloggerPassword = prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
-		Toast.makeText(PublishActivity.this, "Account name is "+mBloggerAccount, Toast.LENGTH_LONG).show();
+		Toast.makeText(PublishActivity.this, "Publishing to: "+mBloggerAccount, Toast.LENGTH_LONG).show();
 		
 		if( (!mBloggerAccount.contains("@") ) || mBloggerPassword.length()<4 ){
 			tracker.trackEvent(
 		            "Publish",  // Category
 		            "Error",  // Action
-		            "In the publish activity but the blogger acount info isnt set, it should have been checked by the edit blog entry activity.", // Label
+		            "In the publish activity but the blogger acount info isnt set, it should have been checked by the edit blog entry activity."+" : "+mAuBlogInstallId, // Label
 		            6021);       // Value
 			//Toast.makeText(PublishActivity.this, "Taking you to the settings to add a Blogger account.", Toast.LENGTH_LONG).show();
 			//Intent i = new Intent(PublishActivity.this, SetPreferencesActivity.class);
@@ -125,14 +129,14 @@ public class PublishActivity extends Activity  {
 				tracker.trackEvent(
 			            "Database",  // Category
 			            "Bug",  // Action
-			            "Retrieval from DB failed with an illegal argument exception "+e, // Label
+			            "Retrieval from DB failed with an illegal argument exception "+e+" : "+mAuBlogInstallId, // Label
 			            601);       // Value
 				Toast.makeText(PublishActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
 			} catch (Exception e) {
 				tracker.trackEvent(
 			            "Database",  // Category
 			            "Bug",  // Action
-			            "The cursor returned is "+e, // Label
+			            "The cursor returned is "+e+" : "+mAuBlogInstallId, // Label
 			            602);       // Value
 				// Log.e(TAG, "Exception (DataBase failed)");
 				Toast.makeText(PublishActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
@@ -158,7 +162,7 @@ public class PublishActivity extends Activity  {
 		tracker.trackEvent(
 	            "AuBlogLifeCycleEvent",  // Category
 	            "Publish",  // Action
-	            "starting to publish blog entry "+myEntry.toString(), // Label
+	            "starting to publish blog entry "+myEntry.toString()+" : "+mAuBlogInstallId, // Label
 	            61);       // Value
 		Thread publish = new Thread() {
 			@SuppressWarnings("static-access")
@@ -198,7 +202,7 @@ public class PublishActivity extends Activity  {
 						tracker.trackEvent(
 					            "Blogger",  // Category
 					            "Bug",  // Action
-					            "AuthenticationException " +e.getMessage(), // Label
+					            "AuthenticationException " +e.getMessage()+" : "+mAuBlogInstallId, // Label
 					            603);       // Value
 					}  catch (Exception e) {
 						// Log.e(TAG, "Exception: " + e.getMessage());
@@ -207,7 +211,7 @@ public class PublishActivity extends Activity  {
 						tracker.trackEvent(
 					            "Internet",  // Category
 					            "Bug",  // Action
-					            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e, // Label
+					            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e+" : "+mAuBlogInstallId, // Label
 					            604);       // Value
 						finish();
 					}
@@ -243,7 +247,7 @@ public class PublishActivity extends Activity  {
 							tracker.trackEvent(
 						            "Internet",  // Category
 						            "Bug",  // Action
-						            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e, // Label
+						            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e+" : "+mAuBlogInstallId, // Label
 						            605);       // Value
 							finish();
 						}
@@ -295,7 +299,7 @@ public class PublishActivity extends Activity  {
 							tracker.trackEvent(
 						            "Internet",  // Category
 						            "Bug",  // Action
-						            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e, // Label
+						            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e+" : "+mAuBlogInstallId, // Label
 						            606);       // Value
 							finish();
 						}
@@ -357,7 +361,7 @@ public class PublishActivity extends Activity  {
 			tracker.trackEvent(
 		            "AuBlogLifeCycleEvent",  // Category
 		            "Publish",  // Action
-		            "successfully published blog entry "+myEntry.toString(), // Label
+		            "successfully published blog entry "+myEntry.toString()+" : "+mAuBlogInstallId, // Label
 		            612);       // Value
 
 			final Dialog dlg = new AlertDialog.Builder(PublishActivity.this)
@@ -382,7 +386,7 @@ public class PublishActivity extends Activity  {
 			tracker.trackEvent(
 		            "AuBlogLifeCycleEvent",  // Category
 		            "Publish",  // Action
-		            "failedto publish blog entry "+myEntry.toString()+" Error code "+ publishStatus, // Label
+		            "failedto publish blog entry "+myEntry.toString()+" Error code "+ publishStatus+" : "+mAuBlogInstallId, // Label
 		            610);       // Value
 			Alert.showAlert(this, "Publishing failed, your Blogger account and/or password may be incorrectly entered in the Settings.", "Error code "
 					+ publishStatus, "Try again",
@@ -393,7 +397,7 @@ public class PublishActivity extends Activity  {
 					tracker.trackEvent(
 				            "Click",  // Category
 				            "Button",  // Action
-				            "user clicked on Try again button "+myEntry.toString()+" Error code "+ publishStatus, // Label
+				            "user clicked on Try again button "+myEntry.toString()+" Error code "+ publishStatus+" : "+mAuBlogInstallId, // Label
 				            612);       // Value
 					publishBlogEntry();
 				}
@@ -403,7 +407,7 @@ public class PublishActivity extends Activity  {
 					tracker.trackEvent(
 				            "Click",  // Category
 				            "Button",  // Action
-				            "user clicked on cancel button "+myEntry.toString()+" Error code "+ publishStatus, // Label
+				            "user clicked on cancel button "+myEntry.toString()+" Error code "+ publishStatus+" : "+mAuBlogInstallId, // Label
 				            613);       // Value
 					dialog.cancel();
 				}

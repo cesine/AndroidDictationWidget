@@ -56,7 +56,7 @@ import ca.ilanguage.aublog.service.AudioToText;
 public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnInitListener {
 
 	GoogleAnalyticsTracker tracker;
-	
+	private String mAuBlogInstallId;
     private static final String TAG = "CreateBlogEntryActivity";
     /** Talk to the user */
     private TextToSpeech mTts;
@@ -127,7 +127,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			tracker.trackEvent(
 		            "DependantPackages",  // Category
 		            "FileManager",  // Action
-		            "user doesnt have TTS, in the init failed section, didnt take them to package manager", // Label
+		            "user doesnt have TTS, in the init failed section, didnt take them to package manager: "+mAuBlogInstallId, // Label
 		            301);       // Value
         	
 			Log.e(TAG, "Sorry, I can't talk to you because I could not initialize TextToSpeech.");
@@ -161,7 +161,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
      
 	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
-     
+	    /*
+		 * set the installid for appending to the labels
+		 */
+		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+		
         
         setContentView(R.layout.main_webview);
         mWebView = (WebView) findViewById(R.id.webview);
@@ -209,7 +213,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				tracker.trackEvent(
 			            "Database",  // Category
 			            "Bug",  // Action
-			            "Retrieval from DB failed with an illegal argument exception "+e, // Label
+			            "Retrieval from DB failed with an illegal argument exception "+e+" : "+mAuBlogInstallId, // Label
 			            301);       // Value
 				Toast.makeText(EditBlogEntryActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
 			} catch (Exception e) {
@@ -217,7 +221,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				tracker.trackEvent(
 			            "Database",  // Category
 			            "Bug",  // Action
-			            "The cursor returned is "+e, // Label
+			            "The cursor returned is "+e+" : "+mAuBlogInstallId, // Label
 			            302);       // Value
 				//Toast.makeText(EditBlogEntryActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
 			}
@@ -264,7 +268,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		tracker.trackEvent(
         	            "TTS",  // Category
         	            "notUsed",  // Action
-        	            "there was a message that was not read via TTS because it is off in the settings: "+message, // Label
+        	            "there was a message that was not read via TTS because it is off in the settings: "+message+" : "+mAuBlogInstallId, // Label
         	            362);       // Value
         	}
         }
@@ -299,7 +303,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "saveSTate",  // Action
-    	            "state was saved via javascript "+strTitle+" : "+strLabels+" : "+strContent, // Label
+    	            "state was saved via javascript "+strTitle+" : "+strLabels+" : "+strContent+" : "+mAuBlogInstallId, // Label
     	            34);       // Value
         	saveStateToActivity(strTitle, strContent, strLabels);
         }
@@ -327,7 +331,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		tracker.trackEvent(
 			            "Publish",  // Category
 			            "Error",  // Action
-			            "displayed Toast:"+R.string.title_or_content_empty_error, // Label
+			            "displayed Toast:"+R.string.title_or_content_empty_error+" : "+mAuBlogInstallId, // Label
 			            30);       // Value
         		Toast.makeText(EditBlogEntryActivity.this, R.string.title_or_content_empty_error, Toast.LENGTH_LONG).show();
         	} else {
@@ -338,7 +342,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         			tracker.trackEvent(
     			            "Publish",  // Category
     			            "Error",  // Action
-    			            "displayed Toast: Taking you to the settings to add a Blogger account.", // Label
+    			            "displayed Toast: Taking you to the settings to add a Blogger account.: "+mAuBlogInstallId, // Label
     			            302);       // Value
         			Toast.makeText(EditBlogEntryActivity.this, "No Blogger account found.\n\nTaking you to the settings to \n\nConfigure a Blogger account.", Toast.LENGTH_LONG).show();
         			Intent i = new Intent(EditBlogEntryActivity.this, SetPreferencesActivity.class);
@@ -399,7 +403,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	tracker.trackEvent(
 	            "Event",  // Category
 	            "Pause",  // Action
-	            "event was paused", // Label
+	            "event was paused: "+mAuBlogInstallId, // Label
 	            38);       // Value
     	mFreshEditScreen=false;
     	mWebView.loadUrl("javascript:savePostToState()");
@@ -470,7 +474,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		tracker.trackEvent(
     	            "Database",  // Category
     	            "Bug",  // Action
-    	            "Database connection problem "+e, // Label
+    	            "Database connection problem "+e+" : "+mAuBlogInstallId, // Label
     	            3201);       // Value
     		Toast.makeText(EditBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
     	} catch (Exception e) {
@@ -478,7 +482,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		tracker.trackEvent(
     	            "Database",  // Category
     	            "Bug",  // Action
-    	            "exception "+e, // Label
+    	            "exception "+e+" : "+mAuBlogInstallId, // Label
     	            3202);       // Value
     		Toast.makeText(EditBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
     	}
@@ -492,7 +496,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	tracker.trackEvent(
 	            "AuBlogLifeCycleEvent",  // Category
 	            "Delete",  // Action
-	            "entry was flagged as deleted in the database"+uri.getLastPathSegment(), // Label
+	            "entry was flagged as deleted in the database"+uri.getLastPathSegment()+" : "+mAuBlogInstallId, // Label
 	            39);       // Value
 		ContentValues values = new ContentValues();
 		values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
@@ -509,7 +513,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		tracker.trackEvent(
 	            "TTS",  // Category
 	            "Use",  // Action
-	            "spoke message: "+message, // Label
+	            "spoke message: "+message+" : "+mAuBlogInstallId, // Label
 	            361);       // Value
 		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);
 		
@@ -520,7 +524,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		tracker.trackEvent(
 	            "Clicks",  // Category
 	            "Button",  // Action
-	            "record audio via "+mAudioSource, // Label
+	            "record audio via "+mAudioSource+" : "+mAuBlogInstallId, // Label
 	            34);       // Value
 		/*
 		 * TODO get audio from blue tooth or mic or usb mic?
@@ -547,7 +551,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			tracker.trackEvent(
     	            "Record",  // Category
     	            "Bug",  // Action
-    	            "The App cannot save audio, maybe the Android is attached to a computer?" +e, // Label
+    	            "The App cannot save audio, maybe the Android is attached to a computer?" +e+" : "+mAuBlogInstallId, // Label
     	            3301);       // Value
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -555,7 +559,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			tracker.trackEvent(
     	            "Record",  // Category
     	            "Bug",  // Action
-    	            "The App cannot save audio, maybe the Android is attached to a computer?" +e, // Label
+    	            "The App cannot save audio, maybe the Android is attached to a computer?" +e+" : "+mAuBlogInstallId, // Label
     	            3302);       // Value
 		}
 		return "Recording...";
@@ -570,7 +574,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	   	tracker.trackEvent(
 	            "AuBlogLifeCycleEvent",  // Category
 	            "Dictation",  // Action
-	            "stop audio recording "+mTimeAudioWasRecorded/100+"sec", // Label
+	            "stop audio recording "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
 	            35);       // Value
 	   	
 	    // Keep the volume control type consistent across all activities.
@@ -640,7 +644,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         			tracker.trackEvent(
             	            "AuBlogLifeCycleEvent",  // Category
             	            "Save",  // Action
-            	            "save as self:no new text", // Label
+            	            "save as self:no new text: "+mAuBlogInstallId, // Label
             	            311);       // Value
         			return;
         		}
@@ -654,7 +658,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "Save",  // Action
-    	            "save as daughter", // Label
+    	            "save as daughter: "+mAuBlogInstallId, // Label
     	            312);       // Value
     		/*
     		 * Save parent but just tell it has a daughter, dont put the new values into its entry.
@@ -683,7 +687,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		tracker.trackEvent(
     	            "Database",  // Category
     	            "Bug",  // Action
-    	            "Database connection problem "+e, // Label
+    	            "Database connection problem "+e+" : "+mAuBlogInstallId, // Label
     	            3101);       // Value
     		// Log.e(TAG,"SQLException (createPost(title, content))");
     		Toast.makeText(EditBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
@@ -694,7 +698,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		tracker.trackEvent(
     	            "Database",  // Category
     	            "Bug",  // Action
-    	            "Unknown exception "+e, // Label
+    	            "Unknown exception "+e+" : "+mAuBlogInstallId, // Label
     	            3102);       // Value
     	}
     	flagDraftTreeAsNeedingToBeReGenerated();

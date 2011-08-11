@@ -10,6 +10,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -45,7 +46,7 @@ import ca.ilanguage.aublog.preferences.PreferenceConstants;
 public class ViewDraftTreeActivity extends Activity {
 
 	GoogleAnalyticsTracker tracker;
-	
+	private String mAuBlogInstallId;
     private static final String TAG = "CreateBlogEntryActivity";
 
 	//uri of the entry being edited.
@@ -94,6 +95,9 @@ public class ViewDraftTreeActivity extends Activity {
         ViewDraftTreeActivity.this.deleteDatabase("webview.db");
         ViewDraftTreeActivity.this.deleteDatabase("webviewCache.db");
         */
+	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+		
         
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
@@ -163,7 +167,7 @@ public class ViewDraftTreeActivity extends Activity {
         	tracker.trackEvent(
 		            "Clicks",  // Category
 		            "Button",  // Action
-		            "user clicked on edit, Toasted: Editing post number "+id, // Label
+		            "user clicked on edit, Toasted: Editing post number "+id+" : "+mAuBlogInstallId, // Label
 		            21);       // Value
         	Toast.makeText(mContext, "Editing post number "+id, Toast.LENGTH_SHORT).show();
         	Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
@@ -176,7 +180,7 @@ public class ViewDraftTreeActivity extends Activity {
 	    	tracker.trackEvent(
 		            "AuBlogLifeCycleEvent",  // Category
 		            "Delete",  // Action
-		            "user clicked on delete, Toasted: Are you sure you want to delete post number "+id, // Label
+		            "user clicked on delete, Toasted: Are you sure you want to delete post number "+id+" : "+mAuBlogInstallId, // Label
 		            23);       // Value
 	    	
 	    	Toast.makeText(mContext, "Are you sure you want to delete post number "+id, Toast.LENGTH_SHORT).show();
@@ -195,7 +199,7 @@ public class ViewDraftTreeActivity extends Activity {
 	    	tracker.trackEvent(
 		            "Clicks",  // Category
 		            "Button",  // Action
-		            "refreshing tree ", // Label
+		            "refreshing tree : "+mAuBlogInstallId, // Label
 		            24);       // Value
 	    	/*
 	    	 * TODO get the javascript to be regenerated, or simply open the json file and change the deleted flag on that entry?
@@ -213,7 +217,7 @@ public class ViewDraftTreeActivity extends Activity {
 	    	tracker.trackEvent(
 		            "AuBlogLifeCycleEvent",  // Category
 		            "Export",  // Action
-		            "user clicked on email/export from the view drafts tree layout ", // Label
+		            "user clicked on email/export from the view drafts tree layout : "+mAuBlogInstallId, // Label
 		            25);       // Value
 	    	
 	    	File file = new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);

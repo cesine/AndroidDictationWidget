@@ -45,4 +45,6 @@ public class PreferenceConstants {
     
     public static final String OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT= "aublog_exported_drafts_json_format.txt";
     public static final String OUTPUT_AUBLOG_DIRECTORY = "/sdcard/AuBlog/";
+    
+    public static final String AUBLOG_INSTALL_ID ="aublogInstallId";
 }
