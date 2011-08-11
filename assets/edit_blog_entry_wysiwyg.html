@@ -95,23 +95,23 @@ $(document).ready(function()	{
     function startStopRecording() {
     	
     	if(document.getElementById('recordButton').value=="Stop Dictation"){
-    		var message = Android.stopRecord();
-    		document.getElementById('markItUp').value = message + document.getElementById('markItUp').value
+    		var messageResult = Android.stopRecord();
+    		document.getElementById('markItUp').value = messageResult + document.getElementById('markItUp').value;
     		document.getElementById('recordButton').value="Play";
     		savePostToDB();
     	}else if(document.getElementById('recordButton').value=="Play"){
-    		Android.playAudio():
+    		Android.playAudio();
     	}else{
     	 	Android.startToRecord();
 	    	document.getElementById('recordButton').value="Stop Dictation";
     	}
     }
     function playAudio() {
-    	return Android.playAudio():
+    	return Android.playAudio();
     }
     
     function timeRecorded() {
-    	return Android.getTimeRecorded():
+    	return Android.getTimeRecorded();
     }
     
     function showAndroidToast(toast) {
