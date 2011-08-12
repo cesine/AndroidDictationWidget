@@ -71,6 +71,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
+    MediaPlayer mMediaPlayer;
+    Boolean mPlayingNow;
     private Boolean mReadBlog;
     //DONE adde recording logic 
     //DONE figure out the problems with the account database,decoup0le the account database with the blog entry screen
@@ -153,6 +155,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
+        mMediaPlayer = new MediaPlayer();
         
         tracker = GoogleAnalyticsTracker.getInstance();
 
@@ -202,6 +205,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					mPostLabels =mCursor.getString(3);
 					mPostParent = mCursor.getString(6);
 					mAudioResultsFile = mCursor.getString(10);
+					Toast.makeText(EditBlogEntryActivity.this, "The audio results file is "+mAudioResultsFile, Toast.LENGTH_LONG).show();
+		    		
 					if("0".equals(mCursor.getString(5))){ 
 						mDeleted=false;
 					}else{
@@ -292,12 +297,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	return stopSaveRecording();
         }
         
-        public String playAudio(){
-        	return playAudioFile();
+        public String playOrPauseAudio(){
+        	return playOrPauseAudioFile();
         }
         
         public Long getTimeRecorded(){
         	return returnTimeRecorded();
+        }
+        public String hasAudioFile(){
+        	return hasAudioFileAttached().toString();
         }
         
         public String fetchPostContent(){
@@ -533,7 +541,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);
 		
 	}
-	
+	public Boolean hasAudioFileAttached(){
+		if (mAudioResultsFile.length() > 5 ){
+			Toast.makeText(EditBlogEntryActivity.this,"There is an audio file.", Toast.LENGTH_SHORT).show();
+    		return true;
+    	}else{
+			Toast.makeText(EditBlogEntryActivity.this,"No audio file.", Toast.LENGTH_SHORT).show();
+    		return false;
+    	}
+	}
 	public String beginRecording(){
 		mAudioSource= "microphone";
 		tracker.trackEvent(
@@ -579,8 +595,51 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 		return "Recording...";
 	}
-	public String playAudioFile(){
-		return "played audio file";
+	public String playOrPauseAudioFile(){
+		if(mMediaPlayer.isPlaying()){
+			//if its playing, pause and rewind ~4 seconds
+			int rewindValue = 4;
+			mMediaPlayer.pause();
+			int startPlayingFromSecond =mMediaPlayer.getCurrentPosition();
+			if ( startPlayingFromSecond <= rewindValue){
+				startPlayingFromSecond=0;
+			}else{
+				startPlayingFromSecond = startPlayingFromSecond - rewindValue;
+			}
+			mMediaPlayer.seekTo(startPlayingFromSecond);
+			return "Play";
+		}else if(mMediaPlayer.getCurrentPosition() > 2 && mMediaPlayer.getCurrentPosition() < mMediaPlayer.getDuration() ){
+			//if its not playing and it has played before, play from paused position
+			try {
+				mMediaPlayer.prepare();
+				mMediaPlayer.start();
+			} catch (IllegalStateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    	return "Pause";
+		}else{
+			//if its not playing, and it hasn't played before, play from beginning
+		    try {
+		    	mMediaPlayer.setDataSource(mAudioResultsFile);
+		    	mMediaPlayer.prepare();
+		    	mMediaPlayer.start();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				Log.e("Error reading file", e.toString());
+			} catch (IllegalStateException e) {
+				// TODO Auto-generated catch block
+				Log.e("Error reading file", e.toString());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				Log.e("Error reading file", e.toString());
+			}
+			return "Pause";
+		}
+		
 	}
 	public String stopSaveRecording(){
 		
@@ -639,7 +698,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		*/
 		
 		
-		return "Attached "+mTimeAudioWasRecorded/100+"sec Recording.\n";
+		return "Attached "+mTimeAudioWasRecorded/100+" second Recording.\n";
 	}
 	
 	public Long returnTimeRecorded(){

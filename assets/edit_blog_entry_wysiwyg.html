@@ -80,34 +80,66 @@ $(document).ready(function()	{
 <!-- <p>Click <a href="#" class="add">this link to insert content</a> from anywhere in the page or 
 <a href="#" class="toggle">this one to <span>remove markItUp!</span></a></p>-->
 <p>
+<span id="buttonArea">
 <input type="button"  id="deleteButton"  value="Delete" onClick="deletePost()" />
 <input type="button"  id="saveButton"  value="Save" onClick="savePostToDB()" />
 <input type="button"  id="publishButton"  value="Publish" onClick="publishPostToDB()" />
-<input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecording()" />
-
+<input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecordingController()" />
+</span>
 <script type="text/javascript">
 	//http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
 	console.error('1');
 	console.info('2');
 	console.log('3');
 	console.warn('4');
+	var hasAudio = false;
 	
-    function startStopRecording() {
-    	
+    function startStopRecordingController() {
     	if(document.getElementById('recordButton').value=="Stop Dictation"){
+    		//If the button says stop, stop
+    		displayPlayButton();
     		var messageResult = Android.stopRecord();
     		document.getElementById('markItUp').value = messageResult + document.getElementById('markItUp').value;
-    		document.getElementById('recordButton').value="Play";
-    		savePostToDB();
-    	}else if(document.getElementById('recordButton').value=="Play"){
-    		Android.playAudio();
+    		document.getElementById('recordButton').value="New Dictation";
+    		savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
     	}else{
+    		//If the button says something else, record
+    		savePostToState(); //so that the title of the audio file will correspond with the current title in the javascript
     	 	Android.startToRecord();
 	    	document.getElementById('recordButton').value="Stop Dictation";
     	}
     }
-    function playAudio() {
-    	return Android.playAudio();
+    /*
+    This function is largely controlled by the MediaPlayer  in Android logic, so it only recieves the value of the buton frmo Android
+    It is not complete in that the MediaPlayer doesnt broadcast to the javasript that the audio is over, so its possible that the button will still say Pause, but if hte user clicks it, it will Play and display Pause again. 
+    Example: Audio is not playing (button will display Play)
+    Audio is playing or has finished playing (button will display Pause)
+    a. if audio is playing, hitting the button will pause it.
+    b. if audio is not playing, hitting the button wil play it. 
+    
+    */
+    function playPauseAudioController(){
+    	if(document.getElementById('playButton').value=="Pause"){
+    		//pause
+    		document.getElementById('playButton').value=Android.playOrPauseAudio();
+    	}else{
+    		//play
+    		document.getElementById('playButton').value=Android.playOrPauseAudio();
+    	}
+    }
+    function displayPlayButton(){
+    	if (hasAudio == true){
+    		//do nothing, the play button is already active
+    	}else{
+    		hasAudio = true;
+    		var playButtn = document.createElement("input");
+        	playButtn.setAttribute("type","button");
+        	playButtn.setAttribute("id","playButton");
+        	playButtn.setAttribute("value","Play");
+        	playButtn.setAttribute("onClick","playPauseAudioController()");
+        	document.getElementById("buttonArea").appendChild(playButtn);
+    	}
+    	
     }
     
     function timeRecorded() {
@@ -140,6 +172,11 @@ $(document).ready(function()	{
     	document.getElementById('f-title').value= Android.fetchPostTitle();
     	document.getElementById('markItUp').value= Android.fetchPostContent();
     	document.getElementById('post-labels').value= Android.fetchPostLabels();
+    	var doit = Android.hasAudioFile();
+    	if (doit == "true" ){
+    		displayPlayButton();
+    		document.getElementById('recordButton').value="New Dictation";
+    	}
     }
 </script>
 
