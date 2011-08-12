@@ -156,7 +156,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
         mMediaPlayer = new MediaPlayer();
-        
+        mMediaPlayer.setLooping(true);
         tracker = GoogleAnalyticsTracker.getInstance();
 
 	    // Start the tracker in manual dispatch mode...
@@ -205,8 +205,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					mPostLabels =mCursor.getString(3);
 					mPostParent = mCursor.getString(6);
 					mAudioResultsFile = mCursor.getString(10);
-					Toast.makeText(EditBlogEntryActivity.this, "The audio results file is "+mAudioResultsFile, Toast.LENGTH_LONG).show();
-		    		
+					//Toast.makeText(EditBlogEntryActivity.this, "The audio results file is "+mAudioResultsFile, Toast.LENGTH_LONG).show();
+		    		if (mAudioResultsFile.length() > 5){
+		    			//SET the media player to point to this audio file so that the play button will work. 
+			    		mMediaPlayer.setDataSource(mAudioResultsFile);
+			    		mMediaPlayer.prepare();
+					}
 					if("0".equals(mCursor.getString(5))){ 
 						mDeleted=false;
 					}else{
@@ -598,8 +602,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public String playOrPauseAudioFile(){
 		if(mMediaPlayer.isPlaying()){
 			//if its playing, pause and rewind ~4 seconds
-			int rewindValue = 4;
+			
 			mMediaPlayer.pause();
+			/* rewind logic doesnt work
+			int rewindValue = 2;
 			int startPlayingFromSecond =mMediaPlayer.getCurrentPosition();
 			if ( startPlayingFromSecond <= rewindValue){
 				startPlayingFromSecond=0;
@@ -607,25 +613,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				startPlayingFromSecond = startPlayingFromSecond - rewindValue;
 			}
 			mMediaPlayer.seekTo(startPlayingFromSecond);
+			mMediaPlayer.prepare();
+			*/
 			return "Play";
-		}else if(mMediaPlayer.getCurrentPosition() > 2 && mMediaPlayer.getCurrentPosition() < mMediaPlayer.getDuration() ){
-			//if its not playing and it has played before, play from paused position
-			try {
-				mMediaPlayer.prepare();
-				mMediaPlayer.start();
-			} catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	    	return "Pause";
 		}else{
-			//if its not playing, and it hasn't played before, play from beginning
+			//if its not playing, play it
 		    try {
-		    	mMediaPlayer.setDataSource(mAudioResultsFile);
-		    	mMediaPlayer.prepare();
+		    	
 		    	mMediaPlayer.start();
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
@@ -633,10 +627,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			} catch (IllegalStateException e) {
 				// TODO Auto-generated catch block
 				Log.e("Error reading file", e.toString());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				Log.e("Error reading file", e.toString());
-			}
+			} 
 			return "Pause";
 		}
 		
@@ -646,7 +637,26 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mEndTime=System.currentTimeMillis();
 	   	mRecorder.stop();
 	   	mRecorder.release();
+	   	
+	   	/*
+	   	 * assign this audio recording to the media player
+	   	 */
+	   	try {
+			mMediaPlayer.setDataSource(mAudioResultsFile);
+			mMediaPlayer.prepare();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	   	
 	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
+	   	
 	   	//Javascript changes the blog content to add the length of the recording 
 	   	//Javascript simpulates a click on the save button, so most likely it will be saved as a daughter. 
 	   	
