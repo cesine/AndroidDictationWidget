@@ -472,6 +472,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }
     @Override
 	protected void onPause() {
+    	mWebView.loadUrl("javascript:savePostToState()");
+    	tracker.trackEvent(
+	            "Event",  // Category
+	            "Pause",  // Action
+	            "event was paused: "+mAuBlogInstallId, // Label
+	            38);       // Value
+    	mFreshEditScreen=false;
     	//http://developer.android.com/guide/topics/media/index.html
 		/*
 		 * As you may know, when the user changes the screen orientation 
@@ -493,45 +500,44 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		 */
     	String appendToContent = "";
 		if (mRecorder != null) {
+			/*
+			 * if the recorder is running, save everything essentially simulating a click on the save button in the UI
+			 */
 			if(mRecordingNow ==true){
 				//do it through the javascript instead to get the complete edits including the length of the audio message etc otherwise, not workign completely: seems to stop but not save to db. mWebView.loadUrl("javascript:startStopRecordingController()");
 				appendToContent = stopSaveRecording(); 
-				
+
+		    	//if the audio was recording, want to append the message to the blog content so this forces this 
+		    	mPostContent = appendToContent + mPostContent;
+				saveAsDaughterToDB(mPostTitle, mPostContent, mPostLabels);
 			}else{
 				//this should not run
 				mRecorder.release(); //this is called in the stop save recording
 	            mRecorder = null;
 			}
+        }else{
+        	/* 
+        	 * If the recorder is not running, then just save things to state, stop the player if its playing although that could be put in the destroy method.
+        	 * 
+        	 */
+	        if (mMediaPlayer != null) {
+	        	mMediaPlayer.release();
+	        	mMediaPlayer = null;
+	        }
+	    	
+	    	/*
+	    	 * un-user-initiated saves do not create a new node in the draft tree (although, this can be changed
+	    	 * by just calling saveAsDaugher here)
+	    	 * 1. asks javascript to put current values into state
+	    	 * 2. saves state to database as self
+	    	 * 
+	    	 * Potential bug: this needs to operate syncronously, if operated async, then the changed values in the javascript will never be perserved unless the user hits save first (before hitting back button or rotating screen). 
+	    	 * 
+	    	 */
+	    	saveAsSelfToDB();
+			
         }
-
-        if (mMediaPlayer != null) {
-        	mMediaPlayer.release();
-        	mMediaPlayer = null;
-        }
-    	tracker.trackEvent(
-	            "Event",  // Category
-	            "Pause",  // Action
-	            "event was paused: "+mAuBlogInstallId, // Label
-	            38);       // Value
-    	mFreshEditScreen=false;
-    	/*
-    	 * un-user-initiated saves do not create a new node in the draft tree (although, this can be changed
-    	 * by just calling saveAsDaugher here)
-    	 * 1. asks javascript to put current values into state
-    	 * 2. saves state to database as self
-    	 * 
-    	 * Potential bug: this needs to operate syncronously, if operated async, then the changed values in the javascript will never be perserved unless the user hits save first (before hitting back button or rotating screen). 
-    	 * 
-    	 */
-    	mWebView.loadUrl("javascript:savePostToState()");
-    	//if the audio was recording, want to append the message to the blog content so this forces this 
-    	mPostContent = appendToContent + mPostContent;
-    	saveAsSelfToDB();
-		//mWebView.loadUrl("javascript:savePostToDB()");
 		super.onPause();
-		
-//		saveOrUpdateToDB();
-
 	}
 	@Override
 	protected void onDestroy() {
