@@ -493,7 +493,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		 */
 		if (mRecorder != null) {
 			if(mRecordingNow ==true){
-				stopSaveRecording();
+				mWebView.loadUrl("javascript:stopRecord()");
+				//do it through the javascript instead to get the complete edits including the length of the audio message etc otherwise, could use the android: stopSaveRecording(); 
 			}else{
 				//this should not run
 				mRecorder.release(); //this is called in the stop save recording
@@ -631,10 +632,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	public Boolean hasAudioFileAttached(){
 		if (mAudioResultsFile.length() > 5 ){
-			Toast.makeText(EditBlogEntryActivity.this,"There is an audio file.", Toast.LENGTH_SHORT).show();
+			//Toast.makeText(EditBlogEntryActivity.this,"There is an audio file.", Toast.LENGTH_SHORT).show();
     		return true;
     	}else{
-			Toast.makeText(EditBlogEntryActivity.this,"No audio file.", Toast.LENGTH_SHORT).show();
+			//Toast.makeText(EditBlogEntryActivity.this,"No audio file.", Toast.LENGTH_SHORT).show();
     		return false;
     	}
 	}
