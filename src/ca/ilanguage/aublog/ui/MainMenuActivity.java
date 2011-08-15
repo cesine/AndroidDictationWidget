@@ -27,9 +27,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -88,6 +90,8 @@ public class MainMenuActivity extends Activity {
 	private String mBloggerPassword;
 	private Runnable generateDraftsTree;
 	private ProgressDialog m_ProgressDialog = null; 
+	private AudioManager mAudioManager;
+    
 	
 	private final String MSG_KEY = "value";
 	public static Feed resultFeed = null;
@@ -101,6 +105,11 @@ public class MainMenuActivity extends Activity {
 	
 	@Override
 	  protected void onDestroy() {
+		/*
+		 * When app is shut down, audio should return to normal.
+		 */
+		mAudioManager.setMode(AudioManager.MODE_NORMAL);
+        mAudioManager.setSpeakerphoneOn(true);
 	    super.onDestroy();
 	    // Stop the tracker when it is no longer needed.
 	    tracker.stop();
@@ -326,7 +335,8 @@ public class MainMenuActivity extends Activity {
 		SharedPreferences.Editor editor = prefs.edit();
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
-		
+		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        
 		setContentView(R.layout.mainmenu);
 
 		mStartButton = findViewById(R.id.startButton);
