@@ -989,14 +989,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         }
         
     }*/
-	@Override
+
+    @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Hold on to this
 		mMenu = menu;
 
 		// Inflate the currently selected menu XML resource.
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.settings_only, menu);
+		inflater.inflate(R.menu.drafts_tree_menu, menu);
 
 
 		return true;
@@ -1011,10 +1012,46 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			tracker.trackEvent(
 		            "Clicks",  // Category
 		            "Button",  // Action
-		            "clicked settings in edit blog entry menu: "+mAuBlogInstallId, // Label
+		            "clicked settings in the edit blog entry menu: "+mAuBlogInstallId, // Label
 		            34);       // Value
 			Intent i = new Intent(getBaseContext(),	SetPreferencesActivity.class);
 			startActivity(i);
+			return true;
+		case R.id.new_entry:
+			tracker.trackPageView("/editBlogEntryScreen");
+			tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "clicked new entry in the edit blog entry menu: "+mAuBlogInstallId, // Label
+		            32);       // Value
+
+			Intent intent = new Intent(getBaseContext(), EditBlogEntryActivity.class);
+
+			Uri uri = getContentResolver().insert(AuBlogHistory.CONTENT_URI,
+					null);
+			// If we were unable to create a new blog entry, then just finish
+			// this activity. A RESULT_CANCELED will be sent back to the
+			// original activity if they requested a result.
+			if (uri == null) {
+				Log.e(TAG, "Failed to insert new blog entry into "
+						+ getIntent().getData());
+				Toast.makeText(
+						EditBlogEntryActivity.this,
+						"Failed to insert new blog entry into the database. You can go to your devices settings, choose Aublog and click Clear data to re-create the database."
+								+ getIntent().getData() + " with this uri"
+								+ AuBlogHistory.CONTENT_URI, Toast.LENGTH_LONG)
+						.show();
+				tracker.trackEvent(
+			            "Database",  // Category
+			            "Bug",  // Action
+			            "cannot create new entry in the edit blog entry menu: "+mAuBlogInstallId, // Label
+			            30);       // Value
+
+			} else {
+				intent.setData(uri);
+				startActivity(intent);
+				finish();
+			}
 			return true;
 		default:
 			// Do nothing
@@ -1024,4 +1061,5 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
 		return false;
 	}
+
 }

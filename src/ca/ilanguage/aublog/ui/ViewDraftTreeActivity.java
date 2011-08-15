@@ -301,7 +301,6 @@ public class ViewDraftTreeActivity extends Activity {
 			Intent i = new Intent(getBaseContext(),	SetPreferencesActivity.class);
 			startActivity(i);
 			return true;
-			break;
 		case R.id.new_entry:
 			tracker.trackPageView("/editBlogEntryScreen");
 			tracker.trackEvent(
@@ -329,12 +328,13 @@ public class ViewDraftTreeActivity extends Activity {
 				tracker.trackEvent(
 			            "Database",  // Category
 			            "Bug",  // Action
-			            "cannot create new entry: "+mAuBlogInstallId, // Label
+			            "cannot create new entry in the view drafts tree menu: "+mAuBlogInstallId, // Label
 			            20);       // Value
 
 			} else {
 				intent.setData(uri);
 				startActivity(intent);
+				finish();
 			}
 			return true;
 		default:
