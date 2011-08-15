@@ -743,7 +743,7 @@ public class MainMenuActivity extends Activity {
 						height = 300;
 					}
 					node = node + TextUtils.htmlEncode(cursor.getString(1)) + "\",\nhidden: \""
-							+ cursor.getString(5) + "\",\ndata: {\"$height\":\""+height+"\", content:\""
+							+ cursor.getString(5) + "\",\ndata: { content:\""
 							+ TextUtils.htmlEncode( cursor.getString(2).replaceAll("(\r\n|\r|\n|\n\r)", "<p>") ) + "\"},\nchildren: [";
 
 					/*
