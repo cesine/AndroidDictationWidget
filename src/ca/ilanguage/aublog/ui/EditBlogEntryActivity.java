@@ -527,11 +527,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
+		
 		// Log.i(TAG, "Method 'onDestroy()' launched");
 		tracker.stop();
 		//saveOrUpdateToDB();
 //		mWebView.loadUrl("javascript:savePostToDB()");
+		super.onDestroy();
 		
 
 	}
@@ -722,6 +723,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	   	 * assign this audio recording to the media player
 	   	 */
 	   	try {
+	   		/*
+	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
+	   		 * reinitialize it
+	   		 */
+	   		mMediaPlayer.release();
+	   		mMediaPlayer = null;
+	   		mMediaPlayer = new MediaPlayer();
+	        mMediaPlayer.setLooping(true);
+	   		
 			mMediaPlayer.setDataSource(mAudioResultsFile);
 			mMediaPlayer.prepare();
 		} catch (IllegalArgumentException e) {

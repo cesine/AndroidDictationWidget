@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -87,6 +88,13 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    	
 	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+	    	String release = Build.VERSION.RELEASE;
+		    if(release.equals("2.2")){
+		    	Toast.makeText(SetPreferencesActivity.this, "You have Android 2.2, there is a bug in 2.2 for using bluetooth for audio." +
+	    	 		"\nThe only availible workaround is to silently kill this app's process id right after the app exits.\n\n" +
+	    	 		"Just besure to exit Aublog before you turn off your bluetooth headset.\n " +
+	    	 		"The bluetooth bug was fixed in Android 2.2.1 and above.", Toast.LENGTH_LONG).show();
+		    }
 	    	/*
 	    	 * then use the media player as usual
 	    	 */

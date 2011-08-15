@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -105,14 +106,34 @@ public class MainMenuActivity extends Activity {
 	
 	@Override
 	  protected void onDestroy() {
+		String release = Build.VERSION.RELEASE;
+	    if(release.equals("2.2")){
+//	    	 Toast.makeText(MainMenuActivity.this, "You have Android 2.2, disconnecting the bluetooth after it has been uesd for audio playback will restart your Android. " +
+//	    	 		"\n\nThe only availible workaround is to killing this app's process id right after the app exits.\n " +
+//	    	 		"The bluetooth bug was fixed in Android 2.2.1 and above.", Toast.LENGTH_LONG).show();
+	    	 //ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		     //activityManager.killBackgroundProcesses("ca.ilanguage.aublog");
+	    }
+		// Stop the tracker when it is no longer needed.
+	    tracker.stop();
 		/*
 		 * When app is shut down, audio should return to normal.
 		 */
 		mAudioManager.setMode(AudioManager.MODE_NORMAL);
         mAudioManager.setSpeakerphoneOn(true);
 	    super.onDestroy();
-	    // Stop the tracker when it is no longer needed.
-	    tracker.stop();
+	    /*
+		 * This is a terrible workaround for issue http://code.google.com/p/android/issues/detail?id=9503 of using bluetooth audio on Android 2.2 phones.
+		 * Summary: it kills the app instead of finishing normally 
+		 */
+	    if(release.equals("2.2")){
+	    	//this does not show a force close, but does sucessfully allow the user to disconnect the bluetooth after they close aublog. 
+	    	//if they have android 2.2 and they disconnect the bluetooth without quitting aublog then the device will reboot.
+	    	 android.os.Process.killProcess(android.os.Process.myPid());
+	    }else{
+	    	//do nothing, bluetooth issue is fixed in 2.2.1 and above
+	    }
+	   
 	  }
 
 	// Create an anonymous implementation of OnClickListener
