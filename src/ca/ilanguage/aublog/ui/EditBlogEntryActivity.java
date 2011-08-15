@@ -161,39 +161,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setLooping(true);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        
-        /*Bluetooth notes
-         * http://stackoverflow.com/questions/2144694/routing-audio-to-bluetooth-headset-non-a2dp-on-android
-         * http://stackoverflow.com/questions/2119060/android-getting-audio-to-play-through-earpiece
-         * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
-
-As the connection is not guaranteed to succeed, applications must wait for this intent with a timeout.
-
-When finished with the SCO connection or if the establishment times out, the application must call stopBluetoothSco() to clear the request and turn down the bluetooth connection.
-
-Even if a SCO connection is established, the following restrictions apply on audio output streams so that they can be routed to SCO headset: - the stream type must be STREAM_VOICE_CALL - the format must be mono - the sampling must be 16kHz or 8kHz
-
-, if a call is received or sent while an application is using the SCO connection, the connection will be lost for the application and NOT returned automatically when the call ends.
-
-AudioManager.setBluetoothScoOn(true)
-
-See Also stopBluetoothSco() ACTION_SCO_AUDIO_STATE_CHANGED
-
-private AudioManager m_amAudioManager;  
-m_amAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);  
-m_amAudioManager.setMode(AudioManager.MODE_IN_CALL); 
-m_amAudioManager.setSpeakerphoneOn(false); 
-
-when finishe put audio back:
-m_amAudioManager.setMode(AudioManager.MODE_NORMAL);
-
-2099 
-We don't have public API's to do this yet, but you can look at 
-ScoSocket.java or BluetoothHeadset.startVoiceRecognition() to see how we may 
-release this in a future API. 
-
-         */
-        
+                
         tracker = GoogleAnalyticsTracker.getInstance();
 
 	    // Start the tracker in manual dispatch mode...
@@ -209,25 +177,38 @@ release this in a future API.
 	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
 	    mUseBluetooth =prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, true);
-	    Boolean bluetoothfound = false;
-	    mUsePhoneEarPiece = true;
+	    mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
+	    Boolean bluetoothfound = true;
 	    if( mUseBluetooth && bluetoothfound){
+	    	/*
+	    	 * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
+	    	 Even if a SCO connection is established, the following restrictions apply on audio output streams so that they can be routed to SCO headset: - the stream type must be STREAM_VOICE_CALL - the format must be mono - the sampling must be 16kHz or 8kHz
+
+ 			Similarly, if a call is received or sent while an application is using the SCO connection, the connection will be lost for the application and NOT returned automatically when the call ends.
+			* Notes:
+			* Use of the blue tooth does not affect the ability to recieve a call while using the app,
+			* However, the app will not have control of hte bluetooth connection when teh phone call comes back. The user must exit the Edit Blog activity.
+			* 
+	    	 */
+	    	mAudioManager.startBluetoothSco();
+	    	mAudioManager.setSpeakerphoneOn(false);
+	    	mAudioManager.setBluetoothScoOn(true);
 	    	
+	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 	    	/*
 	    	 * then use the media player as usual
 	    	 */
-	    }else if( mUsePhoneEarPiece){
+	    }
+	    if(mUsePhoneEarPiece){
 	    	/*
-	    	 * TODO test this first, then use this to base the bluetooth version.
+	    	 * This works.
+	    	 * 
+	    	 * This constant ROUTE_EARPIECE is deprecated. Do not set audio routing directly, use setSpeakerphoneOn(), setBluetoothScoOn() methods instead.
 	    	 */
 	    	mAudioManager.setSpeakerphoneOn(false);
-
 	    	mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
-
-	    	Log.i(TAG, String.valueOf(mAudioManager.getRouting(AudioManager.ROUTE_EARPIECE))); 
-
 	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 	    	/*
 	    	 * then use the media player as usual
@@ -523,6 +504,7 @@ release this in a future API.
 		 * Return audio manager to normal so that the audio will behave normally.
 		 */
 		mAudioManager.setMode(AudioManager.MODE_NORMAL);
+		mAudioManager.stopBluetoothSco();
 
 	}
 	private void saveStateToActivity(String strTitle, String strContent, String strLabels){

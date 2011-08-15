@@ -25,6 +25,7 @@ public class PreferenceConstants {
 	 */
     public static final String PREFERENCE_SOUND_ENABLED = "enableSound";
     public static final String PREFERENCE_USE_BLUETOOTH_AUDIO = "useBluetoothAudio";
+    public static final String PREFERENCE_USE_PHONE_EARPIECE_AUDIO = "usePhoneEarPieceAudio";
     public static final String PREFERENCE_SAFE_MODE = "safeMode";
     public static final String PREFERENCE_SESSION_ID = "session";
     public static final String PREFERENCE_LAST_VERSION = "lastVersion";

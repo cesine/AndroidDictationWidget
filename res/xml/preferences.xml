@@ -18,7 +18,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<PreferenceCategory
-            android:title="@string/preference_game_settings">
+            android:title="@string/preference_app_settings">
             
        <CheckBoxPreference
        			android:key="enableSound"
@@ -36,7 +36,14 @@
                 android:defaultValue="true"
                 android:persistent="true"
                 />
-                
+        <CheckBoxPreference
+       			android:key="usePhoneEarPieceAudio"
+                android:title="@string/preference_enable_phone_earpiece_audio"
+                android:summaryOn="@string/preference_enable_phone_earpiece_audio_summary"
+                android:summaryOff="@string/preference_enable_phone_earpiece_audio_summary"
+                android:defaultValue="false"
+                android:persistent="true"
+                />
 		<PreferenceScreen
 				android:key="controlConfigScreen"
                 android:title="@string/preference_configure_controls"
