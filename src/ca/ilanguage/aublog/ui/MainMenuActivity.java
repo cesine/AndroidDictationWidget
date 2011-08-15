@@ -736,8 +736,14 @@ public class MainMenuActivity extends Activity {
 					if ("1".equals(cursor.getString(5))) {
 						node = node + "*";
 					} // if the node is flagged as deleted write a star
+					int height = (int) cursor.getString(1).length() * 2 + 10;
+					if (height < 35){
+						height = 35;
+					}else if (height >300){
+						height = 300;
+					}
 					node = node + TextUtils.htmlEncode(cursor.getString(1)) + "\",\nhidden: \""
-							+ cursor.getString(5) + "\",\ndata: { content:\""
+							+ cursor.getString(5) + "\",\ndata: {\"$height\":\""+height+"\", content:\""
 							+ TextUtils.htmlEncode( cursor.getString(2).replaceAll("(\r\n|\r|\n|\n\r)", "<p>") ) + "\"},\nchildren: [";
 
 					/*

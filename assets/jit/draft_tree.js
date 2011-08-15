@@ -88,9 +88,9 @@ var json = dataIn;
         //set overridable=true for styling individual
         //nodes or edges
         Node: {
-            height: 30,
-            width: 40,
-            type: 'ellipse',
+            height: 35,
+            width: 50,
+            type: 'rectangle',
             color: '#aaa',
             overridable: true
         },
