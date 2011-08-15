@@ -96,12 +96,12 @@ $(document).ready(function()	{
 	
     function startStopRecordingController() {
     	if(document.getElementById('recordButton').value=="Stop Dictation"){
-    		//If the button says stop, stop
-    		displayPlayButton();
+    		//If the button says stop, stop and simulate save to db
     		var messageResult = Android.stopRecord();
     		document.getElementById('markItUp').value = messageResult + document.getElementById('markItUp').value;
     		document.getElementById('recordButton').value="New Dictation";
     		savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
+    		displayPlayButton();
     	}else{
     		//If the button says something else, record
     		savePostToState(); //so that the title of the audio file will correspond with the current title in the javascript

@@ -491,10 +491,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		 * via quitting the edit blog entry activity or 
 		 * via a notification in the notification area?
 		 */
+    	String appendToContent = "";
 		if (mRecorder != null) {
 			if(mRecordingNow ==true){
-				mWebView.loadUrl("javascript:stopRecord()");
-				//do it through the javascript instead to get the complete edits including the length of the audio message etc otherwise, could use the android: stopSaveRecording(); 
+				//do it through the javascript instead to get the complete edits including the length of the audio message etc otherwise, not workign completely: seems to stop but not save to db. mWebView.loadUrl("javascript:startStopRecordingController()");
+				appendToContent = stopSaveRecording(); 
+				
 			}else{
 				//this should not run
 				mRecorder.release(); //this is called in the stop save recording
@@ -522,6 +524,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	 * 
     	 */
     	mWebView.loadUrl("javascript:savePostToState()");
+    	//if the audio was recording, want to append the message to the blog content so this forces this 
+    	mPostContent = appendToContent + mPostContent;
     	saveAsSelfToDB();
 		//mWebView.loadUrl("javascript:savePostToDB()");
 		super.onPause();
