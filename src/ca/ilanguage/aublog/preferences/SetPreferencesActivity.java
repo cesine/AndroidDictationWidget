@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -39,6 +40,8 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
 	GoogleAnalyticsTracker tracker;
+	private AudioManager mAudioManager;
+    
 	
 	String mBloggerAccount;
 	String mBloggerPassword;
@@ -55,6 +58,58 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    tracker.stop();
 	  }
 	@Override
+	protected void onStop(){
+		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		/*
+		 * Always set audio to normal when the preferecnes activty goes off screen, only turn on earpiece or bluetooth if 
+		 * check boxes are checked when user leaves. 
+		 */
+		mAudioManager.setMode(AudioManager.MODE_NORMAL);
+        mAudioManager.setSpeakerphoneOn(true);
+    	
+        Boolean useBluetooth =prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, true);
+	    Boolean usePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
+	   
+		if(useBluetooth){
+			/*
+	    	 * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
+	    	 Even if a SCO connection is established, the following restrictions apply on audio output streams so that they can be routed to SCO headset: - the stream type must be STREAM_VOICE_CALL - the format must be mono - the sampling must be 16kHz or 8kHz
+
+				Similarly, if a call is received or sent while an application is using the SCO connection, the connection will be lost for the application and NOT returned automatically when the call ends.
+			* Notes:
+			* Use of the blue tooth does not affect the ability to recieve a call while using the app,
+			* However, the app will not have control of hte bluetooth connection when teh phone call comes back. The user must exit the Edit Blog activity.
+			* 
+	    	 */
+	    	mAudioManager.startBluetoothSco();
+	    	mAudioManager.setSpeakerphoneOn(false);
+	    	mAudioManager.setBluetoothScoOn(true);
+	    	
+	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+	    	/*
+	    	 * then use the media player as usual
+	    	 */
+		}
+		if(usePhoneEarPiece){
+			/*
+	    	 * This works.
+	    	 * 
+	    	 * This constant ROUTE_EARPIECE is deprecated. Do not set audio routing directly, use setSpeakerphoneOn(), setBluetoothScoOn() methods instead.
+	    	 */
+	    	mAudioManager.setSpeakerphoneOn(false);
+	    	//routes to earpiece by default when speaker phone is off. 
+	    	//mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
+	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+	    	/*
+	    	 * then the app can use the media player as usual
+	    	 */
+		}
+		super.onStop();
+		
+	}
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
@@ -63,6 +118,8 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    // Start the tracker in manual dispatch mode...
 	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
 
+	    mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        
 	    
         getPreferenceManager().setSharedPreferencesMode(MODE_PRIVATE);
         getPreferenceManager().setSharedPreferencesName(PreferenceConstants.PREFERENCE_NAME);

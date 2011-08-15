@@ -33,7 +33,7 @@
 <string name="preference_enable_sound_summary">The Text to Speech voice might be annoying for some users, you can search for Loquendo on the Market if you want a nice voice.</string>
 
 <string name="preference_enable_bluetooth_audio">Use Bluetooth for Audio Recording/Playback</string>
-<string name="preference_enable_bluetooth_audio_summary">If checked the app will use a paired bluetooth headset to record and play audio.</string>
+<string name="preference_enable_bluetooth_audio_summary">If checked the app will use a paired bluetooth headset to record and play audio, if no device is connected it will play through the earpiece of the phone so that the app wont unexpectedly use the speaker.</string>
 
 
 <string name="preference_enable_phone_earpiece_audio">Use Phone Earpiece for Audio Playback</string>
