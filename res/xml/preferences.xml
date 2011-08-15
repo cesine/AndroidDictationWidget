@@ -28,6 +28,14 @@
                 android:defaultValue="true"
                 android:persistent="true"
                 />
+         <CheckBoxPreference
+       			android:key="useBluetoothAudio"
+                android:title="@string/preference_enable_bluetooth_audio"
+                android:summaryOn="@string/preference_enable_bluetooth_audio_summary"
+                android:summaryOff="@string/preference_enable_bluetooth_audio_summary"
+                android:defaultValue="true"
+                android:persistent="true"
+                />
                 
 		<PreferenceScreen
 				android:key="controlConfigScreen"

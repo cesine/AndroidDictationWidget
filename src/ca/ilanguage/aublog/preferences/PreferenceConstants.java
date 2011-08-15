@@ -24,6 +24,7 @@ public class PreferenceConstants {
 	 * 2 TTS only when head set (or blue tooth) is plugged in? (add a listener for this in the main menu activity as it is always present wen the app is running?
 	 */
     public static final String PREFERENCE_SOUND_ENABLED = "enableSound";
+    public static final String PREFERENCE_USE_BLUETOOTH_AUDIO = "useBluetoothAudio";
     public static final String PREFERENCE_SAFE_MODE = "safeMode";
     public static final String PREFERENCE_SESSION_ID = "session";
     public static final String PREFERENCE_LAST_VERSION = "lastVersion";

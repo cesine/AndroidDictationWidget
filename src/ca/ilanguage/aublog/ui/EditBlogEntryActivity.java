@@ -66,12 +66,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private Long mStartTime;
     private Long mEndTime;
     private Long mTimeAudioWasRecorded;
-    private String mAudioSource;
+    private String mAudioSource;//bluetooth(record,play), phone(recordmic, play earpiece) for privacy, speaker(record mic, play speaker)
+    private Boolean mUseBluetooth;
+    private Boolean mUsePhoneEarPiece;
     private String mDateString ="";
     
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
-    MediaPlayer mMediaPlayer;
+    private MediaPlayer mMediaPlayer;
+    private AudioManager mAudioManager;
     Boolean mPlayingNow;
     private Boolean mReadBlog;
     //DONE adde recording logic 
@@ -157,6 +160,40 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         mTts = new TextToSpeech(this, this);
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setLooping(true);
+        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        
+        /*Bluetooth notes
+         * http://stackoverflow.com/questions/2144694/routing-audio-to-bluetooth-headset-non-a2dp-on-android
+         * http://stackoverflow.com/questions/2119060/android-getting-audio-to-play-through-earpiece
+         * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
+
+As the connection is not guaranteed to succeed, applications must wait for this intent with a timeout.
+
+When finished with the SCO connection or if the establishment times out, the application must call stopBluetoothSco() to clear the request and turn down the bluetooth connection.
+
+Even if a SCO connection is established, the following restrictions apply on audio output streams so that they can be routed to SCO headset: - the stream type must be STREAM_VOICE_CALL - the format must be mono - the sampling must be 16kHz or 8kHz
+
+, if a call is received or sent while an application is using the SCO connection, the connection will be lost for the application and NOT returned automatically when the call ends.
+
+AudioManager.setBluetoothScoOn(true)
+
+See Also stopBluetoothSco() ACTION_SCO_AUDIO_STATE_CHANGED
+
+private AudioManager m_amAudioManager;  
+m_amAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);  
+m_amAudioManager.setMode(AudioManager.MODE_IN_CALL); 
+m_amAudioManager.setSpeakerphoneOn(false); 
+
+when finishe put audio back:
+m_amAudioManager.setMode(AudioManager.MODE_NORMAL);
+
+2099 
+We don't have public API's to do this yet, but you can look at 
+ScoSocket.java or BluetoothHeadset.startVoiceRecognition() to see how we may 
+release this in a future API. 
+
+         */
+        
         tracker = GoogleAnalyticsTracker.getInstance();
 
 	    // Start the tracker in manual dispatch mode...
@@ -171,6 +208,32 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
      
 	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
+	    mUseBluetooth =prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, true);
+	    Boolean bluetoothfound = false;
+	    mUsePhoneEarPiece = true;
+	    if( mUseBluetooth && bluetoothfound){
+	    	
+	    	/*
+	    	 * then use the media player as usual
+	    	 */
+	    }else if( mUsePhoneEarPiece){
+	    	/*
+	    	 * TODO test this first, then use this to base the bluetooth version.
+	    	 */
+	    	mAudioManager.setSpeakerphoneOn(false);
+
+	    	mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
+
+	    	Log.i(TAG, String.valueOf(mAudioManager.getRouting(AudioManager.ROUTE_EARPIECE))); 
+
+	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+
+	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+	    	/*
+	    	 * then use the media player as usual
+	    	 */
+	    }
+	    
 	    /*
 		 * set the installid for appending to the labels
 		 */
@@ -456,6 +519,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		tracker.stop();
 		//saveOrUpdateToDB();
 //		mWebView.loadUrl("javascript:savePostToDB()");
+		/*
+		 * Return audio manager to normal so that the audio will behave normally.
+		 */
+		mAudioManager.setMode(AudioManager.MODE_NORMAL);
 
 	}
 	private void saveStateToActivity(String strTitle, String strContent, String strLabels){
