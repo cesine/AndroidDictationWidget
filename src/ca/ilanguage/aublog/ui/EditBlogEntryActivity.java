@@ -9,8 +9,6 @@ import java.util.Locale;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothProfile.ServiceListener;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -56,7 +54,7 @@ import ca.ilanguage.aublog.service.AudioToText;
  * code paths for this sort of communication.
  *
  */
-public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnInitListener, ServiceListener {
+public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnInitListener {
 
 	GoogleAnalyticsTracker tracker;
 	private String mAuBlogInstallId;
@@ -172,20 +170,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }
     
     @Override
-	public void onServiceConnected(int profile, BluetoothProfile proxy) {
-		// TODO Auto-generated method stub
-    	 Toast.makeText(EditBlogEntryActivity.this, "Connected bluetooth service. ", Toast.LENGTH_LONG).show();
-
-		
-	}
-	@Override
-	public void onServiceDisconnected(int profile) {
-		// TODO Auto-generated method stub
-		 Toast.makeText(EditBlogEntryActivity.this, "Bluetooth service disconnected ", Toast.LENGTH_LONG).show();
-
-		
-	}
-	@Override
     public void onConfigurationChanged(Configuration newConfig) {
       super.onConfigurationChanged(newConfig);
 //      setContentView(R.layout.myLayout);
