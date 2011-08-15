@@ -73,8 +73,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
+    
     private MediaPlayer mMediaPlayer;
     private AudioManager mAudioManager;
+    Boolean mRecordingNow;
     Boolean mPlayingNow;
     private Boolean mReadBlog;
     //DONE adde recording logic 
@@ -160,6 +162,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         mTts = new TextToSpeech(this, this);
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setLooping(true);
+        mRecordingNow = false;
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
                 
         tracker = GoogleAnalyticsTracker.getInstance();
@@ -469,13 +472,45 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }
     @Override
 	protected void onPause() {
+    	//http://developer.android.com/guide/topics/media/index.html
+		/*
+		 * As you may know, when the user changes the screen orientation 
+		 * (or changes the device configuration in another way), the 
+		 * system handles that by restarting the activity (by default),
+		 *  so you might quickly consume all of the system resources as 
+		 *  the user rotates the device back and forth between portrait 
+		 *  and landscape, because at each orientation change, 
+		 * you create a new MediaPlayer that you never release. 
+		 * 
+		 * TODO:  Another option: play and record as a service.
+		 *  if you're running an activity and a service from the same application, 
+		 *  they use the same thread (the "main thread") by default. 
+		 *  
+		 * TODO: At the moment if the user rotates the screen, the dictation is stopped and saved. 
+		 * This is not the ideal behavior, instead the recorder shoudl be run as a service with a stop call 
+		 * via quitting the edit blog entry activity or 
+		 * via a notification in the notification area?
+		 */
+		if (mRecorder != null) {
+			if(mRecordingNow ==true){
+				stopSaveRecording();
+			}else{
+				//this should not run
+				mRecorder.release(); //this is called in the stop save recording
+	            mRecorder = null;
+			}
+        }
+
+        if (mMediaPlayer != null) {
+        	mMediaPlayer.release();
+        	mMediaPlayer = null;
+        }
     	tracker.trackEvent(
 	            "Event",  // Category
 	            "Pause",  // Action
 	            "event was paused: "+mAuBlogInstallId, // Label
 	            38);       // Value
     	mFreshEditScreen=false;
-    	mWebView.loadUrl("javascript:savePostToState()");
     	/*
     	 * un-user-initiated saves do not create a new node in the draft tree (although, this can be changed
     	 * by just calling saveAsDaugher here)
@@ -623,6 +658,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mRecorder = new MediaRecorder();
 		try {
 	    	//http://www.benmccann.com/dev-blog/android-audio-recording-tutorial/
+			mRecordingNow = true;
 	    	mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 		    mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 		    mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
@@ -684,8 +720,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public String stopSaveRecording(){
 		
 		mEndTime=System.currentTimeMillis();
+		mRecordingNow=false;
 	   	mRecorder.stop();
 	   	mRecorder.release();
+	   	mRecorder = null;
 	   	
 	   	/*
 	   	 * assign this audio recording to the media player
