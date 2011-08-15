@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
+import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
@@ -90,10 +91,9 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 	    	String release = Build.VERSION.RELEASE;
 		    if(release.equals("2.2")){
-		    	Toast.makeText(SetPreferencesActivity.this, "You have Android 2.2, there is a bug in 2.2 for using bluetooth for audio." +
-	    	 		"\nThe only availible workaround is to silently kill this app's process id right after the app exits.\n\n" +
-	    	 		"Just besure to exit Aublog before you turn off your bluetooth headset.\n " +
-	    	 		"The bluetooth bug was fixed in Android 2.2.1 and above.", Toast.LENGTH_LONG).show();
+		    	Toast.makeText(SetPreferencesActivity.this, "There is a bluetooth bug in Android 2.2." +
+		    	 		"\n\nJust besure to exit Aublog before you turn off your bluetooth headset.\n\n " +
+		    	 		"The bluetooth bug was fixed in Android 2.2.1 and above.", Toast.LENGTH_LONG).show();
 		    }
 	    	/*
 	    	 * then use the media player as usual

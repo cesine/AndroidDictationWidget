@@ -20,6 +20,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
@@ -73,6 +74,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
+    private AudioManager mAudioManager;
     
     private MediaPlayer mMediaPlayer;
     Boolean mRecordingNow;
@@ -183,6 +185,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
+        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setLooping(true);
         mRecordingNow = false;
@@ -202,7 +205,52 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
      
 	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
-	    
+	    mUseBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
+	    mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
+	   
+	    if(mUseBluetooth){
+			/*
+	    	 * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
+	    	 Even if a SCO connection is established, the following restrictions apply on audio output streams so that they can be routed to SCO headset: - the stream type must be STREAM_VOICE_CALL - the format must be mono - the sampling must be 16kHz or 8kHz
+
+				Similarly, if a call is received or sent while an application is using the SCO connection, the connection will be lost for the application and NOT returned automatically when the call ends.
+			* Notes:
+			* Use of the blue tooth does not affect the ability to recieve a call while using the app,
+			* However, the app will not have control of hte bluetooth connection when teh phone call comes back. The user must exit the Edit Blog activity.
+			* 
+	    	 */
+	    	mAudioManager.startBluetoothSco();
+	    	mAudioManager.setSpeakerphoneOn(false);
+	    	mAudioManager.setBluetoothScoOn(true);
+	    	
+	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+	    	String release = Build.VERSION.RELEASE;
+		    if(release.equals("2.2")){
+		    	Toast.makeText(EditBlogEntryActivity.this, "There is a bluetooth bug in Android 2.2." +
+	    	 		"\n\nJust besure to exit Aublog before you turn off your bluetooth headset.\n\n " +
+	    	 		"The bluetooth bug was fixed in Android 2.2.1 and above.", Toast.LENGTH_LONG).show();
+		    }
+	    	/*
+	    	 * then use the media player as usual
+	    	 */
+		}
+		if(mUsePhoneEarPiece){
+			/*
+	    	 * This works.
+	    	 * 
+	    	 * This constant ROUTE_EARPIECE is deprecated. Do not set audio routing directly, use setSpeakerphoneOn(), setBluetoothScoOn() methods instead.
+	    	 */
+	    	mAudioManager.setSpeakerphoneOn(false);
+	    	//routes to earpiece by default when speaker phone is off. 
+	    	//mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
+	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+	    	/*
+	    	 * then the app can use the media player as usual
+	    	 */
+		}
+ 
 	    
 	    /*
 		 * set the installid for appending to the labels
