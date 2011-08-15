@@ -147,6 +147,30 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			Log.e(TAG, "Sorry, I can't talk to you because I could not initialize TextToSpeech.");
 		}
 	}
+	/*
+	 * Important Potential Hazard:
+	 * 
+	 * Using the bluetooth for audio in 2.2 has a bug which has been documented here:
+	 * http://code.google.com/p/android/issues/detail?id=9503
+	 * Bottom line: this activity can crash the phone if the user turns off the bluetooth device in this activity, in Android 2.2.  
+	 * 
+	 * 
+	 * - Steps to reproduce the problem (including sample code if appropriate).
+		
+		using startBluetoothSco/stopBluetoothSco on Android 2.2 (FRF85B)
+		don't exit the app that called them
+		then disable or disconnect link to bluetooth headset
+		
+		- What happened.
+		
+		The system rebooted because of a crash in AudioService.java. When the headset gets disconnected it tries to call unlinkToDeath with "noSuchElementExceptions: death link does not exist"
+		
+		- What you think the correct behavior should be.
+		
+		When calling stopBluetoothSco the ScoClient should get removed from the list of ScoClients.
+		
+		
+	 */
     private void initBluetoothAudio(){
     	/*
     	 * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
@@ -184,7 +208,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         mMediaPlayer.setLooping(true);
         mRecordingNow = false;
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-                
+        /*
+         * If app errors and doesnt call onDestroy(), the audio manager remains in the phone earpiece for the speaker. 
+         * by setting the mode normal here, when the activity is restarted there is a chance of setting the audio normal. 
+         */
+        mAudioManager.setMode(AudioManager.MODE_NORMAL);
+        mAudioManager.setSpeakerphoneOn(true);
+    	
+        
         tracker = GoogleAnalyticsTracker.getInstance();
 
 	    // Start the tracker in manual dispatch mode...
@@ -201,7 +232,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
 	    mUseBluetooth =prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, true);
 	    mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
-	    Boolean bluetoothfound = true;
+	    Boolean bluetoothfound = true;// placeholder for detecting bluetooth on the platform. apparently unnecessary checking is done when setting audiomanager to bluetooth. 
 	    if( mUseBluetooth && bluetoothfound){
 	    	initBluetoothAudio();
 	    }
@@ -212,7 +243,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    	 * This constant ROUTE_EARPIECE is deprecated. Do not set audio routing directly, use setSpeakerphoneOn(), setBluetoothScoOn() methods instead.
 	    	 */
 	    	mAudioManager.setSpeakerphoneOn(false);
-	    	mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
+	    	//routes to earpiece by default when speaker phone is off. 
+	    	//mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
 	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 	    	/*
@@ -867,6 +899,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		mUri=daughterUri;
     		getIntent().setData(mUri);
     		saveStateToActivity(strTitle, strContent, strLabels);
+    		mFreshEditScreen=true;
     		mDeleted=false;
     		mPostId=mUri.getLastPathSegment();
     		
