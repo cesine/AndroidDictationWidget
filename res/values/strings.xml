@@ -9,6 +9,7 @@
 <string name="method_tracing">Toggle Method Tracing</string>
 
 <string name = "please_wait">PLEASE WAIT</string>
+<string name="status_bar_notifications_sending_message">Sending for transcription</string>
 
 <!-- Aublog -->
 <string name = "untitled_blog_title">Untitled</string>
