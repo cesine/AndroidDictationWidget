@@ -322,7 +322,7 @@ public class MainMenuActivity extends Activity {
 						+ getIntent().getData());
 				Toast.makeText(
 						MainMenuActivity.this,
-						"Failed to insert new blog entry into the database, got to your devices settings, choose Aublog and click Clear data to re-create the database"
+						"Failed to insert new blog entry into the database. You can go to your devices settings, choose Aublog and click Clear data to re-create the database."
 								+ getIntent().getData() + " with this uri"
 								+ AuBlogHistory.CONTENT_URI, Toast.LENGTH_LONG)
 						.show();

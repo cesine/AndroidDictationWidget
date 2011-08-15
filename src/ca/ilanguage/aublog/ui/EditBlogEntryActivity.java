@@ -26,6 +26,9 @@ import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -62,6 +65,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private static final String TAG = "CreateBlogEntryActivity";
     /** Talk to the user */
     private TextToSpeech mTts;
+    private Menu mMenu;
     private String mBloggerAccount;
 	private String mBloggerPassword;
     private Long mStartTime;
@@ -181,29 +185,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       Toast.makeText(EditBlogEntryActivity.this, "Configuration changed ", Toast.LENGTH_LONG).show();
 
     }
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mTts = new TextToSpeech(this, this);
-        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setLooping(true);
-        mRecordingNow = false;
-        
-        
-        tracker = GoogleAnalyticsTracker.getInstance();
-
-	    // Start the tracker in manual dispatch mode...
-	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
-
-	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
-	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
-		
-        
-        mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
-	    mDateString = mDateString.replaceAll("/","_").replaceAll(" ","_");
-     
-	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+    
+    private void recheckAublogSettings(){
+    	SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
 	    mUseBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
 	    mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
@@ -228,9 +212,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    	String release = Build.VERSION.RELEASE;
 		    if(release.equals("2.2")){
 		    	Toast.makeText(EditBlogEntryActivity.this, "There is a bluetooth bug in Android 2.2." +
-	    	 		"\n\nJust besure to exit Aublog before you turn off your bluetooth headset.\n\n " +
-	    	 		"The bluetooth bug was fixed in Android 2.2.1 and above.", Toast.LENGTH_LONG).show();
+	    	 		"\n\nJExit Aublog before you turn off your bluetooth headset.\n\n " +
+	    	 		"Update to Android 2.2.1 and above to remove this message.", Toast.LENGTH_LONG).show();
 		    }
+		    mAudioSource= "maybebluetooth";
+			
 	    	/*
 	    	 * then use the media player as usual
 	    	 */
@@ -246,17 +232,42 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    	//mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
 	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+	    	mAudioSource= "microphone";
+			
 	    	/*
 	    	 * then the app can use the media player as usual
 	    	 */
 		}
- 
-	    
-	    /*
+		/*
 		 * set the installid for appending to the labels
 		 */
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
+    	
+    }
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mTts = new TextToSpeech(this, this);
+        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setLooping(true);
+        mRecordingNow = false;
+        
+        
+        tracker = GoogleAnalyticsTracker.getInstance();
+
+	    // Start the tracker in manual dispatch mode...
+	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
+
+	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
+	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
+		
+        
+        mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
+	    mDateString = mDateString.replaceAll("/","_").replaceAll(" ","_");
+     
+	    recheckAublogSettings();
         
         setContentView(R.layout.main_webview);
         mWebView = (WebView) findViewById(R.id.webview);
@@ -361,6 +372,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
         }
         public void readToTTS(String message){
+        	recheckAublogSettings(); //if user turned off tts dont read it
         	if(mReadBlog){
         		readTTS(message);
         	}else{
@@ -663,6 +675,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * An android method to wrap a call to the TTS engine, the logic of if the app should use text to speech (based on settings check box) is handled in the javascript interface. 
 	 */
 	public void readTTS(String message){
+		
 		tracker.trackEvent(
 	            "TTS",  // Category
 	            "Use",  // Action
@@ -681,7 +694,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	}
 	}
 	public String beginRecording(){
-		mAudioSource= "microphone";
+		recheckAublogSettings();//check if bluetooth is ready, use it if it is
+		
 		tracker.trackEvent(
 	            "Clicks",  // Category
 	            "Button",  // Action
@@ -727,6 +741,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		return "Recording...";
 	}
 	public String playOrPauseAudioFile(){
+		//recheckAublogSettings();//if bluetooth or audio settings have changed, use those. 
 		if(mMediaPlayer.isPlaying()){
 			//if its playing, pause and rewind ~4 seconds
 			
@@ -771,6 +786,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	   	 * assign this audio recording to the media player
 	   	 */
 	   	try {
+	   		recheckAublogSettings();//if audio settings have changed use the new ones.
+
 	   		/*
 	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
 	   		 * reinitialize it
@@ -972,5 +989,39 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         }
         
     }*/
-    
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Hold on to this
+		mMenu = menu;
+
+		// Inflate the currently selected menu XML resource.
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.settings_only, menu);
+
+
+		return true;
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		// For "Title only": Examples of matching an ID with one assigned in
+		//                   the XML
+		case R.id.open_settings:
+			tracker.trackPageView("/settingsScreen");
+			tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "clicked settings in edit blog entry menu: "+mAuBlogInstallId, // Label
+		            34);       // Value
+			Intent i = new Intent(getBaseContext(),	SetPreferencesActivity.class);
+			startActivity(i);
+			return true;
+		default:
+			// Do nothing
+
+			break;
+		}
+
+		return false;
+	}
 }

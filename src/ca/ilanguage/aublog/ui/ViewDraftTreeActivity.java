@@ -16,6 +16,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.Window;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
@@ -27,6 +30,7 @@ import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
+import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
 
 /**
  * Demonstrates how to embed a WebView in your activity. Also demonstrates how
@@ -44,7 +48,7 @@ import ca.ilanguage.aublog.preferences.PreferenceConstants;
  *
  */
 public class ViewDraftTreeActivity extends Activity {
-
+	private Menu mMenu;
 	GoogleAnalyticsTracker tracker;
 	private String mAuBlogInstallId;
     private static final String TAG = "CreateBlogEntryActivity";
@@ -270,4 +274,75 @@ public class ViewDraftTreeActivity extends Activity {
             return true;
         }
     }
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Hold on to this
+		mMenu = menu;
+
+		// Inflate the currently selected menu XML resource.
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.drafts_tree_menu, menu);
+
+
+		return true;
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		// For "Title only": Examples of matching an ID with one assigned in
+		//                   the XML
+		case R.id.open_settings:
+			tracker.trackPageView("/settingsScreen");
+			tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "clicked settings in view drafts tree menu: "+mAuBlogInstallId, // Label
+		            24);       // Value
+			Intent i = new Intent(getBaseContext(),	SetPreferencesActivity.class);
+			startActivity(i);
+			return true;
+			break;
+		case R.id.new_entry:
+			tracker.trackPageView("/editBlogEntryScreen");
+			tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "clicked new entry in view drafts tree menu: "+mAuBlogInstallId, // Label
+		            22);       // Value
+
+			Intent intent = new Intent(getBaseContext(), EditBlogEntryActivity.class);
+
+			Uri uri = getContentResolver().insert(AuBlogHistory.CONTENT_URI,
+					null);
+			// If we were unable to create a new blog entry, then just finish
+			// this activity. A RESULT_CANCELED will be sent back to the
+			// original activity if they requested a result.
+			if (uri == null) {
+				Log.e(TAG, "Failed to insert new blog entry into "
+						+ getIntent().getData());
+				Toast.makeText(
+						ViewDraftTreeActivity.this,
+						"Failed to insert new blog entry into the database. You can go to your devices settings, choose Aublog and click Clear data to re-create the database."
+								+ getIntent().getData() + " with this uri"
+								+ AuBlogHistory.CONTENT_URI, Toast.LENGTH_LONG)
+						.show();
+				tracker.trackEvent(
+			            "Database",  // Category
+			            "Bug",  // Action
+			            "cannot create new entry: "+mAuBlogInstallId, // Label
+			            20);       // Value
+
+			} else {
+				intent.setData(uri);
+				startActivity(intent);
+			}
+			return true;
+		default:
+			// Do nothing
+
+			break;
+		}
+
+		return false;
+	}
 }

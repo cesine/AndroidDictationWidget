@@ -92,9 +92,9 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    	String release = Build.VERSION.RELEASE;
 		    if(release.equals("2.2")){
 		    	Toast.makeText(SetPreferencesActivity.this, "There is a bluetooth bug in Android 2.2." +
-		    	 		"\n\nJust besure to exit Aublog before you turn off your bluetooth headset.\n\n " +
-		    	 		"The bluetooth bug was fixed in Android 2.2.1 and above.", Toast.LENGTH_LONG).show();
-		    }
+		    			"\n\nJExit Aublog before you turn off your bluetooth headset.\n\n " +
+		    	 		"Update to Android 2.2.1 and above to remove this message.", Toast.LENGTH_LONG).show();
+			 }
 	    	/*
 	    	 * then use the media player as usual
 	    	 */
