@@ -9,7 +9,6 @@ import java.util.Locale;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothProfile.ServiceListener;
 import android.content.ContentValues;
@@ -70,7 +69,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private Long mEndTime;
     private Long mTimeAudioWasRecorded;
     private String mAudioSource;//bluetooth(record,play), phone(recordmic, play earpiece) for privacy, speaker(record mic, play speaker)
-    private static final int REQUEST_ENABLE_BT = 2;
     private Boolean mUseBluetooth;
     private Boolean mUsePhoneEarPiece;
     private String mDateString ="";
@@ -151,28 +149,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			Log.e(TAG, "Sorry, I can't talk to you because I could not initialize TextToSpeech.");
 		}
 	}
-    
-    
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-      super.onConfigurationChanged(newConfig);
-//      setContentView(R.layout.myLayout);
-      Toast.makeText(EditBlogEntryActivity.this, "Configuration changed ", Toast.LENGTH_LONG).show();
-
-    }
-    
-    /*
-     * Optionally, your application can also listen for the ACTION_STATE_CHANGED broadcast Intent, 
-     * which the system will broadcast whenever the Bluetooth state has changed.
-     * 
-     * (non-Javadoc)
-     * @see android.bluetooth.BluetoothProfile.ServiceListener#onServiceConnected(int, android.bluetooth.BluetoothProfile)
-     */
-    @Override
-	public void onServiceConnected(int profile, BluetoothProfile proxy) {
-		initBluetoothAudio();
-	}
-
     private void initBluetoothAudio(){
     	/*
     	 * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
@@ -190,30 +166,33 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	
     	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
     	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+    	/*
+    	 * then use the media player as usual
+    	 */
     }
+    
+    @Override
+	public void onServiceConnected(int profile, BluetoothProfile proxy) {
+		// TODO Auto-generated method stub
+    	 Toast.makeText(EditBlogEntryActivity.this, "Connected bluetooth service. ", Toast.LENGTH_LONG).show();
 
+		
+	}
 	@Override
 	public void onServiceDisconnected(int profile) {
-		mAudioManager.setMode(AudioManager.MODE_NORMAL);
-		mAudioManager.stopBluetoothSco();
+		// TODO Auto-generated method stub
+		 Toast.makeText(EditBlogEntryActivity.this, "Bluetooth service disconnected ", Toast.LENGTH_LONG).show();
+
+		
 	}
-
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_ENABLE_BT:
-                //initBluetoothAudio();
-            	/*
-            	 * if user turns on bluetooth, it will connect and so the conect listener can init the blue tooth audio
-            	 */
-            	
-                break;
-            default:
-                break;
-        }
-    }
-	
-
 	@Override
+    public void onConfigurationChanged(Configuration newConfig) {
+      super.onConfigurationChanged(newConfig);
+//      setContentView(R.layout.myLayout);
+      Toast.makeText(EditBlogEntryActivity.this, "Configuration changed ", Toast.LENGTH_LONG).show();
+
+    }
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
@@ -238,36 +217,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
 	    mUseBluetooth =prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, true);
 	    mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
-	    /*
-	     * DONE: turning off bluetooth while in aublog, or in edit activity appears to cause phone to reboot. 
-	     * Implemented best practices for accessing bluetooth listening for events and returning audio managaer to normal. 
-	     */
 	    Boolean bluetoothfound = true;
-	    BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-	    if (mBluetoothAdapter == null) {
-	        // If the Bluetooth Adapter is null, 
-	    	// the Device does not support Bluetooth
-	    	bluetoothfound = false;
-	    }else{
-	    	// Otherwise the bluetooth is  supported, if its not Enabled
-	    	// then pop up a dialog to ask the  user to turn it on. 
-	    	if (!mBluetoothAdapter.isEnabled()) {
-	    	    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-	    	    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-	    	}else{
-	    		/*
-	    		 * if the bluetooth is on and working, then try to set the audio manager settings right away.
-	    		 */
-	    		bluetoothfound = true; 
-	    	}
-	    	
-	    }
-	    
 	    if( mUseBluetooth && bluetoothfound){
 	    	initBluetoothAudio();
-	    	/*
-	    	 * then use the media player as usual
-	    	 */
 	    }
 	    if(mUsePhoneEarPiece){
 	    	/*
