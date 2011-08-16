@@ -17,7 +17,24 @@
 package ca.ilanguage.aublog.service;
 
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -25,6 +42,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.GpsStatus.NmeaListener;
 import android.media.AudioTrack;
 import android.os.Binder;
@@ -32,10 +50,13 @@ import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.preferences.NonPublicConstants;
+import ca.ilanguage.aublog.preferences.PreferenceConstants;
 
 /**
  * This is an example of service that will update its status bar balloon 
@@ -46,10 +67,11 @@ public class NotifyingTranscriptionService extends Service {
 
     private NotificationManager mNM;
    
-    private AudioTrack mAudioTrack;
-	private String mAudioFilePath;
-	private int mSplitType;
+    private String mAudioFilePath;
+	private String mFileNameOnServer;
+    private int mSplitType;
 	private ArrayList<String> mTimeCodes;
+	private String mAuBlogInstallId;
 	
 	public static final String EXTRA_AUDIOFILE_FULL_PATH = "audioFilePath";
 	public static final String EXTRA_RESULTS = "splitUpResults";
@@ -90,11 +112,11 @@ public class NotifyingTranscriptionService extends Service {
 	 */
 	public static final int SPLIT_ON_UPSPEAK = 8;
 	
-
     // Use a layout id for a unique identifier
     private static int MOOD_NOTIFICATIONS = R.layout.status_bar_notifications;
     private String mNotificationMessage;
 
+    
     // variable which controls the notification thread 
     private ConditionVariable mCondition;
  
@@ -119,6 +141,10 @@ public class NotifyingTranscriptionService extends Service {
 
 	@Override
     public void onCreate() {
+		
+		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+		
     	
         mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -142,10 +168,13 @@ public class NotifyingTranscriptionService extends Service {
     private Runnable mTask = new Runnable() {
         public void run() {
         	
+        	showNotification(R.drawable.stat_happy,  mNotificationMessage);
         	/*
         	 * Send audio file for transcription to server. 
         	 * 
         	 */
+        	mNotificationMessage= uploadToServer();
+        	
         	
             for (int i = 0; i < 4; ++i) {
                 showNotification(R.drawable.stat_happy,  mNotificationMessage);
@@ -224,6 +253,51 @@ public class NotifyingTranscriptionService extends Service {
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
         mNM.notify(MOOD_NOTIFICATIONS, notification);
+    }
+    /*
+     * based on 
+     * http://vikaskanani.wordpress.com/2011/01/29/android-image-upload-activity/
+     * http://stackoverflow.com/questions/2017414/post-multipart-request-with-android-sdk
+     */
+    public String uploadToServer(){
+    	try {
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpContext localContext = new BasicHttpContext();
+			Long uniqueId = System.currentTimeMillis();
+			HttpPost httpPost = new HttpPost(NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_URL+"stuff"+uniqueId.toString());
+
+			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+			
+			File audioFile = new File(mAudioFilePath);
+//			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//			bitmap.compress(CompressFormat.JPEG, 100, bos);
+//			byte[] data = bos.toByteArray();
+			entity.addPart("title", new StringBody("thetitle"));
+			///entity.addPart("returnformat", new StringBody("json"));
+			//entity.addPart("uploaded", new ByteArrayBody(data,"myImage.jpg"));
+			entity.addPart("aublogInstallID",new StringBody(mAuBlogInstallId));
+			entity.addPart("file", new FileBody(audioFile));
+			///entity.addPart("photoCaption", new StringBody("thecaption"));
+			httpPost.setEntity(entity);
+			
+			HttpResponse response = httpClient.execute(httpPost,localContext);
+			
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(
+							response.getEntity().getContent(), "UTF-8"));
+
+			String sResponse = reader.readLine();
+			//mFileNameOnServer = reader.readLine().replaceAll(":filename","");
+			mFileNameOnServer = reader.readLine().replaceAll(":path","");
+			//showNotification(R.drawable.stat_happy,  mFileNameOnServer);
+        	
+			return sResponse;
+		} catch (Exception e) {
+			
+			Log.e(e.getClass().getName(), e.getMessage(), e);
+			return null;
+		}
+    	
     }
     public String generateSRT(){
     	String messageToReturn = "";

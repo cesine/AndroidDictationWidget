@@ -50,7 +50,7 @@ public class NotifyingController extends Activity {
     private OnClickListener mStartListener = new OnClickListener() {
         public void onClick(View v) {
         	Intent intent = new Intent(NotifyingController.this, NotifyingTranscriptionService.class);
-        	intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, "/sdcard");
+        	intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, "/sdcard/AuBlog/test.mp3");
             startService(intent); 
         }
     };

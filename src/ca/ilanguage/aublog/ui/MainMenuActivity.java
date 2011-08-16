@@ -354,7 +354,6 @@ public class MainMenuActivity extends Activity {
 	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
 	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
 	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		SharedPreferences.Editor editor = prefs.edit();
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
 		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
