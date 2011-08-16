@@ -49,15 +49,17 @@ public class NotifyingController extends Activity {
 
     private OnClickListener mStartListener = new OnClickListener() {
         public void onClick(View v) {
-            startService(new Intent(NotifyingController.this, 
-                    NotifyingTranscriptionService.class));
+        	Intent intent = new Intent(NotifyingController.this, NotifyingTranscriptionService.class);
+        	intent.putExtra("fullfilepat", "/sdcard");
+            startService(intent); 
         }
     };
 
     private OnClickListener mStopListener = new OnClickListener() {
         public void onClick(View v) {
-            stopService(new Intent(NotifyingController.this, 
-                    NotifyingTranscriptionService.class));
+        	Intent intent = new Intent(NotifyingController.this, NotifyingTranscriptionService.class);
+        	intent.putExtra("error", "user clicked cancel");
+            stopService(intent);
         }
     };
 }
