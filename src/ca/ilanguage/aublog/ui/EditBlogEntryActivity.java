@@ -42,6 +42,8 @@ import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
 import ca.ilanguage.aublog.service.AudioToText;
+import ca.ilanguage.aublog.service.NotifyingController;
+import ca.ilanguage.aublog.service.NotifyingTranscriptionService;
 
 /**
  * Demonstrates how to embed a WebView in your activity. Also demonstrates how
@@ -706,10 +708,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 		mStartTime=System.currentTimeMillis();
 		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
+		mDateString = mDateString.replaceAll("/","-");
 		mAudioResultsFile = mAuBlogDirectory+"audio/";
 		new File(mAudioResultsFile).mkdirs();
 		mAudioResultsFile=mAudioResultsFile+mAuBlogInstallId+"_"+mDateString+"_"+System.currentTimeMillis()+"_"+mPostTitle+".mp3"; 
-		mAudioResultsFile=mAudioResultsFile.replaceAll("/","-").replaceAll(" ","-");
+		mAudioResultsFile=mAudioResultsFile.replaceAll(" ","-");
 		mRecorder = new MediaRecorder();
 		try {
 	    	//http://www.benmccann.com/dev-blog/android-audio-recording-tutorial/
@@ -842,6 +845,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * Audio splitting based on silence
          * 1. c: https://github.com/taf2/audiosplit/graphs/languages
          */
+        /*
+         * launch async notification service which sends file to transcription server.
+         */
+        Intent intent = new Intent(this, NotifyingTranscriptionService.class);
+    	intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
+        startService(intent); 
+        
         /* Code to do a voice recognition via google voice:
         try {
 			URL url = new URL("https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=en-US");

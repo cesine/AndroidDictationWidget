@@ -31,8 +31,9 @@ import ca.ilanguage.aublog.R;
 
 
 /**
- * Controller to start and stop a service. The serivce will update a status bar
- * notification every 5 seconds for a minute.
+ * Controller to start and stop a service. 
+
+Demonstrates how to pass information to the service via extras
  */
 public class NotifyingController extends Activity {
     @Override

@@ -176,8 +176,7 @@ public class MainMenuActivity extends Activity {
 		            "clicked user guide: "+mAuBlogInstallId, // Label
 		            13);       // Value
 			
-			// Intent i = new Intent(getBaseContext(), Settings.class);
-			Intent i = new Intent(getBaseContext(), NotifyingController.class);
+			Intent i = new Intent(getBaseContext(), AboutActivity.class);
 
 			v.startAnimation(mButtonFlickerAnimation);
 			mButtonFlickerAnimation
