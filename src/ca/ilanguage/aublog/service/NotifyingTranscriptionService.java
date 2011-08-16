@@ -31,7 +31,6 @@ import android.widget.RemoteViews;
 
 import ca.ilanguage.aublog.R;
 
-import org.apache.commons.net.ftp.FTPClient;
 /**
  * This is an example of service that will update its status bar balloon 
  * every 5 seconds for a minute.
@@ -67,8 +66,7 @@ public class NotifyingTranscriptionService extends Service {
 
     private Runnable mTask = new Runnable() {
         public void run() {
-        	String message = "Sending for transcription ";
-        	FTPClient f = new FTPClient();
+        	
         	
             for (int i = 0; i < 4; ++i) {
                 showNotification(R.drawable.stat_happy,  R.string.status_bar_notifications_sending_message);

@@ -6,6 +6,5 @@
 	<classpathentry kind="lib" path="lib/android-gdata-1.30.0.jar"/>
 	<classpathentry kind="lib" path="lib/libGoogleAnalytics.jar"/>
 	<classpathentry kind="lib" path="lib/GoogleAdMobAdsSdk-4.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-net-3.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

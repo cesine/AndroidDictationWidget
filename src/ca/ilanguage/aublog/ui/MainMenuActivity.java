@@ -51,6 +51,7 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
+import ca.ilanguage.aublog.service.NotifyingController;
 import ca.ilanguage.aublog.util.UIConstants;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
@@ -176,7 +177,7 @@ public class MainMenuActivity extends Activity {
 		            13);       // Value
 			
 			// Intent i = new Intent(getBaseContext(), Settings.class);
-			Intent i = new Intent(getBaseContext(), AboutActivity.class);
+			Intent i = new Intent(getBaseContext(), NotifyingController.class);
 
 			v.startAnimation(mButtonFlickerAnimation);
 			mButtonFlickerAnimation
