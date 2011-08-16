@@ -288,6 +288,7 @@ public class NotifyingTranscriptionService extends Service {
 
 			String sResponse = reader.readLine();
 			//mFileNameOnServer = reader.readLine().replaceAll(":filename","");
+			reader.readLine();
 			mFileNameOnServer = reader.readLine().replaceAll(":path","");
 			//showNotification(R.drawable.stat_happy,  mFileNameOnServer);
         	
