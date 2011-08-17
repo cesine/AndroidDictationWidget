@@ -91,8 +91,8 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 	    	String release = Build.VERSION.RELEASE;
 		    if(release.equals("2.2")){
-		    	Toast.makeText(SetPreferencesActivity.this, "Warning: Bluetooth bug in Android 2.2." +
-		    	 		"\n\nExit Aublog before you turn off your bluetooth headset.", Toast.LENGTH_LONG).show();
+		    	Toast.makeText(SetPreferencesActivity.this, 
+		    	 		"Exit Aublog before you turn off your bluetooth connection.", Toast.LENGTH_LONG).show();
 			 }
 	    	/*
 	    	 * then use the media player as usual

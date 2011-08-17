@@ -823,8 +823,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            "stop audio recording "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
 	            35);       // Value
 	   	
-	    // Keep the volume control type consistent across all activities.
-        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 //        Uri uri = new Uri();
 //        uri.fromFile(new File(mAudioResultsFile));
 //        MediaPlayer mp = MediaPlayer.create(this, uri);
@@ -849,7 +847,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * launch async notification service which sends file to transcription server.
          */
         Intent intent = new Intent(this, NotifyingTranscriptionService.class);
-    	intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
+        intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
+        intent.putExtra(NotifyingTranscriptionService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionService.SPLIT_ON_SILENCE);
         startService(intent); 
         
         /* Code to do a voice recognition via google voice:

@@ -171,9 +171,9 @@ public class ViewDraftTreeActivity extends Activity {
         	tracker.trackEvent(
 		            "Clicks",  // Category
 		            "Button",  // Action
-		            "user clicked on edit, Toasted: Editing post number "+id+" : "+mAuBlogInstallId, // Label
+		            "user clicked on edit, Toasted: Editing draft number "+id+" : "+mAuBlogInstallId, // Label
 		            21);       // Value
-        	Toast.makeText(mContext, "Editing post number "+id, Toast.LENGTH_SHORT).show();
+        	Toast.makeText(mContext, "Editing draft number "+id, Toast.LENGTH_SHORT).show();
         	Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
         	i.setData( AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build() );
         	startActivity(i);

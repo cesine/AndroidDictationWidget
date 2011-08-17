@@ -81,9 +81,9 @@ $(document).ready(function()	{
 <a href="#" class="toggle">this one to <span>remove markItUp!</span></a></p>-->
 <p>
 <span id="buttonArea">
-<input type="button"  id="deleteButton"  value="Delete" onClick="deletePost()" />
 <input type="button"  id="saveButton"  value="Save" onClick="savePostToDB()" />
 <input type="button"  id="publishButton"  value="Publish" onClick="publishPostToDB()" />
+<input type="button"  id="deleteButton"  value="Delete" onClick="deletePost()" />
 <input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecordingController()" />
 </span>
 <script type="text/javascript">
@@ -185,12 +185,12 @@ $(document).ready(function()	{
 <table  id="titles"  >
 <tbody><tr><td><label for="f-title">Title:</label></td></tr><tr>
 <td width="80%">
-	<input type="text" name="title" value="" id="f-title" tabindex="1" class="text" onkeyup="setPreviewTitle(getTitle());" maxlength="150" dir="ltr" size="48"></div></td></tr>
+	<input type="text" name="title" value="" id="f-title" tabindex="1" class="text" maxlength="150" dir="ltr" size="48"></div></td></tr>
 <tr><td>
 	<div id="label-directions"><b>Labels for this post:</b><br>
 <span style="color: #555">e.g. <b>scooters, vacation, fall</b></span></div>
 </td></tr>
-<tr><td ><input type="text" name="postLabels" value="" class="text" size="48" id="post-labels" tabindex="6" dir="ltr"></td></tr>
+<tr><td ><input type="text" name="postLabels" value="" class="text" size="48" id="post-labels" tabindex="2" dir="ltr"></td></tr>
 </tbody></table>
 
 	<textarea id="markItUp" >

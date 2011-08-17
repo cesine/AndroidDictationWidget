@@ -18,7 +18,6 @@ package ca.ilanguage.aublog.service;
 
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,25 +28,22 @@ import java.util.ArrayList;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.GpsStatus.NmeaListener;
-import android.media.AudioTrack;
+
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo.State;
 import android.os.Binder;
@@ -56,13 +52,11 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
-import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
-import ca.ilanguage.aublog.ui.MainMenuActivity;
 
 /**
  * This is an example of service that will update its status bar balloon 
@@ -80,11 +74,14 @@ public class NotifyingTranscriptionService extends Service {
     private NotificationManager mNM;
    
     private int mMaxFileUploadOverMobileNetworkSize;
+    private int mMaxUploadFileSize = 15000000;  // Set maximum upload size to 1.5MB roughly 15 minutes of audio, 
+    											// users shouldn't abuse transcription service by sending meetings and other sorts of audio.
+    											// If you change this value, change the value in the arrays.xml as well look for:
+    											// 15 minutes (AuBlog\'s max transcription length)
     private String mAudioFilePath;
-	private String mFileNameOnServer;
+	private String mFileNameOnServer="";
     private int mSplitType = 0;
 	private ArrayList<String> mTimeCodes;
-	private String mAuBlogInstallId;
 	
 	public static final String EXTRA_AUDIOFILE_FULL_PATH = "audioFilePath";
 	public static final String EXTRA_RESULTS = "splitUpResults";
@@ -130,8 +127,6 @@ public class NotifyingTranscriptionService extends Service {
     private String mNotificationMessage;
 
     
-    // variable which controls the notification thread 
-    private ConditionVariable mCondition;
  
     @Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -150,25 +145,25 @@ public class NotifyingTranscriptionService extends Service {
         }else{
         	mNotificationMessage ="No file";
         }
+        Thread notifyingThread = new Thread(null, mTask, "NotifyingService");
+        
+        notifyingThread.start();
+        
 		return super.onStartCommand(intent, flags, startId);
 	}
 
 	@Override
     public void onCreate() {
 		
-		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
-		mMaxFileUploadOverMobileNetworkSize = prefs.getInt(PreferenceConstants.PREFERENCE_MAX_UPLOAD_ON_MOBILE_NETWORK, 2000000);
-    	
+		
         mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         
         // Start up the thread running the service.  Note that we create a
         // separate thread because the service normally runs in the process's
         // main thread, which we don't want to block.
-        Thread notifyingThread = new Thread(null, mTask, "NotifyingService");
-        mCondition = new ConditionVariable(false);
-        notifyingThread.start();
+        
+        
     }
 
     @Override
@@ -176,19 +171,24 @@ public class NotifyingTranscriptionService extends Service {
         // Dont Cancel the persistent notification, let the user click on it.
         //mNM.cancel(AUBLOG_NOTIFICATIONS);
         // Stop the thread from generating further notifications
-        mCondition.open();
+    	
+    	// Done with our work...  stop the service!
+        
+       
     }
 
     private Runnable mTask = new Runnable() {
         public void run() {
         	
-        	showNotification(R.drawable.stat_aublog,  mNotificationMessage);
+        	//showNotification(R.drawable.stat_aublog,  mNotificationMessage);
         	/*
         	 * Send audio file for transcription to server. 
         	 * 
         	 */
-        	mNotificationMessage= uploadToServer();
-        	           
+        	mNotificationMessage = uploadToServer();
+        	
+        	showNotification(R.drawable.stat_aublog,  mNotificationMessage);
+        	         
             /*
              * Append fake time codes for testing purposes
              */
@@ -206,7 +206,7 @@ public class NotifyingTranscriptionService extends Service {
              */
             
             new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY).mkdirs();
-			File outSRTFile =  new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+mAudioFilePath.replace(".mp3",".srt"));
+			File outSRTFile =  new File(mAudioFilePath.replace(".mp3",".srt"));
 			try {
 				FileOutputStream outSRT = new FileOutputStream(outSRTFile);
 				outSRT.write(mFileNameOnServer.getBytes());
@@ -223,22 +223,21 @@ public class NotifyingTranscriptionService extends Service {
 				outSRT.close();
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
-				Toast.makeText(
-						NotifyingTranscriptionService.this,
-						"The SDCARD isn't writeable. Is the device being used as a disk drive on a comptuer?\n "
-								+ e.toString(), Toast.LENGTH_LONG).show();
+//				Toast.makeText(
+//						NotifyingTranscriptionService.this,
+//						"The SDCARD isn't writeable. Is the device being used as a disk drive on a comptuer?\n "
+//								+ e.toString(), Toast.LENGTH_LONG).show();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				Toast.makeText(
-						NotifyingTranscriptionService.this,
-						"The SDCARD isn't writeable. Is the device being used as a disk drive on a comptuer?\n "
-								+ e.toString(), Toast.LENGTH_LONG).show();
+//				Toast.makeText(
+//						NotifyingTranscriptionService.this,
+//						"The SDCARD isn't writeable. Is the device being used as a disk drive on a comptuer?\n "
+//								+ e.toString(), Toast.LENGTH_LONG).show();
 			}
 			
             
-            // Done with our work...  stop the service!
-            NotifyingTranscriptionService.this.stopSelf();
-            
+			NotifyingTranscriptionService.this.stopSelf();
+	        
             
         }
     };
@@ -281,7 +280,7 @@ public class NotifyingTranscriptionService extends Service {
                 new Intent(this, NotifyingController.class), 0);
 
         // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, "Transcription in background",
+        notification.setLatestEventInfo(this, "AuBlog Transcription Service",
                        text, contentIntent);
 
         // Send the notification.
@@ -294,64 +293,73 @@ public class NotifyingTranscriptionService extends Service {
      * http://stackoverflow.com/questions/2017414/post-multipart-request-with-android-sdk
      */
     public String uploadToServer(){
-    	try {
-			HttpClient httpClient = new DefaultHttpClient();
-			HttpContext localContext = new BasicHttpContext();
-			Long uniqueId = System.currentTimeMillis();
-			HttpPost httpPost = new HttpPost(NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_URL+"stuff"+uniqueId.toString());
+    	String returnMessage="";
+    	SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		mMaxFileUploadOverMobileNetworkSize = prefs.getInt(PreferenceConstants.PREFERENCE_MAX_UPLOAD_ON_MOBILE_NETWORK, 2000000);
+		File audioFile = new File(mAudioFilePath);
+		if (audioFile.length() > mMaxFileUploadOverMobileNetworkSize || audioFile.length() > mMaxUploadFileSize){
+			//if the audio file is larger than the preferences setting for upload over mobile network, dont upload it unless wifi is connected
+			ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+			State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+			if (wifi == State.CONNECTED || wifi == State.CONNECTING) {
+			    //wifi is on
+				try {
+					HttpClient httpClient = new DefaultHttpClient();
+					HttpContext localContext = new BasicHttpContext();
+					Long uniqueId = System.currentTimeMillis();
+					HttpPost httpPost = new HttpPost(NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_URL+"stuff"+uniqueId.toString());
 
-			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-			
-			File audioFile = new File(mAudioFilePath);
-			if (audioFile.length() > mMaxFileUploadOverMobileNetworkSize){
-				//if the audio file is larger than the preferences setting for upload over mobile network, dont upload it unless wifi is connected
-				ConnectivityManager conMan = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
-				State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-				if (wifi == State.CONNECTED || wifi == State.CONNECTING) {
-				    //wifi is on
-				}else{
-					return "Dictation not sent for transcription: no Wifi. Open Aublog Settings";
+					MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+					
+					
+//					ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//					bitmap.compress(CompressFormat.JPEG, 100, bos);
+//					byte[] data = bos.toByteArray();
+					entity.addPart("title", new StringBody("thetitle"));
+					///entity.addPart("returnformat", new StringBody("json"));
+					//entity.addPart("uploaded", new ByteArrayBody(data,"myImage.jpg"));
+					//entity.addPart("aublogInstallID",new StringBody(mAuBlogInstallId));
+					String splitCode=""+mSplitType;
+					entity.addPart("splitCode",new StringBody(splitCode));
+					entity.addPart("file", new FileBody(audioFile));
+					///entity.addPart("photoCaption", new StringBody("thecaption"));
+					httpPost.setEntity(entity);
+					
+					HttpResponse response = httpClient.execute(httpPost,localContext);
+					
+					BufferedReader reader = new BufferedReader(
+							new InputStreamReader(
+									response.getEntity().getContent(), "UTF-8"));
+
+					String firstLine = reader.readLine();
+					reader.readLine();//mFileNameOnServer = reader.readLine().replaceAll(":filename","");
+					mFileNameOnServer = reader.readLine().replaceAll(":path","");
+					/*
+					 * Read response into timecodes
+					 */
+					String line ="";
+					while((line = reader.readLine()) != null){
+						mTimeCodes.add(line);
+						
+					}
+					
+					//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
+		        	returnMessage = firstLine;
+				} catch (Exception e) {
+					//Log.e(e.getClass().getName(), e.getMessage(), e);
+					returnMessage = "Connection error.";// null;
 				}
-			}
-//			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//			bitmap.compress(CompressFormat.JPEG, 100, bos);
-//			byte[] data = bos.toByteArray();
-			entity.addPart("title", new StringBody("thetitle"));
-			///entity.addPart("returnformat", new StringBody("json"));
-			//entity.addPart("uploaded", new ByteArrayBody(data,"myImage.jpg"));
-			entity.addPart("aublogInstallID",new StringBody(mAuBlogInstallId));
-			String splitCode=""+mSplitType;
-			entity.addPart("splitCode",new StringBody(splitCode));
-			entity.addPart("file", new FileBody(audioFile));
-			///entity.addPart("photoCaption", new StringBody("thecaption"));
-			httpPost.setEntity(entity);
-			
-			HttpResponse response = httpClient.execute(httpPost,localContext);
-			
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(
-							response.getEntity().getContent(), "UTF-8"));
-
-			String firstLine = reader.readLine();
-			reader.readLine();//mFileNameOnServer = reader.readLine().replaceAll(":filename","");
-			mFileNameOnServer = reader.readLine().replaceAll(":path","");
-			/*
-			 * Read response into timecodes
-			 */
-			String line ="";
-			while((line = reader.readLine()) != null){
-				mTimeCodes.add(line);
 				
-			}
+			}else{
+				//no wifi, and the file is larger than the users settings for upload over mobile network.
+				returnMessage = "Transcription not sent.";
+				
+			}//end if for wifi connection
 			
-			//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
-        	
-			return firstLine;
-		} catch (Exception e) {
-			
-			Log.e(e.getClass().getName(), e.getMessage(), e);
-			return null;
-		}
+		}//end if for max file size for upload
+		mTimeCodes.add(returnMessage);
+		return returnMessage;
+    	
     	
     }
     public String generateSRT(){

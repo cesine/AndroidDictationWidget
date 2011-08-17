@@ -126,7 +126,7 @@
                 android:defaultValue="true"
                 android:persistent="true"
                 />
-       <com.google.android.apps.mytracks.IntegerListPreference
+       <ca.ilanguage.aublog.preferences.IntegerListPreference
 		        android:key="maxUploadOnMobleNetwork"
 		        android:title="Max upload when not on Wifi"
 		        android:summary="You can configure AuBlog to send only small audio files for transcription."

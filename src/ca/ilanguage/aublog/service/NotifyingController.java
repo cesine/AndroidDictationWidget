@@ -34,6 +34,13 @@ import ca.ilanguage.aublog.R;
  * Controller to start and stop a service. 
 
 Demonstrates how to pass information to the service via extras
+
+Clicking on the notification brings user here, this is where user can do extra actions, like schedule uplaods for later, import transcriptions into aublog?
+
+add buttons
+Turn on wifi
+Open aublog settings
+Retry xxx audio file (add files to cue)
  */
 public class NotifyingController extends Activity {
     @Override
