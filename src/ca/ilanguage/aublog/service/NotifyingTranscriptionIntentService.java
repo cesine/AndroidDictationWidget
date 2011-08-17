@@ -1,9 +1,14 @@
 package ca.ilanguage.aublog.service;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
 import android.app.IntentService;
 import android.app.Notification;
@@ -22,13 +27,13 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 
 	private NotificationManager mNM;
    
-    private int mMaxFileUploadOverMobileNetworkSize;
+    private int mMaxFileUploadOverMobileNetworkSize = 0;
     private int mMaxUploadFileSize = 15000000;  // Set maximum upload size to 1.5MB roughly 15 minutes of audio, 
     											// users shouldn't abuse transcription service by sending meetings and other sorts of audio.
     											// If you change this value, change the value in the arrays.xml as well look for:
     											// 15 minutes (AuBlog\'s max transcription length)
-    private String mUriString;
-    private String mAudioFilePath;
+    private String mUriString ="";
+    private String mAudioFilePath ="";
 	private String mFileNameOnServer="";
     private int mSplitType = 0;
 	private ArrayList<String> mTimeCodes;
@@ -117,6 +122,37 @@ public class NotifyingTranscriptionIntentService extends IntentService {
         }else{
         	mNotificationMessage ="No file";
         }
+        /*
+         * Append fake time codes for testing purposes
+         */
+        splitOnSilence();
+        
+        File outSRTFile =  new File(mAudioFilePath.replace(".mp3",".srt"));
+		FileOutputStream outSRT;
+		try {
+			outSRT = new FileOutputStream(outSRTFile);
+			outSRT.write(mFileNameOnServer.getBytes());
+			outSRT.write("\n".getBytes());
+			/*
+			 * Append time codes SRT array to srt file.
+			 * the time codes and transcription are read line by line from the in the server's response. 
+			 */
+			for(int i = 0; i < mTimeCodes.size(); i++){
+				outSRT.write(mTimeCodes.get(i).getBytes());
+				outSRT.write("\n".getBytes());
+			}
+							
+			outSRT.flush();
+			outSRT.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			mNotificationMessage ="Cannot write results to SDCARD";
+		}
+		
+		
+		
+        
         showNotification(R.drawable.stat_aublog,  mNotificationMessage);
     	
 	}//end onhandle intent
@@ -151,5 +187,13 @@ public class NotifyingTranscriptionIntentService extends IntentService {
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
         mNM.notify(AUBLOG_NOTIFICATIONS, notification);
+    }
+    public String splitOnSilence(){
+    	mTimeCodes = new ArrayList<String>();
+    	mTimeCodes.add("0:00:02.350,0:00:06.690");
+    	mTimeCodes.add("0:00:07.980,0:00:12.780");
+    	mTimeCodes.add("0:00:14.529,0:00:17.970");
+    	mTimeCodes.add("0:00:17.970,0:00:20.599");
+    	return "right now, these are fake timecodes";
     }
 }

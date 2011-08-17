@@ -87,6 +87,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     Boolean mRecordingNow;
     Boolean mPlayingNow;
     private Boolean mReadBlog;
+    private Boolean mSendForTranscription = false;
     //DONE adde recording logic 
     //DONE figure out the problems with the account database,decoup0le the account database with the blog entry screen
     
@@ -842,12 +843,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            "Dictation",  // Action
 	            "stop audio recording "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
 	            35);       // Value
-	   	
-//        Uri uri = new Uri();
-//        uri.fromFile(new File(mAudioResultsFile));
-//        MediaPlayer mp = MediaPlayer.create(this, uri);
-//        mp.start();
-        
+	   	       
         /*
          * Transcription possibilities:
          * 1. using googles not published speech API
@@ -866,11 +862,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         /*
          * launch async notification service which sends file to transcription server.
          */
-        Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
-        intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
-        intent.putExtra(NotifyingTranscriptionService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionService.SPLIT_ON_SILENCE);
-        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUri.toString());
-        startService(intent); 
+	   	mSendForTranscription=true;
+        
         
         /* Code to do a voice recognition via google voice:
         try {
@@ -951,6 +944,19 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		mUri=daughterUri;
     		getIntent().setData(mUri);
     		saveStateToActivity(strTitle, strContent, strLabels);
+    		
+    		/*
+    		 * If this save to database includes a new audio file, send it for transcription with this 
+    		 * daughter uri to edit when it comes back to the edit activity with transcription content.
+    		 */
+    		if(mSendForTranscription ==true){
+    			Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
+	            intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
+	            intent.putExtra(NotifyingTranscriptionService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionService.SPLIT_ON_SILENCE);
+	            intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUri.toString());
+	            startService(intent); 
+	            mSendForTranscription = false;
+            }
     		mFreshEditScreen=true;
     		mDeleted=false;
     		mPostId=mUri.getLastPathSegment();
