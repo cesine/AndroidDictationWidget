@@ -95,6 +95,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	private Cursor mCursor;
 	//savedInstanceState
 	
+	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
+	private Boolean mReturnedTranscription; //check on reload?
+	
 	private static final int GROUP_BASIC = 0;
 	private static final int GROUP_FORMAT = 1;
 	int selectionStart;
@@ -518,7 +521,23 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       */
 //      mUri = new Uri(savedInstanceState.getString("uri"));
     }
+    
     @Override
+	protected void onStart() {
+		//find out if the intent has a new transcription to insert into the blog content. 
+    	mReturnedTranscription = getIntent().getBooleanExtra(EXTRA_TRANSCRIPTION_RETURNED,false);
+    	if( ! mReturnedTranscription ){
+    		//Toast.makeText(EditBlogEntryActivity.this, "onResume.", Toast.LENGTH_LONG).show();
+    	}else{
+    		mPostContent="Transciption returned:"+mPostContent;
+    		mWebView.loadUrl("javascript:fillFromAndroidActivity()");
+    		//Toast.makeText(EditBlogEntryActivity.this, "onResume, there is a transcription to load. Show alert yes no.", Toast.LENGTH_LONG).show();
+    	}
+    	super.onStart();
+	}
+
+
+	@Override
 	protected void onPause() {
     	mWebView.loadUrl("javascript:savePostToState()");
     	tracker.trackEvent(
@@ -850,6 +869,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
         intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
         intent.putExtra(NotifyingTranscriptionService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionService.SPLIT_ON_SILENCE);
+        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUri.toString());
         startService(intent); 
         
         /* Code to do a voice recognition via google voice:

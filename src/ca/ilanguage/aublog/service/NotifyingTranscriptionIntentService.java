@@ -1,13 +1,16 @@
 package ca.ilanguage.aublog.service;
 
+import java.net.URI;
 import java.util.ArrayList;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.net.Uri;
 
 public class NotifyingTranscriptionIntentService extends IntentService {
 	protected static String TAG = "NotifyingTranscriptionIntentService";
@@ -24,6 +27,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
     											// users shouldn't abuse transcription service by sending meetings and other sorts of audio.
     											// If you change this value, change the value in the arrays.xml as well look for:
     											// 15 minutes (AuBlog\'s max transcription length)
+    private String mUriString;
     private String mAudioFilePath;
 	private String mFileNameOnServer="";
     private int mSplitType = 0;
@@ -32,6 +36,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	public static final String EXTRA_AUDIOFILE_FULL_PATH = "audioFilePath";
 	public static final String EXTRA_RESULTS = "splitUpResults";
 	public static final String EXTRA_SPLIT_TYPE = "splitOn";
+	public static final String EXTRA_CORRESPONDING_DRAFT_URI_STRING = "aublogCorrespondingDraftUri";
 	
 	/**
 	 * Splitting on Silence is relatively quick it only requires mathematic calculation on the audio sample, 
@@ -103,7 +108,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
         try {
             mAudioFilePath = intent.getExtras().getString(EXTRA_AUDIOFILE_FULL_PATH);
             mSplitType = intent.getExtras().getInt(EXTRA_SPLIT_TYPE);
-            
+            mUriString = intent.getExtras().getString(EXTRA_CORRESPONDING_DRAFT_URI_STRING);
         } catch (Exception e) {
         	//Toast.makeText(SRTGeneratorActivity.this, "Error "+e,Toast.LENGTH_LONG).show();
         }
@@ -129,11 +134,15 @@ public class NotifyingTranscriptionIntentService extends IntentService {
         Notification notification = new Notification(iconId, message, System.currentTimeMillis());
 
         // The PendingIntent to launch our activity if the user selects this notification
-        //Intent intent = new Intent(this, NotifyingController.class);
-        //intent.setdata to the post uri
-        //intent.setextra to add a boolean to update content to append transcription
+        //tried sending it to Edit activity but couldnt get extras to be extracted in either onResume or onStart, so cant 
+        //pull in new transcription if user relaunches edit activiyt by clicking on the notification.
+        Intent intent = new Intent(this, EditBlogEntryActivity.class);
+        Uri uri = Uri.parse(mUriString);
+        intent.setData(uri);
+        intent.putExtra(EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUriString);
+        intent.putExtra(EditBlogEntryActivity.EXTRA_TRANSCRIPTION_RETURNED,true);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, NotifyingController.class), 0);
+                intent, 0);
 
         // Set the info for the views that show in the notification panel.
         notification.setLatestEventInfo(this, "AuBlog Transcription Service",
