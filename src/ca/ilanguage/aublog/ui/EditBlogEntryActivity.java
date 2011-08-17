@@ -43,6 +43,7 @@ import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
 import ca.ilanguage.aublog.service.AudioToText;
 import ca.ilanguage.aublog.service.NotifyingController;
+import ca.ilanguage.aublog.service.NotifyingTranscriptionIntentService;
 import ca.ilanguage.aublog.service.NotifyingTranscriptionService;
 
 /**
@@ -846,7 +847,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         /*
          * launch async notification service which sends file to transcription server.
          */
-        Intent intent = new Intent(this, NotifyingTranscriptionService.class);
+        Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
         intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
         intent.putExtra(NotifyingTranscriptionService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionService.SPLIT_ON_SILENCE);
         startService(intent); 
