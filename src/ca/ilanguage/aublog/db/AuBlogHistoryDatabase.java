@@ -38,8 +38,9 @@ public class AuBlogHistoryDatabase {
 	    String ENTRY_LABELS = "labels";
 	    String ENTRY_CONTENT = "content";
 	    String PUBLISHED_IN = "publishedin";
-	    //comma seperated list of ordered pairs, of blog entry id and audiofile corresponding directly to that entry)
-	    String AUDIO_FILES = "audiofiles";
+	    //the full path of an audiofile of blog entry corresponding directly to that entry)
+	    String AUDIO_FILE = "audiofile";
+	    String AUDIO_FILE_STATUS = "audiofilestatus";
 	    //arrange entry histories in a heirarchy based on edits
 	    String PARENT_ENTRY = "parententry";
 	    String DELETED = "deleted";//changed from daughter entry

@@ -1,9 +1,10 @@
 package ca.ilanguage.aublog.ui;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Locale;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
@@ -29,8 +30,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.webkit.JsResult;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
@@ -41,8 +40,6 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
-import ca.ilanguage.aublog.service.AudioToText;
-import ca.ilanguage.aublog.service.NotifyingController;
 import ca.ilanguage.aublog.service.NotifyingTranscriptionIntentService;
 import ca.ilanguage.aublog.service.NotifyingTranscriptionService;
 
@@ -109,10 +106,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	String mPostParent ="";
 	String mPostId ="";
 	String mAudioResultsFile;
+	String mAudioResultsFileStatus;
 	Boolean mFreshEditScreen;
 	private Boolean mDeleted = false;
 	String mLongestEverContent ="";
-	private static final String[] PROJECTION = new String[] {
+	private  String[] PROJECTION = new String[] {
 		AuBlogHistory._ID, //0
 		AuBlogHistory.ENTRY_TITLE, 
 		AuBlogHistory.ENTRY_CONTENT, //2
@@ -123,7 +121,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		AuBlogHistory.PUBLISHED_IN,
 		AuBlogHistory.TIME_CREATED,//8
 		AuBlogHistory.LAST_MODIFIED,
-		AuBlogHistory.AUDIO_FILES//10
+		AuBlogHistory.AUDIO_FILE,//10
+		AuBlogHistory.AUDIO_FILE_STATUS
 	};
 	
 	
@@ -303,6 +302,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					mPostLabels =mCursor.getString(3);
 					mPostParent = mCursor.getString(6);
 					mAudioResultsFile = mCursor.getString(10);
+					mAudioResultsFileStatus = mCursor.getString(11);
 					//Toast.makeText(EditBlogEntryActivity.this, "The audio results file is "+mAudioResultsFile, Toast.LENGTH_LONG).show();
 		    		if (mAudioResultsFile.length() > 5){
 		    			//SET the media player to point to this audio file so that the play button will work. 
@@ -528,10 +528,36 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		//find out if the intent has a new transcription to insert into the blog content. 
     	mReturnedTranscription = getIntent().getBooleanExtra(EXTRA_TRANSCRIPTION_RETURNED,false);
     	if( ! mReturnedTranscription ){
-    		//Toast.makeText(EditBlogEntryActivity.this, "onResume.", Toast.LENGTH_LONG).show();
+    		// nothing to do if no returned transcription
     	}else{
-    		mPostContent="Transciption returned:"+mPostContent;
+    		/*
+    		 * Insert transcription into the blog entry content. Keep current content below the transcription.
+    		 */
+    		mAudioResultsFileStatus="transcriptionintegratedinblogentry";
+    		BufferedReader in;
+    		String transcription="";
+			try {
+				in = new BufferedReader(new FileReader(mAudioResultsFile.replace(".mp3",".srt")));
+				String line ="";
+				while((line = in.readLine()) != null){
+					transcription = transcription + line + "\n";
+				}
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				mAudioResultsFileStatus=mAudioResultsFileStatus+"problemcopyingfromsdcardtoblogpost";
+				mPostContent= "There was a problem reading the transcriptions from the SDCARD to, maybe the device is connected to a computer?\n\n"+mPostContent;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				mAudioResultsFileStatus=mAudioResultsFileStatus+"problemcopyingfromsdcardtoblogpost";
+				mPostContent= "There was a problem reading the transcriptions from the SDCARD to, maybe the device is connected to a computer?\n\n"+mPostContent;
+				//relaunch the pending intent, or create a new method that put transcriptions into aublgo entries, run it out of the main generate drafts tree functions?
+			}
+			mPostContent=transcription+mPostContent;
+    		
     		mWebView.loadUrl("javascript:fillFromAndroidActivity()");
+    		saveAsSelfToDB();
     		//Toast.makeText(EditBlogEntryActivity.this, "onResume, there is a transcription to load. Show alert yes no.", Toast.LENGTH_LONG).show();
     	}
     	super.onStart();
@@ -650,7 +676,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	        	values.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
 	        	values.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
 	        	values.put(AuBlogHistory.LAST_MODIFIED, Long.valueOf(System.currentTimeMillis()));
-	        	values.put(AuBlogHistory.AUDIO_FILES, mAudioResultsFile);
+	        	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
+	        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
+	        	
 //	        	values.put(AuBlogHistory.USER_TOUCHED, "true"); TODO maybe make a field to indicate that the user never touched the entry, that way wont loose branches in the tree? 
 	    		getContentResolver().update(mUri, values,null, null);
 	    		Log.d(TAG, "Post saved to database.");
@@ -717,7 +745,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	public String beginRecording(){
 		recheckAublogSettings();//check if bluetooth is ready, use it if it is
-		
+		mAudioResultsFileStatus = "recordingstarted";
 		tracker.trackEvent(
 	            "Clicks",  // Category
 	            "Button",  // Action
@@ -798,13 +826,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 	}
 	public String stopSaveRecording(){
-		
+		mAudioResultsFileStatus="recordingstopped";
 		mEndTime=System.currentTimeMillis();
 		mRecordingNow=false;
 	   	mRecorder.stop();
 	   	mRecorder.release();
 	   	mRecorder = null;
 	   	
+	   	mAudioResultsFileStatus="recordingsaved";
 	   	/*
 	   	 * assign this audio recording to the media player
 	   	 */
@@ -863,6 +892,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * launch async notification service which sends file to transcription server.
          */
 	   	mSendForTranscription=true;
+	   	mAudioResultsFileStatus="recordingflaggedfortranscription";
         
         
         /* Code to do a voice recognition via google voice:
@@ -905,7 +935,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	daughterValues.put(AuBlogHistory.ENTRY_CONTENT, strContent);
         	daughterValues.put(AuBlogHistory.ENTRY_LABELS, strLabels);
         	daughterValues.put(AuBlogHistory.LAST_MODIFIED, Long.valueOf(System.currentTimeMillis()));
-        	daughterValues.put(AuBlogHistory.AUDIO_FILES, mAudioResultsFile);
+        	daughterValues.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
+        	daughterValues.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
         	if ( (mPostTitle+mPostContent+mPostLabels).length() <= 0 ){
         		if (mLongestEverContent.length() <= 0 ){
         			saveStateToActivity(strTitle, strContent, strLabels);
@@ -956,6 +987,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUri.toString());
 	            startService(intent); 
 	            mSendForTranscription = false;
+	            mAudioResultsFileStatus="recordingsenttotranscriptionservice";
             }
     		mFreshEditScreen=true;
     		mDeleted=false;
