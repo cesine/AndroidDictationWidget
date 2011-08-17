@@ -183,7 +183,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
         // Set the info for the views that show in the notification panel.
         notification.setLatestEventInfo(this, "AuBlog Transcription Service",
                        message, contentIntent);
-
+        //notification will disapear when user clicks and launches the pending intent
+        notification.flags  |= Notification.FLAG_AUTO_CANCEL;
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
         mNM.notify(AUBLOG_NOTIFICATIONS, notification);
