@@ -20,6 +20,9 @@ package ca.ilanguage.aublog.service;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
@@ -45,6 +48,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.GpsStatus.NmeaListener;
 import android.media.AudioTrack;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo.State;
 import android.os.Binder;
 import android.os.ConditionVariable;
 import android.os.IBinder;
@@ -57,19 +62,27 @@ import android.widget.Toast;
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
+import ca.ilanguage.aublog.ui.MainMenuActivity;
 
 /**
  * This is an example of service that will update its status bar balloon 
  * every 5 seconds for a minute.
+ * 
+ * See also Alarm Manager
+ * http://developer.android.com/reference/android/app/AlarmManager.html
+ * 
+ * And Checking whether wifi is on, or firing when wifi turns on
+ * http://stackoverflow.com/questions/4733617/android-scheduled-files-to-server
  * 
  */
 public class NotifyingTranscriptionService extends Service {
 
     private NotificationManager mNM;
    
+    private int mMaxFileUploadOverMobileNetworkSize;
     private String mAudioFilePath;
 	private String mFileNameOnServer;
-    private int mSplitType;
+    private int mSplitType = 0;
 	private ArrayList<String> mTimeCodes;
 	private String mAuBlogInstallId;
 	
@@ -113,7 +126,7 @@ public class NotifyingTranscriptionService extends Service {
 	public static final int SPLIT_ON_UPSPEAK = 8;
 	
     // Use a layout id for a unique identifier
-    private static int MOOD_NOTIFICATIONS = R.layout.status_bar_notifications;
+    private static int AUBLOG_NOTIFICATIONS = R.layout.status_bar_notifications;
     private String mNotificationMessage;
 
     
@@ -123,11 +136,12 @@ public class NotifyingTranscriptionService extends Service {
     @Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
     	/*
-         * TODO get data from bundle, store it in the member variables
+         * get data from extras bundle, store it in the member variables
          */
         try {
             mAudioFilePath = intent.getExtras().getString(EXTRA_AUDIOFILE_FULL_PATH);
-           
+            mSplitType = intent.getExtras().getInt(EXTRA_SPLIT_TYPE);
+            
         } catch (Exception e) {
         	//Toast.makeText(SRTGeneratorActivity.this, "Error "+e,Toast.LENGTH_LONG).show();
         }
@@ -144,7 +158,7 @@ public class NotifyingTranscriptionService extends Service {
 		
 		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
-		
+		mMaxFileUploadOverMobileNetworkSize = prefs.getInt(PreferenceConstants.PREFERENCE_MAX_UPLOAD_ON_MOBILE_NETWORK, 2000000);
     	
         mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -159,8 +173,8 @@ public class NotifyingTranscriptionService extends Service {
 
     @Override
     public void onDestroy() {
-        // Cancel the persistent notification.
-        mNM.cancel(MOOD_NOTIFICATIONS);
+        // Dont Cancel the persistent notification, let the user click on it.
+        //mNM.cancel(AUBLOG_NOTIFICATIONS);
         // Stop the thread from generating further notifications
         mCondition.open();
     }
@@ -168,41 +182,59 @@ public class NotifyingTranscriptionService extends Service {
     private Runnable mTask = new Runnable() {
         public void run() {
         	
-        	showNotification(R.drawable.stat_happy,  mNotificationMessage);
+        	showNotification(R.drawable.stat_aublog,  mNotificationMessage);
         	/*
         	 * Send audio file for transcription to server. 
         	 * 
         	 */
         	mNotificationMessage= uploadToServer();
-        	
-        	
-            for (int i = 0; i < 4; ++i) {
-                showNotification(R.drawable.stat_happy,  mNotificationMessage);
-                if (mCondition.block(5 * 1000)) 
-                    break;
-                showNotification(R.drawable.stat_happy,  mNotificationMessage);
-                if (mCondition.block(5 * 1000)) 
-                    break;
-                showNotification(R.drawable.stat_happy,  mAudioFilePath);
-                if (mCondition.block(5 * 1000)) 
-                    break;
-            }
-            
+        	           
             /*
-             * Generate the SRT
+             * Append fake time codes for testing purposes
              */
-            String message = generateSRT();
+            splitOnSilence();
             
             /*
              * Return results
              * 
              * As an intent:
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra(EXTRA_RESULTS, mTimeCodes);
-            setResult(Activity.RESULT_OK, resultIntent);
-            finish();
+				            Intent resultIntent = new Intent();
+				            resultIntent.putExtra(EXTRA_RESULTS, mTimeCodes);
+				            setResult(Activity.RESULT_OK, resultIntent);
+				            finish();
             * As a .srt file in the audio directory
              */
+            
+            new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY).mkdirs();
+			File outSRTFile =  new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+mAudioFilePath.replace(".mp3",".srt"));
+			try {
+				FileOutputStream outSRT = new FileOutputStream(outSRTFile);
+				outSRT.write(mFileNameOnServer.getBytes());
+				
+				/*
+				 * Append time codes SRT array to srt file.
+				 * the time codes and transcription are read line by line from the in the server's response. 
+				 */
+				for(int i = 0; i < mTimeCodes.size(); i++){
+					outSRT.write(mTimeCodes.get(i).getBytes());
+				}
+								
+				outSRT.flush();
+				outSRT.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				Toast.makeText(
+						NotifyingTranscriptionService.this,
+						"The SDCARD isn't writeable. Is the device being used as a disk drive on a comptuer?\n "
+								+ e.toString(), Toast.LENGTH_LONG).show();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				Toast.makeText(
+						NotifyingTranscriptionService.this,
+						"The SDCARD isn't writeable. Is the device being used as a disk drive on a comptuer?\n "
+								+ e.toString(), Toast.LENGTH_LONG).show();
+			}
+			
             
             // Done with our work...  stop the service!
             NotifyingTranscriptionService.this.stopSelf();
@@ -215,10 +247,11 @@ public class NotifyingTranscriptionService extends Service {
     public IBinder onBind(Intent intent) {
     	/*
     	 * TODO unknown if it is necessary to get data from the intent here in addition to onstartcommand
-         * TODO get data from bundle, store it in the member variables
+         * get data from extras bundle, store it in the member variables
          */
         try {
             mAudioFilePath = intent.getExtras().getString(EXTRA_AUDIOFILE_FULL_PATH);
+            mSplitType = intent.getExtras().getInt(EXTRA_SPLIT_TYPE);
            
         } catch (Exception e) {
         	//Toast.makeText(SRTGeneratorActivity.this, "Error "+e,Toast.LENGTH_LONG).show();
@@ -228,6 +261,7 @@ public class NotifyingTranscriptionService extends Service {
         }else{
         	mNotificationMessage ="No file";
         }
+        
         return mBinder;
     }
     
@@ -252,7 +286,7 @@ public class NotifyingTranscriptionService extends Service {
 
         // Send the notification.
         // We use a layout id because it is a unique number.  We use it later to cancel.
-        mNM.notify(MOOD_NOTIFICATIONS, notification);
+        mNM.notify(AUBLOG_NOTIFICATIONS, notification);
     }
     /*
      * based on 
@@ -269,6 +303,16 @@ public class NotifyingTranscriptionService extends Service {
 			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 			
 			File audioFile = new File(mAudioFilePath);
+			if (audioFile.length() > mMaxFileUploadOverMobileNetworkSize){
+				//if the audio file is larger than the preferences setting for upload over mobile network, dont upload it unless wifi is connected
+				ConnectivityManager conMan = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
+				State wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
+				if (wifi == State.CONNECTED || wifi == State.CONNECTING) {
+				    //wifi is on
+				}else{
+					return "Dictation not sent for transcription: no Wifi. Open Aublog Settings";
+				}
+			}
 //			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 //			bitmap.compress(CompressFormat.JPEG, 100, bos);
 //			byte[] data = bos.toByteArray();
@@ -276,6 +320,8 @@ public class NotifyingTranscriptionService extends Service {
 			///entity.addPart("returnformat", new StringBody("json"));
 			//entity.addPart("uploaded", new ByteArrayBody(data,"myImage.jpg"));
 			entity.addPart("aublogInstallID",new StringBody(mAuBlogInstallId));
+			String splitCode=""+mSplitType;
+			entity.addPart("splitCode",new StringBody(splitCode));
 			entity.addPart("file", new FileBody(audioFile));
 			///entity.addPart("photoCaption", new StringBody("thecaption"));
 			httpPost.setEntity(entity);
@@ -286,13 +332,21 @@ public class NotifyingTranscriptionService extends Service {
 					new InputStreamReader(
 							response.getEntity().getContent(), "UTF-8"));
 
-			String sResponse = reader.readLine();
-			//mFileNameOnServer = reader.readLine().replaceAll(":filename","");
-			reader.readLine();
+			String firstLine = reader.readLine();
+			reader.readLine();//mFileNameOnServer = reader.readLine().replaceAll(":filename","");
 			mFileNameOnServer = reader.readLine().replaceAll(":path","");
-			//showNotification(R.drawable.stat_happy,  mFileNameOnServer);
+			/*
+			 * Read response into timecodes
+			 */
+			String line ="";
+			while((line = reader.readLine()) != null){
+				mTimeCodes.add(line);
+				
+			}
+			
+			//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
         	
-			return sResponse;
+			return firstLine;
 		} catch (Exception e) {
 			
 			Log.e(e.getClass().getName(), e.getMessage(), e);

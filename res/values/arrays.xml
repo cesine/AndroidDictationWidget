@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+	<string-array name="max_upload_on_moblie_network_options">
+    <item>Wifi only</item>
+    <item>2 minutes (recommended for 500MB plans)</item>
+    <item>5 minutes (recommended for 1GB plans)</item>
+    <item>10 minutes</item>
+    <item>15 minutes (AuBlog\'s max transcription length)</item>
+  </string-array>
+  <!-- using 1,000,000 as a metric of 1 min of audio -->
+  <string-array name="max_upload_on_moblie_network_values">
+    <item>0</item>
+    <item>2000000</item>
+    <item>5000000</item>
+    <item>10000000</item>
+    <item>15000000</item>
+  </string-array>
+	
 	<!-- This came right out of frameworks/base/include/ui/KeycodeLabels.h -->
  	<string-array name="keycode_labels">
     <item>SOFT LEFT</item>

@@ -84,6 +84,8 @@
      <PreferenceCategory
             android:title="@string/preference_manage_data">
             
+
+                
         <Preference
                 android:title="@string/preference_email_data"
 				android:key="emailDraftsTree">
@@ -116,7 +118,22 @@
             <intent android:action="org.openintents.action.PICK_FILE"
                     android:data="file:///sdcard/AuBlog/Audio" />
         </PreferenceScreen>
-        
+                <CheckBoxPreference
+       			android:key="uploadWaitForWifi"
+                android:title="Upload only over Wifi"
+                android:summaryOff="Upload for transcription only when Wifi is active. You should turn this on if your cell phone plan has less than 1GB data transfer per month."
+                android:summaryOn="Uploading only over wifi.You can configure exceptions for small transcriptions below."
+                android:defaultValue="true"
+                android:persistent="true"
+                />
+       <com.google.android.apps.mytracks.IntegerListPreference
+		        android:key="maxUploadOnMobleNetwork"
+		        android:title="Max upload when not on Wifi"
+		        android:summary="You can configure AuBlog to send only small audio files for transcription."
+		        android:entries="@array/max_upload_on_moblie_network_options"
+		        android:entryValues="@array/max_upload_on_moblie_network_values"
+		        android:defaultValue="2000000" />
+		        
        <ca.ilanguage.aublog.preferences.YesNoDialogPreference
        			android:key="erasegame"
                 android:title="@string/preference_erase_save_game"

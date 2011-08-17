@@ -266,7 +266,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
         
         mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
-	    mDateString = mDateString.replaceAll("/","_").replaceAll(" ","_");
+	    mDateString = mDateString.replaceAll("/","-").replaceAll(" ","-");
      
 	    recheckAublogSettings();
         
