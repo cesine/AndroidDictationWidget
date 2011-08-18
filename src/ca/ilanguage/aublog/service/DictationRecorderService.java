@@ -156,6 +156,8 @@ public class DictationRecorderService extends Service {
 		try {
 			mAudioResultsFile = intent.getExtras().getString(EXTRA_AUDIOFILE_FULL_PATH);
 			mAudioResultsFileStatus = intent.getExtras().getString(EXTRA_AUDIOFILE_STATUS);
+			//Discard status which was sent.
+			mAudioResultsFileStatus = "Recording service running";
 		} catch (Exception e) {
 			//Toast.makeText(SRTGeneratorActivity.this, "Error "+e,Toast.LENGTH_LONG).show();
 		}

@@ -271,11 +271,11 @@ public class NotifyingTranscriptionIntentService extends IntentService {
         // The PendingIntent to launch our activity if the user selects this notification
         //tried sending it to Edit activity but couldnt get extras to be extracted in either onResume or onStart, so cant 
         //pull in new transcription if user relaunches edit activiyt by clicking on the notification.
-        Intent intent = new Intent(this, EditBlogEntryActivity.class);
+        Intent intent = new Intent(this, NotifyingController.class);
         Uri uri = Uri.parse(mUriString);
         intent.setData(uri);
-        intent.putExtra(EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUriString);
-        intent.putExtra(EditBlogEntryActivity.EXTRA_TRANSCRIPTION_RETURNED,mTranscriptionReturned);
+        //intent.putExtra(EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUriString);
+        //intent.putExtra(EditBlogEntryActivity.EXTRA_TRANSCRIPTION_RETURNED,mTranscriptionReturned);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 intent, 0);
 
