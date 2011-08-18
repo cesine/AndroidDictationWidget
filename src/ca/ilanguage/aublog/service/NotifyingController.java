@@ -36,7 +36,7 @@ import ca.ilanguage.aublog.R;
 Demonstrates how to pass information to the service via extras
 
 Clicking on the notification brings user here, this is where user can do extra actions, like schedule uplaods for later, import transcriptions into aublog?
-
+TODO button to stop recording. (sent from dictationrecorderservice)
 add buttons
 Turn on wifi
 Open aublog settings

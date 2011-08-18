@@ -40,7 +40,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	  
     public NotifyingTranscriptionIntentService() {
 		super(TAG);
-		// TODO Auto-generated constructor stub
 	}
 
 	private NotificationManager mNM;
