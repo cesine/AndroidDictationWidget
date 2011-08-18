@@ -8,6 +8,7 @@ import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
+import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -197,6 +198,11 @@ public class DictationRecorderService extends Service {
 		 */
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
+		tracker.trackEvent(
+	            "Clicks",  // Category
+	            "Button",  // Action
+	            "Record audio via "+mAudioSource+" : "+mAuBlogInstallId, // Label
+	            734);       // Value
 		/*
 		 * turn on the recorder
 		 
@@ -264,6 +270,7 @@ public class DictationRecorderService extends Service {
 		        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
 		        	getContentResolver().update(mUri, values,null, null);
 		        	mDBLastModified = Long.toString(System.currentTimeMillis());
+		        	getContentResolver().notifyChange(AuBlogHistory.CONTENT_URI, null);
 		        	
 		        	// Tell the user we saved recording meta info to the database.
 		            //Toast.makeText(this, "Audiofile info saved to DB.", Toast.LENGTH_SHORT).show();

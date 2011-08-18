@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.media.AudioManager;
@@ -40,6 +41,7 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
+import ca.ilanguage.aublog.service.DictationRecorderService;
 import ca.ilanguage.aublog.service.NotifyingTranscriptionIntentService;
 import ca.ilanguage.aublog.service.NotifyingTranscriptionService;
 
@@ -68,8 +70,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private Menu mMenu;
     private String mBloggerAccount;
 	private String mBloggerPassword;
-    private Long mStartTime;
-    private Long mEndTime;
     private Long mTimeAudioWasRecorded;
     private String mAudioSource;//bluetooth(record,play), phone(recordmic, play earpiece) for privacy, speaker(record mic, play speaker)
     private Boolean mUseBluetooth;
@@ -77,7 +77,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private String mDateString ="";
     
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
-    private MediaRecorder mRecorder;
     private AudioManager mAudioManager;
     
     private MediaPlayer mMediaPlayer;
@@ -91,6 +90,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	//uri of the entry being edited.
 	private Uri mUri;
 	private Cursor mCursor;
+	public AuBlogHistoryContentObserver mAuBlogContentObserver;
 	//savedInstanceState
 	
 	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
@@ -127,6 +127,21 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	
 	
 	private WebView mWebView;
+	
+	private class AuBlogHistoryContentObserver extends ContentObserver {
+
+		public AuBlogHistoryContentObserver(){
+			super(null);
+		}
+		
+		@Override
+		public void onChange(boolean selfChange) {
+			
+			super.onChange(selfChange);
+			getAudioFileDataOutOfDatabase();
+		}
+		
+	}
     
     //implement on Init for the text to speech
 	public void onInit(int status) {
@@ -286,7 +301,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          */
         mUri = getIntent().getData();
         mCursor = managedQuery(mUri, PROJECTION, null, null, null);
-		if (mCursor != null) {
+        mAuBlogContentObserver = new AuBlogHistoryContentObserver();
+        this.getApplicationContext().getContentResolver().registerContentObserver(AuBlogHistory.CONTENT_URI, true, mAuBlogContentObserver);
+   
+        if (mCursor != null) {
 			// Requery in case something changed while paused (such as the title)
 			mCursor.requery();
             // Make sure we are at the one and only row in the cursor.
@@ -565,83 +583,76 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
 	@Override
 	protected void onPause() {
-    	mWebView.loadUrl("javascript:savePostToState()");
-    	tracker.trackEvent(
-	            "Event",  // Category
-	            "Pause",  // Action
-	            "event was paused: "+mAuBlogInstallId, // Label
-	            38);       // Value
-    	mFreshEditScreen=false;
-    	//http://developer.android.com/guide/topics/media/index.html
+		mFreshEditScreen = false;
 		/*
-		 * As you may know, when the user changes the screen orientation 
-		 * (or changes the device configuration in another way), the 
-		 * system handles that by restarting the activity (by default),
-		 *  so you might quickly consume all of the system resources as 
-		 *  the user rotates the device back and forth between portrait 
-		 *  and landscape, because at each orientation change, 
-		 * you create a new MediaPlayer that you never release. 
+		 * Un-user-initiated saves do not create a new node in the draft tree
+		 * (although, this can be changed by just calling saveAsDaugher here) 1.
+		 * asks Javascript to put current values into state 2. saves state to
+		 * database as self
 		 * 
-		 * TODO:  Another option: play and record as a service.
-		 *  if you're running an activity and a service from the same application, 
-		 *  they use the same thread (the "main thread") by default. 
-		 *  
-		 * TODO: At the moment if the user rotates the screen, the dictation is stopped and saved. 
-		 * This is not the ideal behavior, instead the recorder shoudl be run as a service with a stop call 
-		 * via quitting the edit blog entry activity or 
-		 * via a notification in the notification area?
+		 * Potential bug: this needs to operate syncronously, if operated async,
+		 * then the changed values in the javascript will never be perserved
+		 * unless the user hits save first (before hitting back button or
+		 * rotating screen).
+		 * 
+		 * Rotate screen: save as self to database Back button: save as self to
+		 * database
 		 */
-    	String appendToContent = "";
-		if (mRecorder != null) {
-			/*
-			 * if the recorder is running, save everything essentially simulating a click on the save button in the UI
-			 */
-			if(mRecordingNow ==true){
-				//do it through the javascript instead to get the complete edits including the length of the audio message etc otherwise, not workign completely: seems to stop but not save to db. mWebView.loadUrl("javascript:startStopRecordingController()");
-				appendToContent = stopSaveRecording(); 
+		mWebView.loadUrl("javascript:savePostToState()");
+		tracker.trackEvent("Event", // Category
+				"Pause", // Action
+				"event was paused: " + mAuBlogInstallId, // Label
+				38); // Value
 
-		    	//if the audio was recording, want to append the message to the blog content so this forces this 
-		    	mPostContent = appendToContent + mPostContent;
-				saveAsDaughterToDB(mPostTitle, mPostContent, mPostLabels);
-			}else{
-				//this should not run
-				mRecorder.release(); //this is called in the stop save recording
-	            mRecorder = null;
-			}
-        }else{
-        	/* 
-        	 * If the recorder is not running, then just save things to state, stop the player if its playing although that could be put in the destroy method.
-        	 * 
-        	 */
-	        if (mMediaPlayer != null) {
-	        	mMediaPlayer.release();
-	        	mMediaPlayer = null;
-	        }
-	    	
-	    	/*
-	    	 * un-user-initiated saves do not create a new node in the draft tree (although, this can be changed
-	    	 * by just calling saveAsDaugher here)
-	    	 * 1. asks javascript to put current values into state
-	    	 * 2. saves state to database as self
-	    	 * 
-	    	 * Potential bug: this needs to operate syncronously, if operated async, then the changed values in the javascript will never be perserved unless the user hits save first (before hitting back button or rotating screen). 
-	    	 * 
-	    	 */
-	    	saveAsSelfToDB();
-			
-        }
+		saveAsSelfToDB();
+		// http://developer.android.com/guide/topics/media/index.html
+		/*
+		 * As you may know, when the user changes the screen orientation (or
+		 * changes the device configuration in another way), the system handles
+		 * that by restarting the activity (by default), so you might quickly
+		 * consume all of the system resources as the user rotates the device
+		 * back and forth between portrait and landscape, because at each
+		 * orientation change, you create a new MediaPlayer that you never
+		 * release.
+		 * 
+		 * DONE: playing and pausing is kept in the EditBlog activity, if the
+		 * user rotatest the screen or leaves it will stop playing. This is
+		 * preferred. If the user wants to listen to their audio in the
+		 * background they can use the normal Music player by opening the
+		 * settings, and going to the audio folder.
+		 * 
+		 * DONE: refactored record as a service (foregrounded so that it will be
+		 * less likely to be killed by android) Aublog will record a dictation
+		 * until A: the user clicks stop in the EditBlogEntryActivity B: the
+		 * users quits Aublog MainMenuActivity (ondestroy method) C: the user
+		 * clicks on the notification, goes to the NotificationController and
+		 * clicks Stop Recording. D: the system runs out of memory E: the
+		 * service is killed by the system F: (aublog is killed by the system?)
+		 * the service should be running in the same process id, so technically
+		 * the service's ondestroy will be killed of aublog is killed.
+		 * 
+		 * Consequences: NEGATIVE: to find out if the audio file is valid, or
+		 * how long it is, this EditBlogEntry now has to go to the database and
+		 * the Sdcard, it cant know on its own. POSITIVE: the user can rotate
+		 * the screen while dictating, which is very natural since they will
+		 * pick up and put down the phone, walk around, maybe biking etc
+		 * especially if the user is using a bluetooth.
+		 */
+
 		super.onPause();
 	}
+
 	@Override
 	protected void onDestroy() {
-		
-		// Log.i(TAG, "Method 'onDestroy()' launched");
 		tracker.stop();
-		//saveOrUpdateToDB();
-//		mWebView.loadUrl("javascript:savePostToDB()");
+		/*
+		 * If the mediaplayer exists or is playing, release it,
+		 */
+		if (mMediaPlayer != null) {
+			mMediaPlayer.release();
+			mMediaPlayer = null;
+		}
 		super.onDestroy();
-		
-
 	}
 	private void saveStateToActivity(String strTitle, String strContent, String strLabels){
     	if(mDeleted == true){
@@ -677,8 +688,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	        	values.put(AuBlogHistory.TIME_EDITED, Long.valueOf(System.currentTimeMillis()));
 	        	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
 	        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
-	        	
-//	        	values.put(AuBlogHistory.USER_TOUCHED, "true"); TODO maybe make a field to indicate that the user never touched the entry, that way wont loose branches in the tree? 
 	    		getContentResolver().update(mUri, values,null, null);
 	    		Log.d(TAG, "Post saved to database.");
 	    		//Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
@@ -706,7 +715,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	/*
 		 * Flag entry as deleted
 		 */
-    	
     	tracker.trackEvent(
 	            "AuBlogLifeCycleEvent",  // Category
 	            "Delete",  // Action
@@ -724,7 +732,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * An android method to wrap a call to the TTS engine, the logic of if the app should use text to speech (based on settings check box) is handled in the javascript interface. 
 	 */
 	public void readTTS(String message){
-		
 		tracker.trackEvent(
 	            "TTS",  // Category
 	            "Use",  // Action
@@ -742,61 +749,41 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		return false;
     	}
 	}
+	/**
+	 * Launches a service to record 
+	 * 
+	 * @return
+	 */
 	public String beginRecording(){
-		recheckAublogSettings();//check if bluetooth is ready, use it if it is
-		mAudioResultsFileStatus = "recordingstarted";
-		tracker.trackEvent(
-	            "Clicks",  // Category
-	            "Button",  // Action
-	            "record audio via "+mAudioSource+" : "+mAuBlogInstallId, // Label
-	            34);       // Value
-		/*
-		 * TODO get audio from blue tooth or mic or usb mic?
-		 */
-		
-		mStartTime=System.currentTimeMillis();
+		mAudioResultsFileStatus = "recording service started";
 		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
 		mDateString = mDateString.replaceAll("/","-");
 		mAudioResultsFile = mAuBlogDirectory+"audio/";
 		new File(mAudioResultsFile).mkdirs();
 		mAudioResultsFile=mAudioResultsFile+mAuBlogInstallId+"_"+mDateString+"_"+System.currentTimeMillis()+"_"+mPostTitle+".mp3"; 
 		mAudioResultsFile=mAudioResultsFile.replaceAll(" ","-");
-		mRecorder = new MediaRecorder();
-		try {
-	    	//http://www.benmccann.com/dev-blog/android-audio-recording-tutorial/
-			mRecordingNow = true;
-	    	mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-		    mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-		    mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-		    mRecorder.setOutputFile(mAudioResultsFile);
-		    mRecorder.prepare();
-		    mRecorder.start();
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			Toast.makeText(EditBlogEntryActivity.this, "The App cannot save audio, maybe the Android is attached to a computer?", Toast.LENGTH_SHORT).show();
-			tracker.trackEvent(
-    	            "Record",  // Category
-    	            "Bug",  // Action
-    	            "The App cannot record audio, maybe the Android is attached to a computer?" +e+" : "+mAuBlogInstallId, // Label
-    	            3301);       // Value
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			Toast.makeText(EditBlogEntryActivity.this, "The App cannot save audio, maybe the Android is attached to a computer?", Toast.LENGTH_SHORT).show();
-			tracker.trackEvent(
-    	            "Record",  // Category
-    	            "Bug",  // Action
-    	            "The App cannot save audio, maybe the Android is attached to a computer?" +e+" : "+mAuBlogInstallId, // Label
-    	            3302);       // Value
-		}
+		mRecordingNow = true;
+		Intent intent = new Intent(this, DictationRecorderService.class);
+	 	intent.setData(mUri);
+	 	intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
+	    intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+	    startService(intent);
 		return "Recording...";
 	}
+	/**
+	 * A function which starts or pauses the media player.
+	 * The media player is run in a loop so the user only has two options (Play,Pause) not three (Play,Pause,Stop)
+	 * This design choice was made so that the user can transcribe their dictation. If they would like to listen to the audio they can 
+	 * open the AuBlog settings to go to the AuBlog folder (its easy to find, its in the root of the SDCard) and play their dictations using the music player.
+	 * Users can also use the Music player to make a play list of their dictations if they would like to listen continously to their dictations rather than transcribe them.
+	 * 
+	 * @return A message for the button which is the oposite of its current state. (ie, if the player is paused, it returns Play, if the player is started, it returns Pause)
+	 */
 	public String playOrPauseAudioFile(){
-		//recheckAublogSettings();//if bluetooth or audio settings have changed, use those. 
 		if(mMediaPlayer.isPlaying()){
-			//if its playing, pause and rewind ~4 seconds
-			
 			mMediaPlayer.pause();
-			/* rewind logic doesnt work
+			/* TODO rewind logic doesnt work
+			 * //if its playing, pause and rewind ~4 seconds
 			int rewindValue = 2;
 			int startPlayingFromSecond =mMediaPlayer.getCurrentPosition();
 			if ( startPlayingFromSecond <= rewindValue){
@@ -811,7 +798,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}else{
 			//if its not playing, play it
 		    try {
-		    	
 		    	mMediaPlayer.start();
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
@@ -824,44 +810,116 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 		
 	}
-	public String stopSaveRecording(){
-		mAudioResultsFileStatus="recordingstopped";
-		mEndTime=System.currentTimeMillis();
-		mRecordingNow=false;
-	   	mRecorder.stop();
-	   	mRecorder.release();
-	   	mRecorder = null;
-	   	
-	   	mAudioResultsFileStatus="recordingsaved";
-	   	/*
+	/**
+	 * This method gets audio file information out of the database, if the information contains a valid 
+	 * audiofilename, it will set up the play button and the media player. 
+	 */
+	private void getAudioFileDataOutOfDatabase(){
+		/*
+	   	 * get data from database.
+	   	 */
+		// Requery in case something changed while paused (such as the title)
+		mCursor.requery();
+        // Make sure we are at the one and only row in the cursor.
+        mCursor.moveToFirst();
+		try {
+			mAudioResultsFile = mCursor.getString(10);
+			mAudioResultsFileStatus = mCursor.getString(11);
+    		/*
+    		 * Extract the time of the audio that was recorded.
+    		 */
+    		mTimeAudioWasRecorded =extractTimeRecordedFromAudioFileStatus(mAudioResultsFileStatus);
+    		if(mTimeAudioWasRecorded < 2){
+    			tracker.trackEvent(
+    		            "AuBlogLifeCycleEvent",  // Category
+    		            "Dictation",  // Action
+    		            "Probable audio recording error somewhere in the control of post:"+mPostId+", user clicked stop and there was a malformed status message in the database. (could be that the service didnt write to database before editblog entry queried database) This is the extracted time recorded: "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
+    		            350);       // Value
+    		}else{
+    			tracker.trackEvent(
+    		            "AuBlogLifeCycleEvent",  // Category
+    		            "Dictation",  // Action
+    		            "Audio recording of post:"+mPostId+" user clicked stop. This is the extracted time recorded: "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
+    		            350);       // Value
+    		}
+		} catch (IllegalArgumentException e) {
+			tracker.trackEvent(
+    	            "Database",  // Category
+    	            "Bug",  // Action
+    	            "Database connection IllegalArgumentException in extractingn audiofile info after stopping recording"+e+" : "+mAuBlogInstallId, // Label
+    	            3101);       // Value
+		} catch (Exception e) {
+			tracker.trackEvent(
+    	            "Database",  // Category
+    	            "Bug",  // Action
+    	            "Database connection Exception in extracting audiofile info after stopping recording"+e+" : "+mAuBlogInstallId, // Label
+    	            3101);       // Value
+		}
+		/*
 	   	 * assign this audio recording to the media player
 	   	 */
 	   	try {
-	   		recheckAublogSettings();//if audio settings have changed use the new ones.
-
 	   		/*
 	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
 	   		 * reinitialize it
 	   		 */
-	   		mMediaPlayer.release();
-	   		mMediaPlayer = null;
-	   		mMediaPlayer = new MediaPlayer();
-	        mMediaPlayer.setLooping(true);
-	   		
-			mMediaPlayer.setDataSource(mAudioResultsFile);
-			mMediaPlayer.prepareAsync();
+	   		if (mAudioResultsFile.length() > 5){
+	   			if(mMediaPlayer != null){
+	   				mMediaPlayer.release();
+	   				mMediaPlayer = null;
+	   			}
+		   		
+		   		//TODO put this back in after done debuging refactoring recheckAublogSettings();//if audio settings have changed use the new ones.
+		   		mWebView.loadUrl("javascript:displayPlayButton()");
+		   		mMediaPlayer = new MediaPlayer();
+		        mMediaPlayer.setLooping(true);
+		   		mMediaPlayer.setDataSource(mAudioResultsFile);
+				mMediaPlayer.prepareAsync();
+	   		}
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (IllegalStateException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
+	}
+	/**
+	 * This method sends a stopservice command to the DictationRecorderService. 
+	 * The service saves the audio file, and sets the metadata in teh database.
+	 * 
+	 * This method queries teh database to get back the meta information about the recording.
+	 * 
+	 * Notes: if the service is stopped, and this method continues concurrently its highly possible that it wont 
+	 * fetch the final info from the database. 
+	 * 
+	 * Consequences:
+	 *  NOTCRUCIAL: the audio file will likely be the same as the file that was saved to the database when 
+	 *  the service started recording, so the edit activity can simply set this as teh data for the media player.
+	 *  By the time the javascript renders the play button, and the uesr clicks on play, the service will have saved
+	 *  the audio file and finished. 
+	 *  
+	 *  POTENTIALLYPROBLEMATIC: the status message will most likley not contain any value for the length of the recording. so this variable
+	 *  will not be useable until the databse is queried again. 
+	 *  TODO schedule another queriy or create a listener for database updates and then query the database?
+	 * 
+	 * @return
+	 */
+	public String stopSaveRecording(){
+		
+		mRecordingNow=false;
+		Intent intent = new Intent(this, DictationRecorderService.class);
+		stopService(intent);
+		/*
+		 * Get the information out of the database once the database  notifies its observers (which Editblog has a registered observer)
+		 * that the database has been updated. 
+		 */
+		mAuBlogContentObserver.onChange(false);
 	   	
-	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
+	   	
 	   	
 	   	//Javascript changes the blog content to add the length of the recording 
 	   	//Javascript simpulates a click on the save button, so most likely it will be saved as a daughter. 
@@ -912,11 +970,30 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		 
 		startActivity(i);
 		*/
-		
-		
 		return "Attached "+mTimeAudioWasRecorded/100+" second Recording.\n";
 	}
-	
+	/**
+	 * The audio time recorded is saved in the audiofile status message. This extracts it out of the staus. 
+	 * Note: the time is most probably minimally longer than the actual audio time of the saved audio file. 
+	 * 
+	 * @param statusMessage a string delimited by ::: with the words "Attached a "+mTimeAudioWasRecorded/100+" second Recording.\n" somewhere inside
+	 * @return the Long value in miliseconds of the recording. Or 0 if no message was found.
+	 */
+	public Long extractTimeRecordedFromAudioFileStatus(String statusMessage){
+		String[] temp;
+		String delimiter = ":::";
+		String lmTimeAudioWasRecorded="0";
+		temp = statusMessage.split(delimiter);
+		for(int i = 0; i< temp.length ; i++){
+			if(temp[i].contains("Attached a ")){
+				lmTimeAudioWasRecorded=temp[i];
+				lmTimeAudioWasRecorded.replace("Attached a ","");
+				lmTimeAudioWasRecorded.replace(" second Recording.\n","");
+			}
+		}
+		Long timeAudioWasRecorded= Long.parseLong(lmTimeAudioWasRecorded);
+		return timeAudioWasRecorded=timeAudioWasRecorded*100;
+	}
 	public Long returnTimeRecorded(){
 		//Long timePassed = (System.currentTimeMillis()-mStartTime)/1000;
 		
@@ -1128,5 +1205,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
 		return false;
 	}
+
 
 }
