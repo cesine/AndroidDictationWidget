@@ -74,7 +74,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private String mAudioSource;//bluetooth(record,play), phone(recordmic, play earpiece) for privacy, speaker(record mic, play speaker)
     private Boolean mUseBluetooth;
     private Boolean mUsePhoneEarPiece;
-    private String mDateString ="";
     
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private AudioManager mAudioManager;
@@ -91,23 +90,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	private Uri mUri;
 	private Cursor mCursor;
 	public AuBlogHistoryContentObserver mAuBlogContentObserver;
-	//savedInstanceState
 	
-	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
-	private Boolean mReturnedTranscription; //check on reload?
-	
-	private static final int GROUP_BASIC = 0;
-	private static final int GROUP_FORMAT = 1;
 	int selectionStart;
 	int selectionEnd;
-	String mPostContent ="";
-	String mPostTitle ="";
-	String mPostLabels ="";
+	//DONE removed member varibles which are only changed in javascript title, content and labels
 	String mPostParent ="";
 	String mPostId ="";
 	String mAudioResultsFile;
 	String mAudioResultsFileStatus;
-	Boolean mFreshEditScreen;
+	//Boolean mFreshEditScreen;
 	private Boolean mDeleted = false;
 	String mLongestEverContent ="";
 	private  String[] PROJECTION = new String[] {
@@ -172,8 +163,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			Log.e(TAG, "Sorry, I can't talk to you because I could not initialize TextToSpeech.");
 		}
 	}
-	/*
-	 * Important Potential Hazard:
+	/**
+	 * Important Potential Hazard of Bluetooth and changing Audio Settings in the middle of an activity:
 	 * 
 	 * Using the bluetooth for audio in 2.2 has a bug which has been documented here:
 	 * http://code.google.com/p/android/issues/detail?id=9503
@@ -196,19 +187,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 		
 	 */
-    
-    
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-      super.onConfigurationChanged(newConfig);
-//      setContentView(R.layout.myLayout);
-      //Toast.makeText(EditBlogEntryActivity.this, "Configuration changed ", Toast.LENGTH_LONG).show();
-
-    }
-    
-    private void recheckAublogSettings(){
+	private void recheckAublogSettings(){
     	SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
+		/*
+		 * set the installid for appending to the labels
+		 */
+		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+
+		mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
 	    mUseBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
 	    mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
 	   
@@ -229,16 +215,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    	
 	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	String release = Build.VERSION.RELEASE;
-//		    if(release.equals("2.2")){
-//		    	Toast.makeText(EditBlogEntryActivity.this, "Warning: Bluetooth bug in Android 2.2." +
-//	    	 		"\n\nExit Aublog before you turn off your bluetooth headset.", Toast.LENGTH_LONG).show();
-//		    }
 		    mAudioSource= "maybebluetooth";
-			
-	    	/*
-	    	 * then use the media player as usual
-	    	 */
 		}
 		if(mUsePhoneEarPiece){
 			/*
@@ -252,94 +229,37 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 	    	mAudioSource= "microphone";
-			
-	    	/*
-	    	 * then the app can use the media player as usual
-	    	 */
+
 		}
-		/*
-		 * set the installid for appending to the labels
-		 */
-		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
-		
-    	
+    	/*
+    	 * then the app can use the media player as usual
+    	 */
     }
+    
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mTts = new TextToSpeech(this, this);
-        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setLooping(true);
-        mRecordingNow = false;
-        
-        
-        tracker = GoogleAnalyticsTracker.getInstance();
-
-	    // Start the tracker in manual dispatch mode...
-	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
-
-	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
-	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
-		
-        
-        mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
-	    mDateString = mDateString.replaceAll("/","-").replaceAll(" ","-");
-     
-	    recheckAublogSettings();
-        
-        setContentView(R.layout.main_webview);
-        mWebView = (WebView) findViewById(R.id.webview);
-        mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
-        WebSettings webSettings = mWebView.getSettings();
-        webSettings.setSavePassword(false);
-        webSettings.setSaveFormData(true);
-        webSettings.setJavaScriptEnabled(true);
-        
-        /**
+	protected void onStart() {
+    	recheckAublogSettings();
+	    /**
          * Get the uri which was sent to the CreateBlogActivity, put the data into the fields.
          */
+    	String fillFromActivityValues="";
         mUri = getIntent().getData();
         mCursor = managedQuery(mUri, PROJECTION, null, null, null);
-        mAuBlogContentObserver = new AuBlogHistoryContentObserver();
-        this.getApplicationContext().getContentResolver().registerContentObserver(AuBlogHistory.CONTENT_URI, true, mAuBlogContentObserver);
-   
         if (mCursor != null) {
 			// Requery in case something changed while paused (such as the title)
 			mCursor.requery();
             // Make sure we are at the one and only row in the cursor.
             mCursor.moveToFirst();
 			try {
-				//if the edit blog entry screen is fresh (ie, made from some external ativity not from an on puase or rotate screen, then get the values from the db
-				if(mPostId.equals("")|| mFreshEditScreen==true){
-					mFreshEditScreen = false;
+					fillFromActivityValues=mCursor.getString(1)+":::--:::"+ mCursor.getString(2)+":::--:::"+mCursor.getString(3);
 					mPostId = mCursor.getString(0);
-					mPostTitle = mCursor.getString(1);
-					mPostContent = mCursor.getString(2);
-					mPostLabels =mCursor.getString(3);
 					mPostParent = mCursor.getString(6);
-					mAudioResultsFile = mCursor.getString(10);
-					mAudioResultsFileStatus = mCursor.getString(11);
-					//Toast.makeText(EditBlogEntryActivity.this, "The audio results file is "+mAudioResultsFile, Toast.LENGTH_LONG).show();
-		    		if (mAudioResultsFile.length() > 5){
-		    			//SET the media player to point to this audio file so that the play button will work. 
-			    		mMediaPlayer.setDataSource(mAudioResultsFile);
-			    		mMediaPlayer.prepareAsync();
-					}
+					getAudioFileDataOutOfDatabase();
 					if("0".equals(mCursor.getString(5))){ 
 						mDeleted=false;
 					}else{
 						mDeleted=true;
 					}
-					
-	                String nodeAsString="id:"+mCursor.getString(0)+":\ntitle:"+mCursor.getString(1)+":\ncontent:"+mCursor.getString(2)+":\nlabels:"+mCursor.getString(3)+":\npublished:"+mCursor.getString(4)+":\ndeleted:"+mCursor.getString(5)+":\nparent:"+mCursor.getString(6)+":";
-	                //Toast.makeText(EditBlogEntryActivity.this, "Full post info:"+nodeAsString, Toast.LENGTH_LONG).show();
-	                //Toast.makeText(EditBlogEntryActivity.this, "First load of edit blog screen, all info came from db. ", Toast.LENGTH_LONG).show();
-				}else{//else, use the saved state variables
-					String tmp = "";
-					tmp = "dont look in the db for the values, get them from the state";
-					//Toast.makeText(EditBlogEntryActivity.this, "Returning from rotate, no info should be lost. ", Toast.LENGTH_LONG).show();
-				}
 
 			} catch (IllegalArgumentException e) {
 				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
@@ -358,14 +278,37 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			            302);       // Value
 				//Toast.makeText(EditBlogEntryActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
 			}
-		}else{
+        }else{
 			//this should never be executed
-			//this is geting executed when click on a view drafts tree and edit !! not supposed to, the uri came in properly
-//			mPostContent="";
-			mPostLabels="";
-//			mPostTitle="";
 		}
 		mWebView.loadUrl("file:///android_asset/edit_blog_entry_wysiwyg.html");
+		mWebView.loadUrl("javascript:fillTitleContentLabels("+fillFromActivityValues+")");
+    	super.onStart();
+	}
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mTts = new TextToSpeech(this, this);
+        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setLooping(true);
+        mRecordingNow = false;
+        tracker = GoogleAnalyticsTracker.getInstance();
+	    // Start the tracker in manual dispatch mode...
+	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
+
+        mAuBlogContentObserver = new AuBlogHistoryContentObserver();
+        this.getApplicationContext().getContentResolver().registerContentObserver(AuBlogHistory.CONTENT_URI, true, mAuBlogContentObserver);
+           
+        setContentView(R.layout.main_webview);
+        mWebView = (WebView) findViewById(R.id.webview);
+        mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
+        WebSettings webSettings = mWebView.getSettings();
+        webSettings.setSavePassword(false);
+        webSettings.setSaveFormData(true);
+        webSettings.setJavaScriptEnabled(true);
+        		
     }
     public class JavaScriptInterface {
         Context mContext;
@@ -374,25 +317,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         JavaScriptInterface(Context c) {
             mContext = c;
         }
-
-        /** Show a toast from the web page 
-         * 
-         * the buttons onclick calls a javascript function to call the android one
-         * 
-         * function showAndroidToast(toast) {
-        	//Android.showToast(toast);
-    		Android.showToast(toast);
-    	}
-    
-         * call javascript function
-         * 
-         * showAndroidToast(document.getElementById('markItUp').value)
-         * 
-         * 
-         * */
         public void showToast(String toast) {
-            //readTTS(toast);
-        	Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
         }
         public void readToTTS(String message){
         	recheckAublogSettings(); //if user turned off tts dont read it
@@ -410,8 +336,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * methods to record and manage recording of blog entry
          * TODO add some infomesages into the tool bar
          */
-        public String startToRecord(){
-        	return beginRecording();
+        public String startToRecord(String postTitle){
+        	return beginRecording(postTitle);
         }
         public String stopRecord(){
         	return stopSaveRecording();
@@ -420,35 +346,24 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public String playOrPauseAudio(){
         	return playOrPauseAudioFile();
         }
-        
         public Long getTimeRecorded(){
         	return returnTimeRecorded();
         }
-        public String hasAudioFile(){
-        	return hasAudioFileAttached().toString();
-        }
-        
-        public String fetchPostContent(){
-        	return mPostContent;
-        }
-        public String fetchPostTitle(){
-        	return mPostTitle;
-        }
-        public String fetchPostLabels(){
-        	return mPostLabels;
+        public String fetchTitleContentLabels(String concatenated){
+        	return concatenated;
         }
         public String fetchDebugInfo(){
         	return "Id: "+mPostId+" Parent: "+mPostParent+" Deleted: "+mDeleted.toString()+" LongestEverString:"+mLongestEverContent;
         }
-        public void saveState(String strTitle, String strContent, String strLabels){
+        public void savePostToDB(String strTitle, String strContent, String strLabels){
         	tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "saveSTate",  // Action
-    	            "state was saved via javascript "+strTitle+" : "+strLabels+" : "+strContent+" : "+mAuBlogInstallId, // Label
+    	            "Javascript was saved to database "+strTitle+" : "+strLabels+" : "+strContent+" : "+mAuBlogInstallId, // Label
     	            34);       // Value
-        	saveStateToActivity(strTitle, strContent, strLabels);
+        	saveAsSelfToDB(strTitle, strContent, strLabels);
         }
-        public void savePost(String strTitle, String strContent, String strLabels){
+        public void savePostAsDaughter(String strTitle, String strContent, String strLabels){
 //        	mPostContent= strContent;
 //        	mPostTitle=strTitle;
 //        	mPostLabels=strLabels;
@@ -465,10 +380,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public void publishPost(String strTitle, String strContent, String strLabels){
         	//act like publish is both save+publish
         	saveAsDaughterToDB(strTitle, strContent, strLabels);
-        	if ((mPostTitle.length() == 0)
-        			|| (mPostTitle == null)
-        			|| (mPostContent.length() == 0)
-        			|| (mPostContent == null)) {
+        	if ((strTitle.length() == 0)
+        			|| (strTitle == null)
+        			|| (strContent.length() == 0)
+        			|| (strContent == null)) {
         		tracker.trackEvent(
 			            "Publish",  // Category
 			            "Error",  // Action
@@ -502,88 +417,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	}
         }
     }
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-      // Save UI state changes to the savedInstanceState.
-      // This bundle will be passed to onCreate if the process is
-      // killed and restarted.
-    	mWebView.loadUrl("javascript:savePostToState()");
-    	/*THIS PUTS IN THE OLD STUFF, SEEMS TO WORK WITH OUT IT.
-	      savedInstanceState.putString("title", mPostTitle);
-	      savedInstanceState.putString("content", mPostContent);
-	      savedInstanceState.putString("labels", mPostLabels);
-	      savedInstanceState.putString("longestcontentever", mLongestEverContent);
-	      savedInstanceState.putBoolean("deleted", mDeleted);
-	      savedInstanceState.putString("parentid", mPostParent);
-	      savedInstanceState.putString("id",mPostId);
-//	      savedInstanceState.putString("uri", mUri.getPath());
- * 
- */
-      
-      // etc.
-      super.onSaveInstanceState(savedInstanceState);
-    }
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-      super.onRestoreInstanceState(savedInstanceState);
-      // Restore UI state from the savedInstanceState.
-      // This bundle has also been passed to onCreate.
-      /*THIS PUTS UP THE OLD VERSION
-      mPostTitle = savedInstanceState.getString("title");
-      mPostContent = savedInstanceState.getString("content");
-      mPostLabels = savedInstanceState.getString("labels");
-      mLongestEverContent = savedInstanceState.getString("longestcontentever");
-      mDeleted = savedInstanceState.getBoolean("deleted");
-      mPostParent = savedInstanceState.getString("parentid");
-      mPostId = savedInstanceState.getString("id");
-      */
-//      mUri = new Uri(savedInstanceState.getString("uri"));
-    }
-    
-    @Override
-	protected void onStart() {
-		//find out if the intent has a new transcription to insert into the blog content. 
-    	mReturnedTranscription = getIntent().getBooleanExtra(EXTRA_TRANSCRIPTION_RETURNED,false);
-    	if( ! mReturnedTranscription ){
-    		// nothing to do if no returned transcription
-    	}else{
-    		/*
-    		 * Insert transcription into the blog entry content. Keep current content below the transcription.
-    		 */
-    		mAudioResultsFileStatus="transcriptionintegratedinblogentry";
-    		BufferedReader in;
-    		String transcription="";
-			try {
-				in = new BufferedReader(new FileReader(mAudioResultsFile.replace(".mp3",".srt")));
-				String line ="";
-				while((line = in.readLine()) != null){
-					transcription = transcription + line + "\n";
-				}
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-				mAudioResultsFileStatus=mAudioResultsFileStatus+"problemcopyingfromsdcardtoblogpost";
-				mPostContent= "There was a problem reading the transcriptions from the SDCARD to, maybe the device is connected to a computer?\n\n"+mPostContent;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-				mAudioResultsFileStatus=mAudioResultsFileStatus+"problemcopyingfromsdcardtoblogpost";
-				mPostContent= "There was a problem reading the transcriptions from the SDCARD to, maybe the device is connected to a computer?\n\n"+mPostContent;
-				//relaunch the pending intent, or create a new method that put transcriptions into aublgo entries, run it out of the main generate drafts tree functions?
-			}
-			mPostContent=transcription+mPostContent;
-    		
-    		mWebView.loadUrl("javascript:fillFromAndroidActivity()");
-    		saveAsSelfToDB();
-    		//Toast.makeText(EditBlogEntryActivity.this, "onResume, there is a transcription to load. Show alert yes no.", Toast.LENGTH_LONG).show();
-    	}
-    	super.onStart();
-	}
+   
+
 
 
 	@Override
 	protected void onPause() {
-		mFreshEditScreen = false;
 		/*
 		 * Un-user-initiated saves do not create a new node in the draft tree
 		 * (although, this can be changed by just calling saveAsDaugher here) 1.
@@ -598,13 +437,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		 * Rotate screen: save as self to database Back button: save as self to
 		 * database
 		 */
-		mWebView.loadUrl("javascript:savePostToState()");
+		mWebView.loadUrl("javascript:savePostToTheDB()");
 		tracker.trackEvent("Event", // Category
 				"Pause", // Action
 				"event was paused: " + mAuBlogInstallId, // Label
 				38); // Value
 
-		saveAsSelfToDB();
 		// http://developer.android.com/guide/topics/media/index.html
 		/*
 		 * As you may know, when the user changes the screen orientation (or
@@ -654,62 +492,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 		super.onDestroy();
 	}
-	private void saveStateToActivity(String strTitle, String strContent, String strLabels){
-    	if(mDeleted == true){
-    		return;
-    	}
-    	if (!(mPostTitle.equals(strTitle)) ){
-    		flagDraftTreeAsNeedingToBeReGenerated();
-    	}
-    	mPostContent= strContent;
-    	mPostTitle=strTitle;
-    	mPostLabels=strLabels;
-    	if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
-			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
-		}
-    }
-	private void saveAsSelfToDB(){
-		if (mDeleted == true){
-			return ;
-		}
-    	try{
-    		if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
-    			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
-    		}
-//    		if ( mLongestEverContent.length() <=3 ){ 
-//    			//delete the entry the blog entry is completely empty, or if the user never anything. this should prevent having empty entrys in the database, but keep entries that are zeroed out and had content before
-//    			deleteEntry(mUri);
-//    		}
-    		else{
-	    		ContentValues values = new ContentValues();
-	        	values.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
-	        	values.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
-	        	values.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
-	        	values.put(AuBlogHistory.TIME_EDITED, Long.valueOf(System.currentTimeMillis()));
-	        	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
-	        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
-	    		getContentResolver().update(mUri, values,null, null);
-	    		Log.d(TAG, "Post saved to database.");
-	    		//Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
-    		}
-    	} catch (SQLException e) {
-    		// Log.e(TAG,"SQLException (createPost(title, content))");
-    		tracker.trackEvent(
-    	            "Database",  // Category
-    	            "Bug",  // Action
-    	            "Database connection problem "+e+" : "+mAuBlogInstallId, // Label
-    	            3201);       // Value
-    		Toast.makeText(EditBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
-    	} catch (Exception e) {
-    		// Log.e(TAG, "Exception: " + e.getMessage());
-    		tracker.trackEvent(
-    	            "Database",  // Category
-    	            "Bug",  // Action
-    	            "exception "+e+" : "+mAuBlogInstallId, // Label
-    	            3202);       // Value
-    		Toast.makeText(EditBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
-    	}
-	}
+	
 	public void deleteEntry(Uri uri){
     	mDeleted = true;
     	/*
@@ -754,13 +537,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * 
 	 * @return
 	 */
-	public String beginRecording(){
+	public String beginRecording(String postTitle){
 		mAudioResultsFileStatus = "recording service started";
-		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
-		mDateString = mDateString.replaceAll("/","-");
+		String dateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
+		dateString = dateString.replaceAll("/","-");
 		mAudioResultsFile = mAuBlogDirectory+"audio/";
 		new File(mAudioResultsFile).mkdirs();
-		mAudioResultsFile=mAudioResultsFile+mAuBlogInstallId+"_"+mDateString+"_"+System.currentTimeMillis()+"_"+mPostTitle+".mp3"; 
+		mAudioResultsFile=mAudioResultsFile+mAuBlogInstallId+"_"+dateString+"_"+System.currentTimeMillis()+"_"+postTitle+".mp3"; 
 		mAudioResultsFile=mAudioResultsFile.replaceAll(" ","-");
 		mRecordingNow = true;
 		Intent intent = new Intent(this, DictationRecorderService.class);
@@ -829,19 +612,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		 * Extract the time of the audio that was recorded.
     		 */
     		mTimeAudioWasRecorded =extractTimeRecordedFromAudioFileStatus(mAudioResultsFileStatus);
-    		if(mTimeAudioWasRecorded < 2){
-    			tracker.trackEvent(
-    		            "AuBlogLifeCycleEvent",  // Category
-    		            "Dictation",  // Action
-    		            "Probable audio recording error somewhere in the control of post:"+mPostId+", user clicked stop and there was a malformed status message in the database. (could be that the service didnt write to database before editblog entry queried database) This is the extracted time recorded: "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
-    		            350);       // Value
-    		}else{
-    			tracker.trackEvent(
-    		            "AuBlogLifeCycleEvent",  // Category
-    		            "Dictation",  // Action
-    		            "Audio recording of post:"+mPostId+" user clicked stop. This is the extracted time recorded: "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
-    		            350);       // Value
-    		}
+    		
 		} catch (IllegalArgumentException e) {
 			tracker.trackEvent(
     	            "Database",  // Category
@@ -909,27 +680,29 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * @return
 	 */
 	public String stopSaveRecording(){
-		
+		/*
+		 * Stop recording service, it will save the audio to sdcard and database
+		 */
 		mRecordingNow=false;
 		Intent intent = new Intent(this, DictationRecorderService.class);
 		stopService(intent);
 		/*
-		 * Get the information out of the database once the database  notifies its observers (which Editblog has a registered observer)
+		 * Get the information out of the database once the database notifies its observers (which Editblog has a registered observer)
 		 * that the database has been updated. 
 		 */
 		mAuBlogContentObserver.onChange(false);
-	   	
-	   	
-	   	
-	   	//Javascript changes the blog content to add the length of the recording 
-	   	//Javascript simpulates a click on the save button, so most likely it will be saved as a daughter. 
-	   	
-	   	tracker.trackEvent(
+
+		tracker.trackEvent(
 	            "AuBlogLifeCycleEvent",  // Category
 	            "Dictation",  // Action
-	            "stop audio recording "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
-	            35);       // Value
-	   	       
+	            "Audio recording of post:"+mPostId+" user clicked stop. This is the extracted time recorded (accurate depending on whether the contextobserver got back the database info: "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
+	            350);       // Value
+	
+		/*
+         * launch async notification service which sends file to transcription server.
+         */
+	   	mSendForTranscription=true;
+	   	
         /*
          * Transcription possibilities:
          * 1. using googles not published speech API
@@ -944,15 +717,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * 
          * Audio splitting based on silence
          * 1. c: https://github.com/taf2/audiosplit/graphs/languages
-         */
-        /*
-         * launch async notification service which sends file to transcription server.
-         */
-	   	mSendForTranscription=true;
-	   	mAudioResultsFileStatus="recordingflaggedfortranscription";
-        
-        
-        /* Code to do a voice recognition via google voice:
+         * 
+         * Code to do a voice recognition via google voice:
         try {
 			URL url = new URL("https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=en-US");
 			
@@ -969,8 +735,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		 * get the array of results, use some internal aublog logic to determine which is most likely and append the text into the blog content
 		 
 		startActivity(i);
-		*/
-		return "Attached "+mTimeAudioWasRecorded/100+" second Recording.\n";
+         */
+		
+        
+	   
+		return "Attached "+mTimeAudioWasRecorded/100+" second recorded dictation.\n";
 	}
 	/**
 	 * The audio time recorded is saved in the audiofile status message. This extracts it out of the staus. 
@@ -1000,7 +769,67 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		return mTimeAudioWasRecorded;//timePassed+"min";
 	}
 	
-	
+	/*
+	private void saveStateToActivity(String strTitle, String strContent, String strLabels){
+    	if(mDeleted == true){
+    		return;
+    	}
+    	if (!(mPostTitle.equals(strTitle)) ){
+    		flagDraftTreeAsNeedingToBeReGenerated();
+    	}
+    	mPostContent= strContent;
+    	mPostTitle=strTitle;
+    	mPostLabels=strLabels;
+    	if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
+			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+		}
+    }*/
+	/**
+	 * Accepts title content and labels (probably from the javascript), saves those to the database along with the audiofile info
+	 */
+	private void saveAsSelfToDB(String strTitle, String strContent, String strLabels){
+		//TODO changing so that whatever value is sent in, is saved for title content and labels
+		if (mDeleted == true){
+			return ;
+		}
+    	try{
+    		if (mLongestEverContent.length() < (strTitle+strContent+strContent).length() ){
+    			mLongestEverContent=strTitle+strContent+strContent;
+    		}
+//    		if ( mLongestEverContent.length() <=3 ){ 
+//    			//delete the entry the blog entry is completely empty, or if the user never anything. this should prevent having empty entrys in the database, but keep entries that are zeroed out and had content before
+//    			deleteEntry(mUri);
+//    		}
+    		else{
+	    		ContentValues values = new ContentValues();
+	        	values.put(AuBlogHistory.ENTRY_TITLE, strTitle);
+	        	values.put(AuBlogHistory.ENTRY_CONTENT, strContent);
+	        	values.put(AuBlogHistory.ENTRY_LABELS, strLabels);
+	        	values.put(AuBlogHistory.TIME_EDITED, Long.valueOf(System.currentTimeMillis()));
+	        	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
+	        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
+	    		getContentResolver().update(mUri, values,null, null);
+	    		Log.d(TAG, "Post saved to database.");
+	    		//Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
+    		}
+    	} catch (SQLException e) {
+    		// Log.e(TAG,"SQLException (createPost(title, content))");
+    		tracker.trackEvent(
+    	            "Database",  // Category
+    	            "Bug",  // Action
+    	            "Database connection problem "+e+" : "+mAuBlogInstallId, // Label
+    	            3201);       // Value
+    		Toast.makeText(EditBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
+    	} catch (Exception e) {
+    		// Log.e(TAG, "Exception: " + e.getMessage());
+    		tracker.trackEvent(
+    	            "Database",  // Category
+    	            "Bug",  // Action
+    	            "exception "+e+" : "+mAuBlogInstallId, // Label
+    	            3202);       // Value
+    		Toast.makeText(EditBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
+    	}
+	}
 	private void saveAsDaughterToDB(String strTitle, String strContent, String strLabels){
     	try{
     		/*
@@ -1014,10 +843,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	daughterValues.put(AuBlogHistory.TIME_EDITED, Long.valueOf(System.currentTimeMillis()));
         	daughterValues.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
         	daughterValues.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
-        	if ( (mPostTitle+mPostContent+mPostLabels).length() <= 0 ){
+        	if ( (strTitle+strContent+strLabels).length() <= 0 ){
         		if (mLongestEverContent.length() <= 0 ){
-        			saveStateToActivity(strTitle, strContent, strLabels);
-        			saveAsSelfToDB();
+        			saveAsSelfToDB(strTitle, strContent, strLabels);
         			tracker.trackEvent(
             	            "AuBlogLifeCycleEvent",  // Category
             	            "Save",  // Action
@@ -1051,7 +879,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		//Toast.makeText(EditBlogEntryActivity.this, "Post "+daughterUri.getLastPathSegment()+" saved as daugher of: " +mUri.getLastPathSegment()+" to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
     		mUri=daughterUri;
     		getIntent().setData(mUri);
-    		saveStateToActivity(strTitle, strContent, strLabels);
+    		saveAsSelfToDB(strTitle, strContent, strLabels);
     		
     		/*
     		 * If this save to database includes a new audio file, send it for transcription with this 
@@ -1066,7 +894,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            mSendForTranscription = false;
 	            mAudioResultsFileStatus="recordingsenttotranscriptionservice";
             }
-    		mFreshEditScreen=true;
     		mDeleted=false;
     		mPostId=mUri.getLastPathSegment();
     		
@@ -1138,12 +965,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Hold on to this
 		mMenu = menu;
-
 		// Inflate the currently selected menu XML resource.
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.drafts_tree_menu, menu);
-
-
 		return true;
 	}
 	@Override
@@ -1202,9 +1026,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
 			break;
 		}
-
 		return false;
 	}
-
-
 }

@@ -46,7 +46,7 @@ function autoSize() {
 <script type="text/javascript">
 <!--
 $(document).ready(function()	{
-	fillFromAndroidActivity();
+	
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
 	$('#markItUp').markItUp(mySettings);
@@ -97,15 +97,17 @@ $(document).ready(function()	{
     function startStopRecordingController() {
     	if(document.getElementById('recordButton').value=="Stop Dictation"){
     		//If the button says stop, stop and simulate save to db
+    		savePostToState();
     		var messageResult = Android.stopRecord();
-    		document.getElementById('markItUp').value = messageResult + document.getElementById('markItUp').value;
+    		//document.getElementById('markItUp').value = messageResult + document.getElementById('markItUp').value;
     		document.getElementById('recordButton').value="New Dictation";
-    		savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
-    		displayPlayButton();
+    		//savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
+    		//displayPlayButton();
     	}else{
     		//If the button says something else, record
-    		savePostToState(); //so that the title of the audio file will correspond with the current title in the javascript
-    	 	Android.startToRecord();
+    		//savePostToState(); //so that the title of the audio file will correspond with the current title in the javascript
+    		savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
+    		Android.startToRecord(document.getElementById('f-title').value);
 	    	document.getElementById('recordButton').value="Stop Dictation";
     	}
     }
@@ -139,41 +141,37 @@ $(document).ready(function()	{
         	playButtn.setAttribute("onClick","playPauseAudioController()");
         	document.getElementById("buttonArea").appendChild(playButtn);
     	}
-    	
     }
-    
-    function timeRecorded() {
+	function timeRecorded() {
     	return Android.getTimeRecorded();
     }
-    
-    function showAndroidToast(toast) {
+	function showAndroidToast(toast) {
         //Android.readTTS(toast);
     	Android.showToast(toast);
     }
-    
-    function readTTSPost(){
+	function readTTSPost(){
     	Android.readToTTS("This is what your blog entry says... "+document.getElementById('markItUp').value);
     }
     function deletePost(){
     	Android.deletePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
-    	
     }
-    function savePostToDB(){
+    function savePostAsDaughterToDB(){
     	readTTSPost();
-    	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	Android.savePostAsDaughter(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
-    function savePostToState(){
-    	Android.saveState(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    function savePostToTheDB(){
+    	Android.savePostToDB(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function publishPostToDB(){
     	Android.publishPost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
-    function fillFromAndroidActivity(){
-    	document.getElementById('f-title').value= Android.fetchPostTitle();
-    	document.getElementById('markItUp').value= Android.fetchPostContent();
-    	document.getElementById('post-labels').value= Android.fetchPostLabels();
-    	var doit = Android.hasAudioFile();
-    	if (doit == "true" ){
+    fillTitleContentLabels(var concatinated){
+    	//TODO to a array split on  :::--:::
+    	document.getElementById('f-title').value= concatinated;
+    	document.getElementById('markItUp').value= concatinated;
+    	document.getElementById('post-labels').value= concatinated;
+    	var doit = Android.getTimeRecorded();
+    	if (doit > 2 ){
     		displayPlayButton();
     		document.getElementById('recordButton').value="New Dictation";
     	}
