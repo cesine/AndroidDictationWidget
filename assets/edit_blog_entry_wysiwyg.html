@@ -74,6 +74,15 @@ $(document).ready(function()	{
 		}
  		return false;
 	});
+	
+	/*
+	if (userHasEdited == true ){
+		//dont take teh data from this function
+	}else{
+		Android.fillFromDatabase();
+	//fillTitleContentLabels("title:::--here:::--there");
+	}
+	*/
 });
 -->
 </script>
@@ -156,7 +165,7 @@ $(document).ready(function()	{
 	    Android.getAudioResultsFileStatus();
     */
 
-    }
+    
 	function readTTSPost(){
     	Android.readToTTS("This is what your blog entry says... "+document.getElementById('markItUp').value);
     }
@@ -179,19 +188,26 @@ $(document).ready(function()	{
     function displayAudioResultsFileStatus(){
     	var statusMessages = Android.getAudioResultsFileStatus().split(":::");
     	var txt = document.createTextNode(statusMessages.join("<br/>"));
-    	document.getElementById("debugArea").appendChild(txt);
+    	document.getElementById("debugArea").appendChild("Audio file status: "+txt);
     	
     }
-    fillTitleContentLabels(var concatinated){
-    	var temp = concatinated.split(":::--:::");
-    	document.getElementById('f-title').value= temp[0];
-    	document.getElementById('markItUp').value= temp[1];
-    	document.getElementById('post-labels').value= temp[2];
-    	var doit = Android.getTimeRecorded();
-    	if (doit > 2 ){
-    		displayPlayButton();
-    		document.getElementById('recordButton').value="New Dictation";
-    	}
+    
+    var fillTitleContentLabels = function(concatinated){
+    	
+	    	var temp = concatinated.split(":::--");
+	    	document.getElementById('f-title').value= temp[0];
+	    	if(temp[1].length >0){
+	    		document.getElementById('markItUp').value= temp[1];
+	    	}
+	    	document.getElementById('post-labels').value= temp[2];
+	    	/*var doit = Android.getTimeRecorded();
+	    	if (doit > 2 ){
+	    		displayPlayButton();
+	    		document.getElementById('recordButton').value="New Dictation";
+	    	}
+	    	*/
+	    
+    	
     }
 </script>
 

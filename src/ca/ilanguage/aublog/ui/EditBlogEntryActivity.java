@@ -97,6 +97,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	int selectionStart;
 	int selectionEnd;
 	//DONE removed member varibles which are only changed in javascript title, content and labels
+	String mTitleContentLabel="";
 	String mPostParent ="";
 	String mPostId ="";
 	String mAudioResultsFile;
@@ -248,7 +249,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    /**
          * Get the uri which was sent to the CreateBlogActivity, put the data into the fields.
          */
-    	String fillFromActivityValues="";
+    	//String fillFromActivityValues="";
+    	String title;
+    	String content;
+    	String label;
         mUri = getIntent().getData();
         mCursor = managedQuery(mUri, PROJECTION, null, null, null);
         if (mCursor != null) {
@@ -257,7 +261,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             // Make sure we are at the one and only row in the cursor.
             mCursor.moveToFirst();
 			try {
-					fillFromActivityValues=mCursor.getString(1)+":::--:::"+ mCursor.getString(2)+":::--:::"+mCursor.getString(3);
+					title =mCursor.getString(1);
+					content =mCursor.getString(2);
+					label= mCursor.getString(3);
+					mTitleContentLabel=title+":::--"+content+":::--"+label;
+					mTitleContentLabel.replaceAll("\"", "\\\"");
 					mPostId = mCursor.getString(0);
 					mPostParent = mCursor.getString(6);
 					getAudioFileDataOutOfDatabase();
@@ -288,7 +296,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			//this should never be executed
 		}
 		mWebView.loadUrl("file:///android_asset/edit_blog_entry_wysiwyg.html");
-		mWebView.loadUrl("javascript:fillTitleContentLabels("+fillFromActivityValues+")");
+		//mWebView.loadUrl("javascript:fillTitleContentLabels("+fillFromActivityValues+")");
+		//mWebView.loadUrl("javascript:fillTitleContentLabels(\"About me:::--Your blog's About Me page should not be overlooked. It's an essential tool to establish who you are as a blogger and help readers understand what your blog is about. Simply listing your name and contact information is not enough. Sell yourself and your blog on your About Me page, and make readers believe you're not only an expert in your blog's topic but your blog is also the place for people to find information about your topic on the web. From <a href='http://weblogs.about.com/od/partsofablog/qt/AboutPage.htm'>About.com</a>:::--about me\")");
 		mWebView.loadUrl("javascript:displayAudioResultsFileStatus()");
 		
 	}
@@ -420,6 +429,53 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          */
         public void savePostAsDaughter(String strTitle, String strContent, String strLabels){
         	saveAsDaughterToDB(strTitle, strContent, strLabels);
+        }
+        public void fillFromDatabase(){
+        	/**
+             * Get the uri which was sent to the CreateBlogActivity, put the data into the fields.
+             */
+        	String fillFromActivityValues="";
+        	
+            mUri = getIntent().getData();
+            mCursor = managedQuery(mUri, PROJECTION, null, null, null);
+            if (mCursor != null) {
+    			// Requery in case something changed while paused (such as the title)
+    			mCursor.requery();
+                // Make sure we are at the one and only row in the cursor.
+                mCursor.moveToFirst();
+    			try {
+    					fillFromActivityValues=mCursor.getString(1)+":::--"+mCursor.getString(2)+":::--"+mCursor.getString(3);
+    					fillFromActivityValues.replaceAll("\"", "\\\"");
+    					mPostId = mCursor.getString(0);
+    					mPostParent = mCursor.getString(6);
+    					getAudioFileDataOutOfDatabase();
+    					if("0".equals(mCursor.getString(5))){ 
+    						mDeleted=false;
+    					}else{
+    						mDeleted=true;
+    					}
+    			} catch (IllegalArgumentException e) {
+    				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
+    				tracker.trackEvent(
+    			            "Database",  // Category
+    			            "Bug",  // Action
+    			            "Retrieval from DB failed with an illegal argument exception "+e+" : "+mAuBlogInstallId, // Label
+    			            301);       // Value
+    				Toast.makeText(EditBlogEntryActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
+    			} catch (Exception e) {
+    				// Log.e(TAG, "Exception (DataBase failed)");
+    				tracker.trackEvent(
+    			            "Database",  // Category
+    			            "Bug",  // Action
+    			            "The cursor returned is "+e+" : "+mAuBlogInstallId, // Label
+    			            302);       // Value
+    				//Toast.makeText(EditBlogEntryActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
+    			}
+            }else{
+    			//this should never be executed
+    		}
+    		mWebView.loadUrl("javascript:displayAudioResultsFileStatus()");
+    		mWebView.loadUrl("javascript:fillTitleContentLabels(\""+fillFromActivityValues+"\")");
         }
         public void deletePost(String strTitle, String strContent, String strLabels){
         	saveAsSelfToDB(strTitle, strContent, strLabels);
