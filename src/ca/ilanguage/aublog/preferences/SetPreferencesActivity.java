@@ -92,7 +92,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    	String release = Build.VERSION.RELEASE;
 		    if(release.equals("2.2")){
 		    	Toast.makeText(SetPreferencesActivity.this, 
-		    	 		"Exit Aublog before you turn off your bluetooth connection.", Toast.LENGTH_LONG).show();
+		    	 		"Warning: before you turn off your bluetooth connection, exit AuBlog.", Toast.LENGTH_LONG).show();
 			 }
 	    	/*
 	    	 * then use the media player as usual

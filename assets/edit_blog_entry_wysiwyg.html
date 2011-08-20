@@ -81,7 +81,7 @@ $(document).ready(function()	{
 <a href="#" class="toggle">this one to <span>remove markItUp!</span></a></p>-->
 <p>
 <span id="buttonArea">
-<input type="button"  id="saveButton"  value="Save" onClick="savePostToDB()" />
+<input type="button"  id="saveButton"  value="Save" onClick="saveButton()" />
 <input type="button"  id="publishButton"  value="Publish" onClick="publishPostToDB()" />
 <input type="button"  id="deleteButton"  value="Delete" onClick="deletePost()" />
 <input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecordingController()" />
@@ -100,12 +100,13 @@ $(document).ready(function()	{
     		var messageResult = Android.stopRecord();
     		document.getElementById('markItUp').value = messageResult + document.getElementById('markItUp').value;
     		document.getElementById('recordButton').value="New Dictation";
-    		savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
+    		savePostToState(); //Any text changes made durring the recording will be saved with the recording.
     		displayPlayButton();
     	}else{
     		//If the button says something else, record
     		savePostToState(); //so that the title of the audio file will correspond with the current title in the javascript
-    	 	Android.startToRecord();
+    		savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
+    		Android.startToRecord();
 	    	document.getElementById('recordButton').value="Stop Dictation";
     	}
     }
@@ -158,8 +159,11 @@ $(document).ready(function()	{
     	Android.deletePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     	
     }
-    function savePostToDB(){
+    function saveButton(){
     	readTTSPost();
+    	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    }
+    function savePostToDB(){
     	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function savePostToState(){
