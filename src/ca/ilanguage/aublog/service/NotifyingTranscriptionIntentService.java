@@ -286,8 +286,16 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 						//some other activity or service has edited the important fields in the database!
 						//if they edited the filename, over write it with this file name because this one is in process of recording. 
 						//if they changed the status message, add their status message and a note about "being walked on" 
-						mAudioResultsFileStatus = mAudioResultsFileStatus+":::Walking on this status message that was in the database.---"+ mCursor.getString(4)+"---";
-					
+						/*
+						 * To avoid save walking, check if it contains it. if i contains it do nothing. if it doesnt contain it, then send the walking message.
+						 * Recording service running:::/sdcard/AuBlog/audio/13137125920433253_2011-08-20_06.05_1313877906018_transcription-wifi-with-exceptions.mp3:::Recording started.:::maybebluetooth:::1313877911675:::Walking on this status message that was in the database.------:::Recording stopped.:::Attached a 529 second Recording.
+:::Recording flagged for transcription.:::Sent to transcription service.:::File saved on server as data/e1fd831e1f6b913b9c8504d081271b4f.mp3 .:::Transcription server response saved as .srt in the AuBlog folder.:::Walking on this status message that was in the database.---Recording service running:::/sdcard/AuBlog/audio/13137125920433253_2011-08-20_06.05_1313877906018_transcription-wifi-with-exceptions.mp3:::Recording started.:::maybebluetooth:::1313877911675:::Walking on this status message that was in the database.------:::Recording stopped.:::Attached a 529 second Recording.
+:::Recording flagged for transcription.:::Sent to transcription service.---
+
+						 */
+						if (! (mAudioResultsFileStatus.contains(mCursor.getString(4))) ){
+								mAudioResultsFileStatus = mAudioResultsFileStatus+":::Walking on this status message that was in the database.--__"+ mCursor.getString(4)+"-__";
+						}
 					}
 					ContentValues values = new ContentValues();
 		        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);

@@ -264,8 +264,9 @@ public class DictationRecorderService extends Service {
 						//some other activity or service has edited the important fields in the database!
 						//if they edited the filename, over write it with this file name because this one is in process of recording. 
 						//if they changed the status message, add their status message and a note about "being walked on" 
-						mAudioResultsFileStatus = mAudioResultsFileStatus+":::Walking on this status message that was in the database.---"+ mCursor.getString(4)+"---";
-					
+						if (! (mAudioResultsFileStatus.contains(mCursor.getString(4))) ){
+							mAudioResultsFileStatus = mAudioResultsFileStatus+":::Walking on this status message that was in the database.--__"+ mCursor.getString(4)+"-__";
+						}
 					}
 					ContentValues values = new ContentValues();
 		        	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
