@@ -87,46 +87,56 @@ $(document).ready(function()	{
 <input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecordingController()" />
 </span>
 <script type="text/javascript">
-	//http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
+	/*/http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
 	console.error('1');
 	console.info('2');
 	console.log('3');
 	console.warn('4');
+	*/
 	var hasAudio = false;
 	
     function startStopRecordingController() {
     	if(document.getElementById('recordButton').value=="Stop Dictation"){
     		//If the button says stop, stop and simulate save to db
-    		var messageResult = Android.stopRecord();
+    		var messageResult = Android.stopRecordJS();
     		document.getElementById('markItUp').value = messageResult + document.getElementById('markItUp').value;
     		document.getElementById('recordButton').value="New Dictation";
     		savePostToState(); //Any text changes made durring the recording will be saved with the recording.
-    		//Android.preparePlayer(); //set up the medial player with the current value of the audio file. this wasnt workign because the service hadnt saved the file completely before showing the button.
+    		//Android.preparePlayerJS(); //set up the medial player with the current value of the audio file. this wasnt workign because the service hadnt saved the file completely before showing the button.
+    		//right now the media player is only prepared if hte user clicks on the play button. 
     		displayPlayButton();
     	}else{
     		//If the button says something else, record
+    		/*
+    		1. save what the user sees to this post.
+    		*/
     		savePostToState(); //so that the title of the audio file will correspond with the current title in the javascript
+    		/*
+    		2. create a new daughter post with the same content 
+    		so that the edits teh user makes between turning on the recording 
+    		and stopping the reocording go with the recording. 
+    		*/
     		savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
-    		Android.startToRecord();
+    		/*
+    		3. start the recording
+    		*/
+    		Android.startToRecordJS();
 	    	document.getElementById('recordButton').value="Stop Dictation";
     	}
     }
     /*
-    This function is largely controlled by the MediaPlayer  in Android logic, so it only recieves the value of the buton frmo Android
-    It is not complete in that the MediaPlayer doesnt broadcast to the javasript that the audio is over, so its possible that the button will still say Pause, but if hte user clicks it, it will Play and display Pause again. 
-    Example: Audio is not playing (button will display Play)
-    Audio is playing or has finished playing (button will display Pause)
+    This function is largely controlled by the MediaPlayer in the Android logic, so it only recieves the value of the buton frmo Android
+    The audio is played in a loop.
     a. if audio is playing, hitting the button will pause it.
     b. if audio is not playing, hitting the button wil play it. 
-    
     */
     function playPauseAudioController(){
     	if(document.getElementById('playButton').value=="Pause"){
     		//pause
-    		document.getElementById('playButton').value=Android.playOrPauseAudio();
+    		document.getElementById('playButton').value=Android.playOrPauseAudioJS();
     	}else{
     		//play
-    		document.getElementById('playButton').value=Android.playOrPauseAudio();
+    		document.getElementById('playButton').value=Android.playOrPauseAudioJS();
     	}
     }
     function displayPlayButton(){
@@ -143,41 +153,38 @@ $(document).ready(function()	{
     	}
     	
     }
+    /* Additional Interface contents:
+		Android.getTimeRecordedJS();
+	    Android.showToastJS(toast);
+	    Android.getAudioResultsFileStatusJS(); TODO?
+	*/
     
-    function timeRecorded() {
-    	return Android.getTimeRecorded();
-    }
-    
-    function showAndroidToast(toast) {
-        //Android.readTTS(toast);
-    	Android.showToast(toast);
-    }
     
     function readTTSPost(){
-    	Android.readToTTS("This is what your blog entry says... "+document.getElementById('markItUp').value);
+    	Android.readToTTSJS("This is what your blog entry says... "+document.getElementById('markItUp').value);
     }
     function deletePost(){
-    	Android.deletePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	Android.deletePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     	
     }
     function saveButton(){
     	readTTSPost();
-    	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	Android.savePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function savePostToDB(){
-    	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	Android.savePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function savePostToState(){
-    	Android.saveState(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	Android.saveStateJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function publishPostToDB(){
-    	Android.publishPost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	Android.publishPostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function fillFromAndroidActivity(){
-    	document.getElementById('f-title').value= Android.fetchPostTitle();
-    	document.getElementById('markItUp').value= Android.fetchPostContent();
-    	document.getElementById('post-labels').value= Android.fetchPostLabels();
-    	var doit = Android.hasAudioFile();
+    	document.getElementById('f-title').value= Android.fetchPostTitleJS();
+    	document.getElementById('markItUp').value= Android.fetchPostContentJS();
+    	document.getElementById('post-labels').value= Android.fetchPostLabelsJS();
+    	var doit = Android.hasAudioFileJS();
     	if (doit == "true" ){
     		displayPlayButton();
     		document.getElementById('recordButton').value="New Dictation";

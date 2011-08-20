@@ -255,8 +255,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setLooping(true);
+//        mMediaPlayer = new MediaPlayer();
+//        mMediaPlayer.setLooping(true); //only initalize media player when user clicks on play incase they dont want to play the audio
         mRecordingNow = false;
         
         
@@ -306,8 +306,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					//Toast.makeText(EditBlogEntryActivity.this, "The audio results file is "+mAudioResultsFile, Toast.LENGTH_LONG).show();
 		    		if (mAudioResultsFile.length() > 5){
 		    			//SET the media player to point to this audio file so that the play button will work. 
-			    		mMediaPlayer.setDataSource(mAudioResultsFile);
-			    		mMediaPlayer.prepare();
+//			    		mMediaPlayer.setDataSource(mAudioResultsFile);
+//			    		mMediaPlayer.prepareAsync();
+		    			preparePlayerAttachedAudioFile();
 					}
 					if("0".equals(mCursor.getString(5))){ 
 						mDeleted=false;
@@ -350,6 +351,19 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 		mWebView.loadUrl("file:///android_asset/edit_blog_entry_wysiwyg.html");
     }
+    /**
+     * This inner class contains functions which are available to the javascript in the webview
+     * It is called using the name in the line:
+     *  mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
+     *  
+     * So for example, the button in the javascript of the webview, would have as its onClick()
+     * Android.stopRecordJS()
+     * 
+     * Convention: methods in this interface are suffixed with JS to distinguish between Android methods and the JavaScript functions defined in the html
+     * 
+     * @author gina
+     *
+     */
     public class JavaScriptInterface {
         Context mContext;
 
@@ -373,11 +387,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * 
          * 
          * */
-        public void showToast(String toast) {
+        public void showToastJS(String toast) {
             //readTTS(toast);
         	Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
         }
-        public void readToTTS(String message){
+        public void readToTTSJS(String message){
         	recheckAublogSettings(); //if user turned off tts dont read it
         	if(mReadBlog){
         		readTTS(message);
@@ -389,74 +403,68 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	            362);       // Value
         	}
         }
-        /*
-         * methods to record and manage recording of blog entry
-         * TODO add some infomesages into the tool bar
+        /**
+         * A wrapper for the edit blog activity's method which creates a new audio file name TODO using the posts title
+         * and sends it off to the DictaitonRecorder service to be recorded. 
+         * @param postTitle The current title of the blog post, it will show up in the audio file's name
+         * @return an internal status message
          */
-        public String startToRecord(){
+        public String startToRecordJS(){
         	return beginRecording();
         }
-        public String stopRecord(){
+        /**
+         * A wrapper which stops the Dictation recorder service. It doesn't set up the media player immediately as the recording service takes some time to finalize and write the .mp3 to the sdcard. 
+         * @return an internal status message
+         */
+        public String stopRecordJS(){
         	return stopSaveRecording();
         }
         /** 
          * Potentially unnecesary function to prepare the player from the javascript.
          * @return
          */
-        public String preparePlayer(){
-        	/*
-    	   	 * assign this audio recording to the media player
-    	   	 */
-    	   	try {
-    	   		//TODO recheckAublogSettings();//if audio settings have changed use the new ones.
-
-    	   		/*
-    	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
-    	   		 * reinitialize it
-    	   		 */
-    	   		mMediaPlayer.release();
-    	   		mMediaPlayer = null;
-    	   		mMediaPlayer = new MediaPlayer();
-    	        mMediaPlayer.setLooping(true);
-    	   		
-    			mMediaPlayer.setDataSource(mAudioResultsFile);
-    			mMediaPlayer.prepareAsync();
-    		} catch (IllegalArgumentException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		} catch (IllegalStateException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		} catch (IOException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
+        public String preparePlayerJS(){
+        	preparePlayerAttachedAudioFile();
         	return "player prepared with audio result file";
         }
-        public String playOrPauseAudio(){
+        /**
+         * A wrapper for the play or pause audio function in the edit blog activity
+         * @return a string which can be used for the button (ie Play if the media player is paused or stopped, or Pause if the media player is playing)
+         */
+        public String playOrPauseAudioJS(){
         	return playOrPauseAudioFile();
         }
-        
-        public Long getTimeRecorded(){
+        /**
+         * Returns a Long of the time recorded. TODO The time recorded is extracted out of the audiofile status message when 
+         * the audio file data is fetched. This happens in each onstart, and also after the user clicks Stop dictation.
+         * This can be used to find out if the blog post has an audio file (it will return a value greater than 0).
+         * 
+         * @return time in milliseconds of the recording
+         */
+        public Long getTimeRecordedJS(){
         	return returnTimeRecorded();
         }
-        public String hasAudioFile(){
+        /**
+         * Depreciated, use getTimeRecordedJS instead
+         * @return
+         */
+        public String hasAudioFileJS(){
         	return hasAudioFileAttached().toString();
         }
         
-        public String fetchPostContent(){
+        public String fetchPostContentJS(){
         	return mPostContent;
         }
-        public String fetchPostTitle(){
+        public String fetchPostTitleJS(){
         	return mPostTitle;
         }
-        public String fetchPostLabels(){
+        public String fetchPostLabelsJS(){
         	return mPostLabels;
         }
-        public String fetchDebugInfo(){
+        public String fetchDebugInfoJS(){
         	return "Id: "+mPostId+" Parent: "+mPostParent+" Deleted: "+mDeleted.toString()+" LongestEverString:"+mLongestEverContent;
         }
-        public void saveState(String strTitle, String strContent, String strLabels){
+        public void saveStateJS(String strTitle, String strContent, String strLabels){
         	tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "saveSTate",  // Action
@@ -464,7 +472,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	            34);       // Value
         	saveStateToActivity(strTitle, strContent, strLabels);
         }
-        public void savePost(String strTitle, String strContent, String strLabels){
+        /**
+         * Wrapper for the edit blog activty save post as a daughter to the database method. TODO rename method to reflect its action as saving a daughter.
+         * 
+         * @param strTitle
+         * @param strContent
+         * @param strLabels
+         */
+        public void savePostJS(String strTitle, String strContent, String strLabels){
 //        	mPostContent= strContent;
 //        	mPostTitle=strTitle;
 //        	mPostLabels=strLabels;
@@ -473,12 +488,19 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		//Toast.makeText(EditBlogEntryActivity.this, "Saved \n\""+mPostTitle+"\"", Toast.LENGTH_LONG).show();
 
         }
-        public void deletePost(String strTitle, String strContent, String strLabels){
+        public void deletePostJS(String strTitle, String strContent, String strLabels){
 //        	saveState(strTitle, strContent, strLabels);
         	deleteEntry(mUri);
         	finish();
         }
-        public void publishPost(String strTitle, String strContent, String strLabels){
+        /**
+         * Saves the post as a daughter to the database, then calls the Publish activity, which then gets the info out of the database and publishes it.
+         * TODO instead send Title, content, labels to publish activity as extras, and let it save them to the database too? otherwise have to register a content listener in the publish activity. 
+         * @param strTitle
+         * @param strContent
+         * @param strLabels
+         */
+        public void publishPostJS(String strTitle, String strContent, String strLabels){
         	//act like publish is both save+publish
         	saveAsDaughterToDB(strTitle, strContent, strLabels);
         	if ((mPostTitle.length() == 0)
@@ -517,7 +539,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		}
         	}
         }
-    }
+    }//end javascript interface
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
       // Save UI state changes to the savedInstanceState.
@@ -766,6 +788,42 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);
 		
 	}
+	/**
+	 * If the media player is instantiated, release it and make it null
+	 * 
+	 * Then instantiate it, set it to the audio file name and prepare it.
+	 */
+	public void preparePlayerAttachedAudioFile(){
+
+		if(mMediaPlayer != null){
+			mMediaPlayer.release();
+	   		mMediaPlayer = null;
+		}
+	   	try {
+	   		//TODO recheckAublogSettings();//if audio settings have changed use the new ones.
+
+	   		/*
+	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
+	   		 * reinitialize it
+	   		 */
+	   		mMediaPlayer = new MediaPlayer();
+	        mMediaPlayer.setLooping(true);
+			/*
+		   	 * assign this audio recording to the media player
+		   	 */
+			mMediaPlayer.setDataSource(mAudioResultsFile);
+			mMediaPlayer.prepareAsync();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public Boolean hasAudioFileAttached(){
 		if (mAudioResultsFile.length() > 5 ){
 			//Toast.makeText(EditBlogEntryActivity.this,"There is an audio file.", Toast.LENGTH_SHORT).show();
@@ -798,6 +856,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		3. start the recording
     		
     		Android.startToRecord(document.getElementById('f-title').value);
+	 * 
+	 * Notes: the user can play audio while recording. When they hit stop the player will stop and reinitalize to the new dictation.
 	 * 
 	 * @return an internal status message
 	 */
@@ -838,40 +898,42 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * @return A message for the button which is the oposite of its current state. (ie, if the player is paused, it returns Play, if the player is started, it returns Pause)
 	 */
 	public String playOrPauseAudioFile(){
-		//recheckAublogSettings();//if bluetooth or audio settings have changed, use those. 
-		if(mMediaPlayer.isPlaying()){
-			//if its playing, pause and rewind ~4 seconds
-			
-			mMediaPlayer.pause();
-			/* rewind logic doesnt work
-			int rewindValue = 2;
-			int startPlayingFromSecond =mMediaPlayer.getCurrentPosition();
-			if ( startPlayingFromSecond <= rewindValue){
-				startPlayingFromSecond=0;
-			}else{
-				startPlayingFromSecond = startPlayingFromSecond - rewindValue;
-			}
-			mMediaPlayer.seekTo(startPlayingFromSecond);
-			mMediaPlayer.prepare();
-			*/
-			return "Play";
-		}else{
-			//if its not playing, play it
-		    try {
-		    	
-		    	mMediaPlayer.start();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				
-				//try to prepare audio again?
-				Log.e("Error reading file", e.toString());
-			} catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
-				Log.e("Error reading file", e.toString());
-			} 
-			return "Pause";
-		}
 		
+		if (mMediaPlayer == null) {
+			/*
+			 * This is called if the user is playing audio while recording a new dictation. 
+			 * after the user hits stop record, it will reset the player to the new dictation.
+			 */
+			preparePlayerAttachedAudioFile();
+		} else if (mMediaPlayer.isPlaying()) {
+			mMediaPlayer.pause();
+			/*
+			 * rewind logic doesnt work //if its playing, pause and rewind ~4
+			 * seconds int rewindValue = 2; int startPlayingFromSecond
+			 * =mMediaPlayer.getCurrentPosition(); if ( startPlayingFromSecond
+			 * <= rewindValue){ startPlayingFromSecond=0; }else{
+			 * startPlayingFromSecond = startPlayingFromSecond - rewindValue; }
+			 * mMediaPlayer.seekTo(startPlayingFromSecond);
+			 * mMediaPlayer.prepare();
+			 */
+			return "Play";
+		}
+
+		// if its not playing, play it
+		try {
+
+			mMediaPlayer.start();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+
+			// try to prepare audio again?
+			Log.e("Error reading file", e.toString());
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			Log.e("Error reading file", e.toString());
+		}
+		return "Pause";
+
 	}
 	/**
 	 * This method sends a stopservice command to the DictationRecorderService. 
@@ -955,7 +1017,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		startActivity(i);
 		*/
 		
-		
+		preparePlayerAttachedAudioFile();
 		return "Attached "+mTimeAudioWasRecorded/100+"~ second Recording.\n";
 	}
 	
