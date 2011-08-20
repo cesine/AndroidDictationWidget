@@ -211,7 +211,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	        	mNotificationMessage = firstLine + "\nSelect to import transcription.";
 			} catch (Exception e) {
 				//Log.e(e.getClass().getName(), e.getMessage(), e);
-				mNotificationMessage = "Connection error.";// null;
+				mNotificationMessage = "File/Connection error.";// null;
 			}
 			
 			

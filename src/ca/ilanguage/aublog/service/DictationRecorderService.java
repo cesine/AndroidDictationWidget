@@ -130,7 +130,7 @@ public class DictationRecorderService extends Service {
 
 	@Override
 	public void onDestroy() {
-		//saveRecording();
+		saveRecording();
 		mNM.cancel(NOTIFICATION);
 		super.onDestroy();
 		
@@ -140,7 +140,7 @@ public class DictationRecorderService extends Service {
 
 	@Override
 	public void onLowMemory() {
-		//saveRecording();
+		saveRecording();
 		super.onLowMemory();
 	}
 
@@ -207,7 +207,7 @@ public class DictationRecorderService extends Service {
 	            734);       // Value
 		/*
 		 * turn on the recorder
-		 
+		 */
 		mRecordingNow = true;
 		mStartTime=System.currentTimeMillis();
 		mAudioResultsFileStatus = mAudioResultsFileStatus+":::"+"recordingstarted"+":::"+mAudioSource+":::"+mStartTime;
@@ -239,7 +239,7 @@ public class DictationRecorderService extends Service {
     	            "The App cannot save audio, maybe the Android is attached to a computer?" +e+" : "+mAuBlogInstallId, // Label
     	            7302);       // Value
 		}
-		*/
+		
 		//autofilled by eclipsereturn super.onStartCommand(intent, flags, startId);
 		// We want this service to continue running until it is explicitly
         // stopped, so return sticky.
@@ -265,8 +265,8 @@ public class DictationRecorderService extends Service {
 						//if they edited the filename, over write it with this file name because this one is in process of recording. 
 						//if they changed the status message, add their status message and a note about "being walked on" 
 						mAudioResultsFileStatus = mAudioResultsFileStatus+":::walking on this status message that was in the database---"+ mCursor.getString(4)+"---";
-					}
 					
+					}
 					ContentValues values = new ContentValues();
 		        	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
 		        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
