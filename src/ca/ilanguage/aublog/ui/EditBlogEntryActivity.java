@@ -857,6 +857,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		
     		Android.startToRecord(document.getElementById('f-title').value);
 	 * 
+	 * Notes: the user can play audio while recording. When they hit stop the player will stop and reinitalize to the new dictation.
+	 * 
 	 * @return an internal status message
 	 */
 	public String beginRecording(){
@@ -896,7 +898,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * @return A message for the button which is the oposite of its current state. (ie, if the player is paused, it returns Play, if the player is started, it returns Pause)
 	 */
 	public String playOrPauseAudioFile(){
+		
 		if (mMediaPlayer == null) {
+			/*
+			 * This is called if the user is playing audio while recording a new dictation. 
+			 * after the user hits stop record, it will reset the player to the new dictation.
+			 */
 			preparePlayerAttachedAudioFile();
 		} else if (mMediaPlayer.isPlaying()) {
 			mMediaPlayer.pause();
