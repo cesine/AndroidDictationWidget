@@ -101,6 +101,7 @@ $(document).ready(function()	{
     		document.getElementById('markItUp').value = messageResult + document.getElementById('markItUp').value;
     		document.getElementById('recordButton').value="New Dictation";
     		savePostToState(); //Any text changes made durring the recording will be saved with the recording.
+    		//Android.preparePlayer(); //set up the medial player with the current value of the audio file. this wasnt workign because the service hadnt saved the file completely before showing the button.
     		displayPlayButton();
     	}else{
     		//If the button says something else, record

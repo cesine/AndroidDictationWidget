@@ -399,7 +399,40 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public String stopRecord(){
         	return stopSaveRecording();
         }
-        
+        /** 
+         * Potentially unnecesary function to prepare the player from the javascript.
+         * @return
+         */
+        public String preparePlayer(){
+        	/*
+    	   	 * assign this audio recording to the media player
+    	   	 */
+    	   	try {
+    	   		//TODO recheckAublogSettings();//if audio settings have changed use the new ones.
+
+    	   		/*
+    	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
+    	   		 * reinitialize it
+    	   		 */
+    	   		mMediaPlayer.release();
+    	   		mMediaPlayer = null;
+    	   		mMediaPlayer = new MediaPlayer();
+    	        mMediaPlayer.setLooping(true);
+    	   		
+    			mMediaPlayer.setDataSource(mAudioResultsFile);
+    			mMediaPlayer.prepareAsync();
+    		} catch (IllegalArgumentException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (IllegalStateException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		} catch (IOException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    		}
+        	return "player prepared with audio result file";
+        }
         public String playOrPauseAudio(){
         	return playOrPauseAudioFile();
         }
@@ -823,6 +856,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		    	mMediaPlayer.start();
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
+				
+				//try to prepare audio again?
 				Log.e("Error reading file", e.toString());
 			} catch (IllegalStateException e) {
 				// TODO Auto-generated catch block
@@ -860,33 +895,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		Intent intent = new Intent(this, DictationRecorderService.class);
 		stopService(intent);
 	   	
-	   	/*
-	   	 * assign this audio recording to the media player
-	   	 */
-	   	try {
-	   		//TODO recheckAublogSettings();//if audio settings have changed use the new ones.
-
-	   		/*
-	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
-	   		 * reinitialize it
-	   		 */
-	   		mMediaPlayer.release();
-	   		mMediaPlayer = null;
-	   		mMediaPlayer = new MediaPlayer();
-	        mMediaPlayer.setLooping(true);
-	   		
-			mMediaPlayer.setDataSource(mAudioResultsFile);
-			mMediaPlayer.prepareAsync();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	   	
 	   	
 	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
 	   	
