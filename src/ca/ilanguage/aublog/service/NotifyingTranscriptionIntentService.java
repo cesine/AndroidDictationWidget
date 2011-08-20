@@ -2,11 +2,9 @@ package ca.ilanguage.aublog.service;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
@@ -21,16 +19,18 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
-import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.NetworkInfo.State;
@@ -49,16 +49,25 @@ public class NotifyingTranscriptionIntentService extends IntentService {
     											// users shouldn't abuse transcription service by sending meetings and other sorts of audio.
     											// If you change this value, change the value in the arrays.xml as well look for:
     											// 15 minutes (AuBlog\'s max transcription length)
-    private String mUriString ="";
     private String mAudioFilePath ="";
+    private String mAudioResultsFileStatus="";
+    private Uri mUri;
+	
+    private String mDBLastModified="";
+	private Cursor mCursor;
+	private  String[] PROJECTION = new String[] {
+			AuBlogHistory._ID, //0
+			AuBlogHistory.LAST_MODIFIED,
+			AuBlogHistory.TIME_EDITED,//2
+			AuBlogHistory.AUDIO_FILE,
+			AuBlogHistory.AUDIO_FILE_STATUS//4
+		};
 	private String mFileNameOnServer="";
     private int mSplitType = 0;
 	private ArrayList<String> mTimeCodes;
 	
-	public static final String EXTRA_AUDIOFILE_FULL_PATH = "audioFilePath";
 	public static final String EXTRA_RESULTS = "splitUpResults";
 	public static final String EXTRA_SPLIT_TYPE = "splitOn";
-	public static final String EXTRA_CORRESPONDING_DRAFT_URI_STRING = "aublogCorrespondingDraftUri";
 	
 	/**
 	 * Splitting on Silence is relatively quick it only requires mathematic calculation on the audio sample, 
@@ -98,6 +107,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
     // Use a layout id for a unique identifier
     private static int AUBLOG_NOTIFICATIONS = R.layout.status_bar_notifications;
     private String mNotificationMessage;
+    
 
 	@Override
 	public void onCreate() {
@@ -128,9 +138,11 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		 * get data from extras bundle, store it in the member variables
 		 */
 		try {
-			mAudioFilePath = intent.getExtras().getString(EXTRA_AUDIOFILE_FULL_PATH);
+			mUri = intent.getData();
+			mAudioFilePath = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH);
+			mAudioResultsFileStatus = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 			mSplitType = intent.getExtras().getInt(EXTRA_SPLIT_TYPE);
-			mUriString = intent.getExtras().getString(EXTRA_CORRESPONDING_DRAFT_URI_STRING);
+			
 		} catch (Exception e) {
 			//Toast.makeText(SRTGeneratorActivity.this, "Error "+e,Toast.LENGTH_LONG).show();
 		}
@@ -206,7 +218,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					mTimeCodes.add(line);
 					
 				}
-				
+				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
 				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
 	        	mNotificationMessage = firstLine + "\nSelect to import transcription.";
 			} catch (Exception e) {
@@ -237,25 +249,69 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 
 				outSRT.flush();
 				outSRT.close();
+				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription server response saved as .srt in the AuBlog folder.";
 				mTranscriptionReturned = true;
+				saveMetaDataToDatabase();
 				//mNotificationMessage = "Select to import transcription.";
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				//e.printStackTrace();
 				mNotificationMessage ="Cannot write results to SDCARD";
 			}
-			
-
-		}else{
-			//no wifi, and the file is larger than the users settings for upload over mobile network.
-			mNotificationMessage = "Dication was too long to send for transcription. Check settings.";
+			}else{
+				//no wifi, and the file is larger than the users settings for upload over mobile network.
+				mNotificationMessage = "Dication was not sent for transcription: no wifi or too long. Check settings.";
+				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription wasn't set, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 		}//end if for max file size for upload
 
 
 		showNotification(R.drawable.stat_aublog,  mNotificationMessage);
 
 	}//end onhandle intent
-
+	private void saveMetaDataToDatabase(){
+		/*
+		 * Save to database
+		 */
+        mCursor = getContentResolver().query(mUri, PROJECTION, null, null, null);
+		if (mCursor != null) {
+			// Requery in case something changed while paused (such as the title)
+			mCursor.requery();
+            // Make sure we are at the one and only row in the cursor.
+            mCursor.moveToFirst();
+			try {
+					//compare the last time this service modified the database, 
+					//if its earlier than the database modified time, then someone else has written in this entry in the database (they might have written in different fields, in just incase if they wrote in the audiofile or audiofilestatus, 
+					int result = mDBLastModified.compareTo(mCursor.getString(1));
+					if ( result < 0){
+						//some other activity or service has edited the important fields in the database!
+						//if they edited the filename, over write it with this file name because this one is in process of recording. 
+						//if they changed the status message, add their status message and a note about "being walked on" 
+						mAudioResultsFileStatus = mAudioResultsFileStatus+":::Walking on this status message that was in the database.---"+ mCursor.getString(4)+"---";
+					
+					}
+					ContentValues values = new ContentValues();
+		        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
+		        	getContentResolver().update(mUri, values,null, null);
+		        	mDBLastModified = Long.toString(System.currentTimeMillis());
+		        	getContentResolver().notifyChange(AuBlogHistory.CONTENT_URI, null);
+		        	
+		        	// Tell the user we saved recording meta info to the database.
+		            //Toast.makeText(this, "Audiofile info saved to DB.", Toast.LENGTH_SHORT).show();
+		            //mNotification.setLatestEventInfo(this, "AuBlog Dictation", "Saved to DB", mContentIntent);
+		    		
+		        	
+			} catch (IllegalArgumentException e) {
+				
+			} catch (Exception e) {
+				
+			}
+			
+			
+			
+			
+		}//end if where cursor has content.
+		
+	}
 	  
     private void showNotification(int iconId, String message) {
         // In this sample, we'll use the same text for the ticker and the expanded notification
@@ -272,10 +328,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
         //tried sending it to Edit activity but couldnt get extras to be extracted in either onResume or onStart, so cant 
         //pull in new transcription if user relaunches edit activiyt by clicking on the notification.
         Intent intent = new Intent(this, NotifyingController.class);
-        Uri uri = Uri.parse(mUriString);
-        intent.setData(uri);
-        //intent.putExtra(EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUriString);
-        //intent.putExtra(EditBlogEntryActivity.EXTRA_TRANSCRIPTION_RETURNED,mTranscriptionReturned);
+        intent.setData(mUri);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
                 intent, 0);
 

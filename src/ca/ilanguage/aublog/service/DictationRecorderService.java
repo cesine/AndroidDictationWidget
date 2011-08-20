@@ -210,7 +210,7 @@ public class DictationRecorderService extends Service {
 		 */
 		mRecordingNow = true;
 		mStartTime=System.currentTimeMillis();
-		mAudioResultsFileStatus = mAudioResultsFileStatus+":::"+"recordingstarted"+":::"+mAudioSource+":::"+mStartTime;
+		mAudioResultsFileStatus = mAudioResultsFileStatus+":::"+"Recording started."+":::"+mAudioSource+":::"+mStartTime;
 		
 		saveMetaDataToDatabase();
 		mRecorder = new MediaRecorder();
@@ -264,7 +264,7 @@ public class DictationRecorderService extends Service {
 						//some other activity or service has edited the important fields in the database!
 						//if they edited the filename, over write it with this file name because this one is in process of recording. 
 						//if they changed the status message, add their status message and a note about "being walked on" 
-						mAudioResultsFileStatus = mAudioResultsFileStatus+":::walking on this status message that was in the database---"+ mCursor.getString(4)+"---";
+						mAudioResultsFileStatus = mAudioResultsFileStatus+":::Walking on this status message that was in the database.---"+ mCursor.getString(4)+"---";
 					
 					}
 					ContentValues values = new ContentValues();
@@ -302,7 +302,7 @@ public class DictationRecorderService extends Service {
 				/*
 				 * Save recording
 				 */
-				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"recordingstopped";
+				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recording stopped.";
 				mEndTime=System.currentTimeMillis();
 				mRecordingNow=false;
 			   	mRecorder.stop();
@@ -322,8 +322,8 @@ public class DictationRecorderService extends Service {
 			   	
 			   	appendToContent ="Attached a "+mTimeAudioWasRecorded/100+" second Recording.\n";
 			   	mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+appendToContent;
-	            mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"recordingflaggedfortranscription";
-	            
+	            mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recording flagged for transcription.";
+	            sendForTranscription();
 				saveMetaDataToDatabase();
 			}else{
 				//this should not run
@@ -331,6 +331,16 @@ public class DictationRecorderService extends Service {
 	            mRecorder = null;
 			}
 		}
+	}
+	private void sendForTranscription(){
+		mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Sent to transcription service.";
+		Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
+		intent.setData(mUri);
+        intent.putExtra(EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
+        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
+        intent.putExtra(EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+        startService(intent); 
+       
 	}
 
 }

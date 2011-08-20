@@ -1022,11 +1022,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		 * daughter uri to edit when it comes back to the edit activity with transcription content.
     		 */
     		if(mSendForTranscription ==true){
-    			Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
-	            intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
-	            intent.putExtra(NotifyingTranscriptionService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionService.SPLIT_ON_SILENCE);
-	            intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUri.toString());
-	            startService(intent); 
+//    			Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
+//	            intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
+//	            intent.putExtra(NotifyingTranscriptionService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionService.SPLIT_ON_SILENCE);
+//	            intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUri.toString());
+//	            startService(intent); 
+    			Toast.makeText(EditBlogEntryActivity.this, "Check your notification area for transcription status. ", Toast.LENGTH_LONG).show();
+
 	            mSendForTranscription = false;
 	            mAudioResultsFileStatus="recordingsenttotranscriptionservice";
             }
