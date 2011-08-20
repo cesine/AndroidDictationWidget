@@ -350,6 +350,19 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 		mWebView.loadUrl("file:///android_asset/edit_blog_entry_wysiwyg.html");
     }
+    /**
+     * This inner class contains functions which are available to the javascript in the webview
+     * It is called using the name in the line:
+     *  mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
+     *  
+     * So for example, the button in the javascript of the webview, would have as its onClick()
+     * Android.stopRecordJS()
+     * 
+     * Convention: methods in this interface are suffixed with JS to distinguish between Android methods and the JavaScript functions defined in the html
+     * 
+     * @author gina
+     *
+     */
     public class JavaScriptInterface {
         Context mContext;
 
@@ -389,13 +402,19 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	            362);       // Value
         	}
         }
-        /*
-         * methods to record and manage recording of blog entry
-         * TODO add some infomesages into the tool bar
+        /**
+         * A wrapper for the edit blog activity's method which creates a new audio file name TODO using the posts title
+         * and sends it off to the DictaitonRecorder service to be recorded. 
+         * @param postTitle The current title of the blog post, it will show up in the audio file's name
+         * @return an internal status message
          */
         public String startToRecordJS(){
         	return beginRecording();
         }
+        /**
+         * A wrapper which stops the Dictation recorder service. It doesn't set up the media player immediately as the recording service takes some time to finalize and write the .mp3 to the sdcard. 
+         * @return an internal status message
+         */
         public String stopRecordJS(){
         	return stopSaveRecording();
         }
@@ -433,13 +452,27 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		}
         	return "player prepared with audio result file";
         }
+        /**
+         * A wrapper for the play or pause audio function in the edit blog activity
+         * @return a string which can be used for the button (ie Play if the media player is paused or stopped, or Pause if the media player is playing)
+         */
         public String playOrPauseAudioJS(){
         	return playOrPauseAudioFile();
         }
-        
+        /**
+         * Returns a Long of the time recorded. TODO The time recorded is extracted out of the audiofile status message when 
+         * the audio file data is fetched. This happens in each onstart, and also after the user clicks Stop dictation.
+         * This can be used to find out if the blog post has an audio file (it will return a value greater than 0).
+         * 
+         * @return time in milliseconds of the recording
+         */
         public Long getTimeRecordedJS(){
         	return returnTimeRecorded();
         }
+        /**
+         * Depreciated, use getTimeRecordedJS instead
+         * @return
+         */
         public String hasAudioFileJS(){
         	return hasAudioFileAttached().toString();
         }
@@ -464,6 +497,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	            34);       // Value
         	saveStateToActivity(strTitle, strContent, strLabels);
         }
+        /**
+         * Wrapper for the edit blog activty save post as a daughter to the database method. TODO rename method to reflect its action as saving a daughter.
+         * 
+         * @param strTitle
+         * @param strContent
+         * @param strLabels
+         */
         public void savePostJS(String strTitle, String strContent, String strLabels){
 //        	mPostContent= strContent;
 //        	mPostTitle=strTitle;
@@ -478,6 +518,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	deleteEntry(mUri);
         	finish();
         }
+        /**
+         * Saves the post as a daughter to the database, then calls the Publish activity, which then gets the info out of the database and publishes it.
+         * TODO instead send Title, content, labels to publish activity as extras, and let it save them to the database too? otherwise have to register a content listener in the publish activity. 
+         * @param strTitle
+         * @param strContent
+         * @param strLabels
+         */
         public void publishPostJS(String strTitle, String strContent, String strLabels){
         	//act like publish is both save+publish
         	saveAsDaughterToDB(strTitle, strContent, strLabels);
