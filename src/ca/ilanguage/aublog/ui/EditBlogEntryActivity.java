@@ -255,8 +255,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setLooping(true);
+//        mMediaPlayer = new MediaPlayer();
+//        mMediaPlayer.setLooping(true); //only initalize media player when user clicks on play incase they dont want to play the audio
         mRecordingNow = false;
         
         
@@ -306,8 +306,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					//Toast.makeText(EditBlogEntryActivity.this, "The audio results file is "+mAudioResultsFile, Toast.LENGTH_LONG).show();
 		    		if (mAudioResultsFile.length() > 5){
 		    			//SET the media player to point to this audio file so that the play button will work. 
-			    		mMediaPlayer.setDataSource(mAudioResultsFile);
-			    		mMediaPlayer.prepare();
+//			    		mMediaPlayer.setDataSource(mAudioResultsFile);
+//			    		mMediaPlayer.prepareAsync();
+		    			preparePlayerAttachedAudioFile();
 					}
 					if("0".equals(mCursor.getString(5))){ 
 						mDeleted=false;
@@ -423,33 +424,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * @return
          */
         public String preparePlayerJS(){
-        	/*
-    	   	 * assign this audio recording to the media player
-    	   	 */
-    	   	try {
-    	   		//TODO recheckAublogSettings();//if audio settings have changed use the new ones.
-
-    	   		/*
-    	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
-    	   		 * reinitialize it
-    	   		 */
-    	   		mMediaPlayer.release();
-    	   		mMediaPlayer = null;
-    	   		mMediaPlayer = new MediaPlayer();
-    	        mMediaPlayer.setLooping(true);
-    	   		
-    			mMediaPlayer.setDataSource(mAudioResultsFile);
-    			mMediaPlayer.prepareAsync();
-    		} catch (IllegalArgumentException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		} catch (IllegalStateException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		} catch (IOException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
+        	preparePlayerAttachedAudioFile();
         	return "player prepared with audio result file";
         }
         /**
@@ -813,6 +788,42 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);
 		
 	}
+	/**
+	 * If the media player is instantiated, release it and make it null
+	 * 
+	 * Then instantiate it, set it to the audio file name and prepare it.
+	 */
+	public void preparePlayerAttachedAudioFile(){
+
+		if(mMediaPlayer != null){
+			mMediaPlayer.release();
+	   		mMediaPlayer = null;
+		}
+	   	try {
+	   		//TODO recheckAublogSettings();//if audio settings have changed use the new ones.
+
+	   		/*
+	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
+	   		 * reinitialize it
+	   		 */
+	   		mMediaPlayer = new MediaPlayer();
+	        mMediaPlayer.setLooping(true);
+			/*
+		   	 * assign this audio recording to the media player
+		   	 */
+			mMediaPlayer.setDataSource(mAudioResultsFile);
+			mMediaPlayer.prepareAsync();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	public Boolean hasAudioFileAttached(){
 		if (mAudioResultsFile.length() > 5 ){
 			//Toast.makeText(EditBlogEntryActivity.this,"There is an audio file.", Toast.LENGTH_SHORT).show();
@@ -885,40 +896,37 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * @return A message for the button which is the oposite of its current state. (ie, if the player is paused, it returns Play, if the player is started, it returns Pause)
 	 */
 	public String playOrPauseAudioFile(){
-		//recheckAublogSettings();//if bluetooth or audio settings have changed, use those. 
-		if(mMediaPlayer.isPlaying()){
-			//if its playing, pause and rewind ~4 seconds
-			
+		if (mMediaPlayer == null) {
+			preparePlayerAttachedAudioFile();
+		} else if (mMediaPlayer.isPlaying()) {
 			mMediaPlayer.pause();
-			/* rewind logic doesnt work
-			int rewindValue = 2;
-			int startPlayingFromSecond =mMediaPlayer.getCurrentPosition();
-			if ( startPlayingFromSecond <= rewindValue){
-				startPlayingFromSecond=0;
-			}else{
-				startPlayingFromSecond = startPlayingFromSecond - rewindValue;
-			}
-			mMediaPlayer.seekTo(startPlayingFromSecond);
-			mMediaPlayer.prepare();
-			*/
+			/*
+			 * rewind logic doesnt work //if its playing, pause and rewind ~4
+			 * seconds int rewindValue = 2; int startPlayingFromSecond
+			 * =mMediaPlayer.getCurrentPosition(); if ( startPlayingFromSecond
+			 * <= rewindValue){ startPlayingFromSecond=0; }else{
+			 * startPlayingFromSecond = startPlayingFromSecond - rewindValue; }
+			 * mMediaPlayer.seekTo(startPlayingFromSecond);
+			 * mMediaPlayer.prepare();
+			 */
 			return "Play";
-		}else{
-			//if its not playing, play it
-		    try {
-		    	
-		    	mMediaPlayer.start();
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				
-				//try to prepare audio again?
-				Log.e("Error reading file", e.toString());
-			} catch (IllegalStateException e) {
-				// TODO Auto-generated catch block
-				Log.e("Error reading file", e.toString());
-			} 
-			return "Pause";
 		}
-		
+
+		// if its not playing, play it
+		try {
+
+			mMediaPlayer.start();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+
+			// try to prepare audio again?
+			Log.e("Error reading file", e.toString());
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			Log.e("Error reading file", e.toString());
+		}
+		return "Pause";
+
 	}
 	/**
 	 * This method sends a stopservice command to the DictationRecorderService. 
