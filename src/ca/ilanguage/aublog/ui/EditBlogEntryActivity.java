@@ -648,14 +648,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            38);       // Value
     	mFreshEditScreen=false;
     	
-		/*
-		 * Stop the player if its playing, although that could be put in the
-		 * destroy method.
-		 */
-		if (mMediaPlayer != null) {
-			mMediaPlayer.release();
-			mMediaPlayer = null;
-		}
+
 		saveAsSelfToDB();
 		super.onPause();
 	}
@@ -664,6 +657,19 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mTts.shutdown();
 		// Log.i(TAG, "Method 'onDestroy()' launched");
 		tracker.stop();
+		
+		/*
+		 * Stop the player if its playing, this must be in the ondestroy method,
+		 * not the onpause method Reason: onpause is called when user opens the
+		 * menu and goes to teh settings, resulting in a non-existant
+		 * mediaplayer when they come back to the edit blog activity. if they
+		 * click on the Play button the edit blog activity closes silently. In
+		 * the debugger we get a class missing error type.
+		 */
+		if (mMediaPlayer != null) {
+			mMediaPlayer.release();
+			mMediaPlayer = null;
+		}
 		//saveOrUpdateToDB();
 //		mWebView.loadUrl("javascript:savePostToDB()");
 		super.onDestroy();
