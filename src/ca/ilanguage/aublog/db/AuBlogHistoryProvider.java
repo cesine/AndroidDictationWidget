@@ -298,10 +298,6 @@ public class AuBlogHistoryProvider extends ContentProvider {
 
         case AUBLOGHISTORY_ID:
             String audiobookId = uri.getPathSegments().get(1);
-            //set last modified to now.
-            Long now = Long.valueOf(System.currentTimeMillis());
-			values.put(AuBlogHistory.LAST_MODIFIED, now);
-			
             //update teh row using the values provided
             //this takes updates from the title editor
             //this takes updates from the audiobooks editor

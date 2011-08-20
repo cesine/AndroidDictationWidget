@@ -46,8 +46,8 @@ public class AuBlogHistoryDatabase {
 	    String DELETED = "deleted";//changed from daughter entry
 	    String PUBLISHED = "published";
 	    String TIME_CREATED = "timecreated";
-	    String TIME_EDITED = "timeedited";  //should be used by editblog entry to indicate a user edit.
-	    String LAST_MODIFIED = "lastmodified"; //used by database provider, automatically set when entry is updated
+	    String TIME_EDITED = "timeedited";
+	    String LAST_MODIFIED = "lastmodified";
 	    String ROOT_ID_DEFAULT= "1";
     }
     

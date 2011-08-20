@@ -46,7 +46,7 @@ function autoSize() {
 <script type="text/javascript">
 <!--
 $(document).ready(function()	{
-	
+	fillFromAndroidActivity();
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
 	$('#markItUp').markItUp(mySettings);
@@ -74,15 +74,6 @@ $(document).ready(function()	{
 		}
  		return false;
 	});
-	
-	/*
-	if (userHasEdited == true ){
-		//dont take teh data from this function
-	}else{
-		Android.fillFromDatabase();
-	//fillTitleContentLabels("title:::--here:::--there");
-	}
-	*/
 });
 -->
 </script>
@@ -96,43 +87,33 @@ $(document).ready(function()	{
 <input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecordingController()" />
 </span>
 <script type="text/javascript">
-	/*http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
+	//http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
 	console.error('1');
 	console.info('2');
 	console.log('3');
 	console.warn('4');
-	*/
 	var hasAudio = false;
 	
     function startStopRecordingController() {
     	if(document.getElementById('recordButton').value=="Stop Dictation"){
-    		//If the button says stop, stop and save the content to db
-    		savePostToTheDB();
-    		Android.stopRecord();
-    		//the play button will appear asyncronously once the edit blog activity gets notification from the datbase that the recordign service saved.
+    		//If the button says stop, stop and simulate save to db
+    		var messageResult = Android.stopRecord();
+    		document.getElementById('markItUp').value = messageResult + document.getElementById('markItUp').value;
     		document.getElementById('recordButton').value="New Dictation";
+    		savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
+    		displayPlayButton();
     	}else{
     		//If the button says something else, record
-    		/*
-    		1. save what the user sees to this post.
-    		*/
-    		savePostToTheDB(); 
-    		/*
-    		2. create a new daughter post with the same content 
-    		so that the edits teh user makes between turning on the recording 
-    		and stopping the reocording go with the recording. 
-    		*/
-    		savePostAsDaughterToDB(); 
-    		/*
-    		3. start the recording
-    		*/
-    		Android.startToRecord(document.getElementById('f-title').value);
+    		savePostToState(); //so that the title of the audio file will correspond with the current title in the javascript
+    	 	Android.startToRecord();
 	    	document.getElementById('recordButton').value="Stop Dictation";
     	}
     }
     /*
-    This function is largely controlled by the MediaPlayer in the Android logic, so it only recieves the value of the buton frmo Android
-    The audio is played in a loop.
+    This function is largely controlled by the MediaPlayer  in Android logic, so it only recieves the value of the buton frmo Android
+    It is not complete in that the MediaPlayer doesnt broadcast to the javasript that the audio is over, so its possible that the button will still say Pause, but if hte user clicks it, it will Play and display Pause again. 
+    Example: Audio is not playing (button will display Play)
+    Audio is playing or has finished playing (button will display Pause)
     a. if audio is playing, hitting the button will pause it.
     b. if audio is not playing, hitting the button wil play it. 
     
@@ -158,56 +139,44 @@ $(document).ready(function()	{
         	playButtn.setAttribute("onClick","playPauseAudioController()");
         	document.getElementById("buttonArea").appendChild(playButtn);
     	}
+    	
     }
-	/* Additional Interface contents:
-		Android.getTimeRecorded();
-	    Android.showToast(toast);
-	    Android.getAudioResultsFileStatus();
-    */
-
     
-	function readTTSPost(){
+    function timeRecorded() {
+    	return Android.getTimeRecorded();
+    }
+    
+    function showAndroidToast(toast) {
+        //Android.readTTS(toast);
+    	Android.showToast(toast);
+    }
+    
+    function readTTSPost(){
     	Android.readToTTS("This is what your blog entry says... "+document.getElementById('markItUp').value);
     }
     function deletePost(){
     	Android.deletePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	
     }
-    function savePostAsDaughterToDB(){
+    function savePostToDB(){
     	readTTSPost();
-    	Android.savePostAsDaughter(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    	Android.savePost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
-    function savePostToTheDB(){
-    	Android.savePostToDB(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    function savePostToState(){
+    	Android.saveState(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function publishPostToDB(){
     	Android.publishPost(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
-    /**
-    Prints out the status messages seperated by <br> in a text area above the Blog Contents.
-    */
-    function displayAudioResultsFileStatus(){
-    	var statusMessages = Android.getAudioResultsFileStatus().split(":::");
-    	var txt = document.createTextNode(statusMessages.join("<br/>"));
-    	document.getElementById("debugArea").appendChild("Audio file status: "+txt);
-    	
-    }
-    
-    var fillTitleContentLabels = function(concatinated){
-    	
-	    	var temp = concatinated.split(":::--");
-	    	document.getElementById('f-title').value= temp[0];
-	    	if(temp[1].length >0){
-	    		document.getElementById('markItUp').value= temp[1];
-	    	}
-	    	document.getElementById('post-labels').value= temp[2];
-	    	/*var doit = Android.getTimeRecorded();
-	    	if (doit > 2 ){
-	    		displayPlayButton();
-	    		document.getElementById('recordButton').value="New Dictation";
-	    	}
-	    	*/
-	    
-    	
+    function fillFromAndroidActivity(){
+    	document.getElementById('f-title').value= Android.fetchPostTitle();
+    	document.getElementById('markItUp').value= Android.fetchPostContent();
+    	document.getElementById('post-labels').value= Android.fetchPostLabels();
+    	var doit = Android.hasAudioFile();
+    	if (doit == "true" ){
+    		displayPlayButton();
+    		document.getElementById('recordButton').value="New Dictation";
+    	}
     }
 </script>
 
@@ -223,8 +192,7 @@ $(document).ready(function()	{
 </td></tr>
 <tr><td ><input type="text" name="postLabels" value="" class="text" size="48" id="post-labels" tabindex="2" dir="ltr"></td></tr>
 </tbody></table>
-<span id="debugArea">
-</span>
+
 	<textarea id="markItUp" >
 Type your text here. You can select text and then hit the button you want, or you can hit the button type and then hit the button to turn it off. You can use new paragraphs:
 

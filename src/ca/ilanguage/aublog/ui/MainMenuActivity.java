@@ -51,7 +51,6 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
-import ca.ilanguage.aublog.service.DictationRecorderService;
 import ca.ilanguage.aublog.service.NotifyingController;
 import ca.ilanguage.aublog.util.UIConstants;
 
@@ -123,12 +122,6 @@ public class MainMenuActivity extends Activity {
 		 */
 		mAudioManager.setMode(AudioManager.MODE_NORMAL);
         mAudioManager.setSpeakerphoneOn(true);
-        /*
-         * Tell the Dictation recorder to stop, if it is running.
-         */
-        Intent intent = new Intent(this, DictationRecorderService.class);
-		stopService(intent);
-		
 	    super.onDestroy();
 	    /*
 		 * This is a terrible workaround for issue http://code.google.com/p/android/issues/detail?id=9503 of using bluetooth audio on Android 2.2 phones.

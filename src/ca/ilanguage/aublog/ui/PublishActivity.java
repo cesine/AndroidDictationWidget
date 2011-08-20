@@ -36,9 +36,7 @@ import ca.ilanguage.aublog.util.Alert;
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.service.*;
 
-/*
- * TODO consider using a contentobserver to wait until the publish method has sent the post information to the database
- */
+
 public class PublishActivity extends Activity  {
 	GoogleAnalyticsTracker tracker;
 	private String mAuBlogInstallId;
