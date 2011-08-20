@@ -1010,7 +1010,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		startActivity(i);
 		*/
 		
-		
+		preparePlayerAttachedAudioFile();
 		return "Attached "+mTimeAudioWasRecorded/100+"~ second Recording.\n";
 	}
 	
