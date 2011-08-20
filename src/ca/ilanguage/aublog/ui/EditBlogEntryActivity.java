@@ -373,11 +373,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * 
          * 
          * */
-        public void showToast(String toast) {
+        public void showToastJS(String toast) {
             //readTTS(toast);
         	Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
         }
-        public void readToTTS(String message){
+        public void readToTTSJS(String message){
         	recheckAublogSettings(); //if user turned off tts dont read it
         	if(mReadBlog){
         		readTTS(message);
@@ -393,17 +393,17 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * methods to record and manage recording of blog entry
          * TODO add some infomesages into the tool bar
          */
-        public String startToRecord(){
+        public String startToRecordJS(){
         	return beginRecording();
         }
-        public String stopRecord(){
+        public String stopRecordJS(){
         	return stopSaveRecording();
         }
         /** 
          * Potentially unnecesary function to prepare the player from the javascript.
          * @return
          */
-        public String preparePlayer(){
+        public String preparePlayerJS(){
         	/*
     	   	 * assign this audio recording to the media player
     	   	 */
@@ -433,30 +433,30 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		}
         	return "player prepared with audio result file";
         }
-        public String playOrPauseAudio(){
+        public String playOrPauseAudioJS(){
         	return playOrPauseAudioFile();
         }
         
-        public Long getTimeRecorded(){
+        public Long getTimeRecordedJS(){
         	return returnTimeRecorded();
         }
-        public String hasAudioFile(){
+        public String hasAudioFileJS(){
         	return hasAudioFileAttached().toString();
         }
         
-        public String fetchPostContent(){
+        public String fetchPostContentJS(){
         	return mPostContent;
         }
-        public String fetchPostTitle(){
+        public String fetchPostTitleJS(){
         	return mPostTitle;
         }
-        public String fetchPostLabels(){
+        public String fetchPostLabelsJS(){
         	return mPostLabels;
         }
-        public String fetchDebugInfo(){
+        public String fetchDebugInfoJS(){
         	return "Id: "+mPostId+" Parent: "+mPostParent+" Deleted: "+mDeleted.toString()+" LongestEverString:"+mLongestEverContent;
         }
-        public void saveState(String strTitle, String strContent, String strLabels){
+        public void saveStateJS(String strTitle, String strContent, String strLabels){
         	tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "saveSTate",  // Action
@@ -464,7 +464,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	            34);       // Value
         	saveStateToActivity(strTitle, strContent, strLabels);
         }
-        public void savePost(String strTitle, String strContent, String strLabels){
+        public void savePostJS(String strTitle, String strContent, String strLabels){
 //        	mPostContent= strContent;
 //        	mPostTitle=strTitle;
 //        	mPostLabels=strLabels;
@@ -473,12 +473,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		//Toast.makeText(EditBlogEntryActivity.this, "Saved \n\""+mPostTitle+"\"", Toast.LENGTH_LONG).show();
 
         }
-        public void deletePost(String strTitle, String strContent, String strLabels){
+        public void deletePostJS(String strTitle, String strContent, String strLabels){
 //        	saveState(strTitle, strContent, strLabels);
         	deleteEntry(mUri);
         	finish();
         }
-        public void publishPost(String strTitle, String strContent, String strLabels){
+        public void publishPostJS(String strTitle, String strContent, String strLabels){
         	//act like publish is both save+publish
         	saveAsDaughterToDB(strTitle, strContent, strLabels);
         	if ((mPostTitle.length() == 0)
@@ -517,7 +517,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		}
         	}
         }
-    }
+    }//end javascript interface
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
       // Save UI state changes to the savedInstanceState.
