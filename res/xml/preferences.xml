@@ -36,7 +36,17 @@
                 android:defaultValue="true"
                 android:persistent="true"
                 />
-        <CheckBoxPreference
+         <CheckBoxPreference
+       			android:key="useEarPhonesAudio"
+                android:title="@string/preference_enable_earphones_audio"
+                android:summaryOn="@string/preference_enable_earphones_audio_summary"
+                android:summaryOff="@string/preference_enable_earphones_audio_summary"
+                android:defaultValue="true"
+                android:persistent="true"
+                android:enabled="false"
+                android:selectable="false"
+                />
+         <CheckBoxPreference
        			android:key="usePhoneEarPieceAudio"
                 android:title="@string/preference_enable_phone_earpiece_audio"
                 android:summaryOn="@string/preference_enable_phone_earpiece_audio_summary"
@@ -44,6 +54,7 @@
                 android:defaultValue="false"
                 android:persistent="true"
                 />
+
 		<PreferenceScreen
 				android:key="controlConfigScreen"
                 android:title="@string/preference_configure_controls"

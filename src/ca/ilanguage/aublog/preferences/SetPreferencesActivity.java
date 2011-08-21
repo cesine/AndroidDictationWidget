@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,19 +29,18 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
-import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
-import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
+	private static final int REQUEST_ENABLE_BLUETOOTH = 0;
 	GoogleAnalyticsTracker tracker;
 	private AudioManager mAudioManager;
     
@@ -52,69 +52,31 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	 * It is used to identify anonymously the install to the aublog webserver. It can be tied to an Aublog user id, if aublog user ids logic is added to the server side logic.
 	 */
 	private String mAuBlogInstallId;
-	
+	CheckBoxPreference mCheckBoxUseBluetooth;
 	@Override
 	  protected void onDestroy() {
 	    super.onDestroy();
 	    // Stop the tracker when it is no longer needed.
 	    tracker.stop();
 	  }
-	@Override
-	protected void onStop(){
-		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		/*
-		 * Always set audio to normal when the preferecnes activty goes off screen, only turn on earpiece or bluetooth if 
-		 * check boxes are checked when user leaves. 
-		 */
-		mAudioManager.setMode(AudioManager.MODE_NORMAL);
-        mAudioManager.setSpeakerphoneOn(true);
-    	
-        Boolean useBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
-	    Boolean usePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
-	   
-		if(useBluetooth){
-			/*
-	    	 * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
-	    	 Even if a SCO connection is established, the following restrictions apply on audio output streams so that they can be routed to SCO headset: - the stream type must be STREAM_VOICE_CALL - the format must be mono - the sampling must be 16kHz or 8kHz
 
-				Similarly, if a call is received or sent while an application is using the SCO connection, the connection will be lost for the application and NOT returned automatically when the call ends.
-			* Notes:
-			* Use of the blue tooth does not affect the ability to recieve a call while using the app,
-			* However, the app will not have control of hte bluetooth connection when teh phone call comes back. The user must exit the Edit Blog activity.
-			* 
-	    	 */
-	    	mAudioManager.startBluetoothSco();
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	mAudioManager.setBluetoothScoOn(true);
-	    	
-	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	String release = Build.VERSION.RELEASE;
-		    if(release.equals("2.2")){
-		    	Toast.makeText(SetPreferencesActivity.this, 
-		    	 		"Warning: before you turn off your bluetooth connection, exit AuBlog.", Toast.LENGTH_LONG).show();
-			 }
-	    	/*
-	    	 * then use the media player as usual
-	    	 */
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case REQUEST_ENABLE_BLUETOOTH:
+			if (resultCode == RESULT_CANCELED) {
+				/*
+				 * if the user cancels the request, or there
+				 * is no bluetooth on the system then uncheck the Use Bluetooth
+				 * box.
+				 */
+				mCheckBoxUseBluetooth.setChecked(false);
+			}else if(resultCode==RESULT_OK) {
+				mCheckBoxUseBluetooth.setChecked(true);
+			}
+			break;
+		default:
+			break;
 		}
-		if(usePhoneEarPiece){
-			/*
-	    	 * This works.
-	    	 * 
-	    	 * This constant ROUTE_EARPIECE is deprecated. Do not set audio routing directly, use setSpeakerphoneOn(), setBluetoothScoOn() methods instead.
-	    	 */
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	//routes to earpiece by default when speaker phone is off. 
-	    	//mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
-	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	/*
-	    	 * then the app can use the media player as usual
-	    	 */
-		}
-		super.onStop();
-		
 	}
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,7 +106,6 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         
         Preference exportTree = findPreference(PreferenceConstants.PREFERENCE_EMAIL_DRAFTS_TREE);
         exportTree.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-			
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
 				
@@ -166,7 +127,34 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 				return true;
 			}
 		});
-        
+        /*
+         * If the user trys to turn on bluetooth, ask them if they want to turn on the blue tooth connection.
+         */
+        mCheckBoxUseBluetooth = (CheckBoxPreference) findPreference(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO);
+        mCheckBoxUseBluetooth.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				
+				if (mCheckBoxUseBluetooth.isChecked() == false) {
+					/*
+					 * If the user is trying to use bluetooth in aublog, ask them to turn on their bluetooth connection.
+					 * REQUIRES: <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />TODO ?	
+					 */
+					BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+					if (!bluetoothAdapter.isEnabled()) {
+						Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+						startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
+						return false;
+					}else{
+						mCheckBoxUseBluetooth.setChecked(true);
+						return true;
+					}
+				}else{
+					mCheckBoxUseBluetooth.setChecked(false);
+					return false;
+				}
+			}
+		});
         
         Preference eraseGameButton = getPreferenceManager().findPreference("erasegame");
         if (eraseGameButton != null) {

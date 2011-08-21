@@ -10,9 +10,11 @@ import java.util.Locale;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -74,12 +76,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private Long mTimeAudioWasRecorded;
     private String mAudioSource;//bluetooth(record,play), phone(recordmic, play earpiece) for privacy, speaker(record mic, play speaker)
     private Boolean mUseBluetooth;
+    private Boolean mUseEarPhones;
     private Boolean mUsePhoneEarPiece;
     private String mDateString ="";
-    
+    private AudioFileUpdateReceiver audioFileUpdateReceiver;
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private AudioManager mAudioManager;
-    
     private MediaPlayer mMediaPlayer;
     Boolean mRecordingNow;
     Boolean mPlayingNow;
@@ -95,9 +97,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	
 	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
 	//private Boolean mReturnedTranscription; //check on reload?
+	public static final String REFRESH_AUDIOFILE_INTENT = NonPublicConstants.NONPUBLIC_INTENT_AUDIOFILE_RECORDED_AND_SAVED;
 	
-	private static final int GROUP_BASIC = 0;
-	private static final int GROUP_FORMAT = 1;
+	
+	private static final int CHANGED_SETTINGS = 0;
 	int selectionStart;
 	int selectionEnd;
 	String mPostContent ="";
@@ -191,75 +194,143 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       Toast.makeText(EditBlogEntryActivity.this, "Configuration changed ", Toast.LENGTH_LONG).show();
 
     }
-    
-    private void recheckAublogSettings(){
-    	SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
-	    mUseBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
-	    mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
-	   
-	    if(mUseBluetooth){
-			/*
-	    	 * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
-	    	 Even if a SCO connection is established, the following restrictions apply on audio output streams so that they can be routed to SCO headset: - the stream type must be STREAM_VOICE_CALL - the format must be mono - the sampling must be 16kHz or 8kHz
 
-				Similarly, if a call is received or sent while an application is using the SCO connection, the connection will be lost for the application and NOT returned automatically when the call ends.
-			* Notes:
-			* Use of the blue tooth does not affect the ability to recieve a call while using the app,
-			* However, the app will not have control of hte bluetooth connection when teh phone call comes back. The user must exit the Edit Blog activity.
-			* 
-	    	 */
-	    	mAudioManager.startBluetoothSco();
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	mAudioManager.setBluetoothScoOn(true);
-	    	
-	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	String release = Build.VERSION.RELEASE;
-//		    if(release.equals("2.2")){
-//		    	Toast.makeText(EditBlogEntryActivity.this, "Warning: Bluetooth bug in Android 2.2." +
-//	    	 		"\n\nExit Aublog before you turn off your bluetooth headset.", Toast.LENGTH_LONG).show();
-//		    }
-		    mAudioSource= "maybebluetooth";
-			
-	    	/*
-	    	 * then use the media player as usual
-	    	 */
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case CHANGED_SETTINGS:
+			if(mRecordingNow  || mPlayingNow){
+				/*
+				 * if recording now, or playing now is true, don't change the audio settings.
+				 * instead after user clicks on stop then can change the audio
+				 * settings. maybe android is robust enough to start recording
+				 * for example with the blue tooth, then switch to normal mode
+				 * but dont want to risk it.
+				 */
+			}else{
+				recheckAublogSettings();
+			}
+			break;
+		default:
+			break;
 		}
-		if(mUsePhoneEarPiece){
-			/*
-	    	 * This works.
-	    	 * 
-	    	 * This constant ROUTE_EARPIECE is deprecated. Do not set audio routing directly, use setSpeakerphoneOn(), setBluetoothScoOn() methods instead.
-	    	 */
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	//routes to earpiece by default when speaker phone is off. 
-	    	//mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
-	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	mAudioSource= "microphone";
-			
-	    	/*
-	    	 * then the app can use the media player as usual
-	    	 */
-		}
+	}
+	/**
+	 * Re-checks the audio settings and the installid from the settings.
+	 * 
+	 */
+	private void recheckAublogSettings() {
+		Boolean oldBluetooth=mUseBluetooth;
+		Boolean oldEarphones=mUseEarPhones;  
+		Boolean oldPhoneEarPiece=mUsePhoneEarPiece;
+		SharedPreferences prefs = getSharedPreferences(
+				PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		/*
 		 * set the installid for appending to the labels
 		 */
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+		mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
 		
-    	
-    }
+		mUseBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
+		//mUseEarPhones = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_EARPHONES_AUDIO, false);
+		//controlled properly by Android, dont need to use but included here for completeness.
+		mUseEarPhones = mAudioManager.isWiredHeadsetOn();
+		mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
+		
+		if (mUseBluetooth){
+			
+			if( (mAudioManager.isBluetoothScoOn() == false ) || (oldBluetooth ==null ) || (mUseBluetooth != oldBluetooth) )  {
+		
+			/*
+			 * If the user wants bluetooth, but it wasnt set up yet, 
+			 * or the user changed the bluetooth to on...
+			 * 
+			 * TODO As the SCO connection establishment can take several seconds,
+			 * applications should not rely on the connection to be available
+			 * when the method returns but instead register to receive the
+			 * intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to
+			 * be SCO_AUDIO_STATE_CONNECTED. Even if a SCO connection is
+			 * established, the following restrictions apply on audio output
+			 * streams so that they can be routed to SCO headset: - the stream
+			 * type must be STREAM_VOICE_CALL - the format must be mono - the
+			 * sampling must be 16kHz or 8kHz
+			 * 
+			 * Similarly, if a call is received or sent while an application is
+			 * using the SCO connection, the connection will be lost for the
+			 * application and NOT returned automatically when the call ends.
+			 * Notes: Use of the blue tooth does not affect the ability to
+			 * recieve a call while using the app, However, the app will not
+			 * have control of hte bluetooth connection when teh phone call
+			 * comes back. Aublog refreshes the settings at key recording/play situations to reestablish the connection.
+			 */
+			mAudioManager.startBluetoothSco();
+			mAudioManager.setSpeakerphoneOn(false);
+			mAudioManager.setBluetoothScoOn(true);
+
+			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+			mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+			mAudioSource = "maybe bluetooth";
+			}//end iff to change bluetooth settings
+			/*
+			 * else blue tooth is on, and nothing changed in the user preferences. it should still be on, so dont change any audio manager.
+			 * if other areas of the app turn off the blue tooth then this else might be needed to confirm that bluetooth is set up.
+			 */
+		}else if (oldBluetooth != null && oldBluetooth){
+			/*
+			 * mUseBluetooth is off now, but it was ON then the user turned off
+			 * bluetooth 
+			 * 
+			 * NOTE: in Android 2.2 (fixed in Android 2.2.1) stop
+			 * bluetooth doest completely release it. the only way to release it
+			 * is to kill the process that called it, this is why AuBlog kills
+			 * it self in the ondestroy of the main menu, it doesnt have to kill
+			 * itself in the on destroy of the notification controller (which
+			 * can be called without running the main menu) because it doesnt do anything with the audio manager.
+			 */
+			mAudioManager.setMode(AudioManager.MODE_NORMAL);
+			mAudioManager.setSpeakerphoneOn(true);
+			mAudioManager.setBluetoothScoOn(false);
+			mAudioManager.stopBluetoothSco();
+		}
+		/*
+		 * regardless of whether user wants either bluetooth or the phone's internal incall speaker
+		 * the speakerphone and audiomanager settings are the same 
+		 */
+		if (mUsePhoneEarPiece || mUseBluetooth){
+			if ((oldPhoneEarPiece ==null)||(mUsePhoneEarPiece != oldPhoneEarPiece)) {
+			/*
+			 * If user wants to play audio through the phone's in-call speaker,
+			 */
+			mAudioManager.setSpeakerphoneOn(false);
+			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+			mAudioManager.setMode(AudioManager.MODE_IN_CALL);//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
+			}
+			if (!mAudioManager.isBluetoothScoOn()){
+				mAudioSource = "internal microphone";
+			}
+		}else{
+			/*
+			 * if mUseBluetooth and the Phones earpiece are supposed to be off,
+			 * This sets audio values to normal
+			 * 
+			 * This is all that is needed to enable the Headset/earphones
+			 * option. As the earphones settings are controlled by simply
+			 * plugging them in. The android, if in normal mode, will switch to
+			 * earphones mode.
+			 */
+			mAudioManager.setMode(AudioManager.MODE_NORMAL);
+			mAudioManager.setSpeakerphoneOn(true);
+		}
+		/*
+		 * then the app can use the media player, and the recorder as usual
+		 */
+	}
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-//        mMediaPlayer = new MediaPlayer();
-//        mMediaPlayer.setLooping(true); //only initalize media player when user clicks on play incase they dont want to play the audio
-        mRecordingNow = false;
-        
-        
+
+	    
         tracker = GoogleAnalyticsTracker.getInstance();
 
 	    // Start the tracker in manual dispatch mode...
@@ -269,10 +340,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
 		
         
+	    mRecordingNow = false;
+	    mPlayingNow = false;
+	    recheckAublogSettings();
+	    
         mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
 	    mDateString = mDateString.replaceAll("/","-").replaceAll(" ","-");
      
-	    recheckAublogSettings();
         
         setContentView(R.layout.main_webview);
         mWebView = (WebView) findViewById(R.id.webview);
@@ -361,7 +435,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
      * 
      * Convention: methods in this interface are suffixed with JS to distinguish between Android methods and the JavaScript functions defined in the html
      * 
-     * @author gina
+     * @author cesine
      *
      */
     public class JavaScriptInterface {
@@ -392,7 +466,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
         }
         public void readToTTSJS(String message){
-        	recheckAublogSettings(); //if user turned off tts dont read it
+        	//recheckAublogSettings(); //if user turned off tts dont read it
         	if(mReadBlog){
         		readTTS(message);
         	}else{
@@ -525,7 +599,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     			            302);       // Value
         			Toast.makeText(EditBlogEntryActivity.this, "No Blogger account found.\n\nTaking you to the settings to \n\nConfigure a Blogger account.", Toast.LENGTH_LONG).show();
         			Intent i = new Intent(EditBlogEntryActivity.this, SetPreferencesActivity.class);
-            		startActivity(i);
+        			startActivityForResult(i, CHANGED_SETTINGS);
         		}else{
         		
 	        		tracker.setCustomVar(1, "Navigation Type", "Button click", 22);
@@ -669,16 +743,32 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            "event was paused: "+mAuBlogInstallId, // Label
 	            38);       // Value
     	mFreshEditScreen=false;
-    	
-
 		saveAsSelfToDB();
+		if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 		super.onPause();
 	}
+	/**
+	 * put back in an onResume override, watch out for loss of state side effects.
+	 */
+	@Override
+	protected void onResume() {
+		if (audioFileUpdateReceiver == null){
+			audioFileUpdateReceiver = new AudioFileUpdateReceiver();
+		}
+		IntentFilter intentFilter = new IntentFilter(REFRESH_AUDIOFILE_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentFilter);
+		super.onResume();
+	}
+
+
 	@Override
 	protected void onDestroy() {
-		mTts.shutdown();
+		//mTts.shutdown();
 		// Log.i(TAG, "Method 'onDestroy()' launched");
 		tracker.stop();
+		mFreshEditScreen=false;
 		
 		/*
 		 * Stop the player if its playing, this must be in the ondestroy method,
@@ -692,6 +782,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mMediaPlayer.release();
 			mMediaPlayer = null;
 		}
+		mPlayingNow = false;
 		//saveOrUpdateToDB();
 //		mWebView.loadUrl("javascript:savePostToDB()");
 		super.onDestroy();
@@ -789,6 +880,48 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 	}
 	/**
+	 * Inner class which waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. 
+	 * 
+	 * Notes:
+	 * -Beware of security hasard of running code in this reviecer.
+	 * In this case, ony rechecking the aduio setings and releaseing the media player and reattaching it. 
+	 * -Recievers should be registerd in the manifest, but this is an inner class so that it can access the member functions of EditBlogEntryActivity so it 
+	 * doesnt need to be registered in the manifest.xml.
+	 * 
+	 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
+	 * http://thinkandroid.wordpress.com/2010/02/02/custom-intents-and-broadcasting-with-receivers/
+	 * 
+	 * could pass data in the Intent instead of updating database tables
+	 * 
+	 * @author cesine
+	 */
+	public class AudioFileUpdateReceiver extends BroadcastReceiver {
+	    @Override
+	    public void onReceive(Context context, Intent intent) {
+	        if (intent.getAction().equals(REFRESH_AUDIOFILE_INTENT)) {
+	        //Do stuff - maybe update my view based on the changed DB contents
+	        	recheckAublogSettings();//if audio settings have changed use the new ones.
+	        	preparePlayerAttachedAudioFile();
+	        }
+	        String tmep;
+	        tmep = "wait to see if error is here";
+			/*
+			 * error after this line, dont need a reciever registered in the manifest if its an inner class.
+			 * 
+			 * java.lang.ClassNotFoundException: ca.ilanguage.aublog.ui.EditBlogEntryActivity.AudioFileUpdateReceiver 
+			 * in loader dalvik.system.PathClassLoader[/mnt/asec/ca.ilanguage.aublog-1/pkg.apk]
+			 * 
+			 *  ReceiverData{intent=Intent {
+			 * act=ca.ilanguage
+			 * .aublog.intent.action.BROADCAST_DICTATIONSERVICE_FINISHED
+			 * cmp=ca.ilanguage
+			 * .aublog/.ui.EditBlogEntryActivity.AudioFileUpdateReceiver }
+			 * packageName=ca.ilanguage.aublog resultCode=-1 resultData=null
+			 * resultExtras=null}
+			 */
+	    }
+	}
+	/**
 	 * If the media player is instantiated, release it and make it null
 	 * 
 	 * Then instantiate it, set it to the audio file name and prepare it.
@@ -799,9 +932,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mMediaPlayer.release();
 	   		mMediaPlayer = null;
 		}
+		
 	   	try {
-	   		//TODO recheckAublogSettings();//if audio settings have changed use the new ones.
-
+	   		
 	   		/*
 	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
 	   		 * reinitialize it
@@ -862,7 +995,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * @return an internal status message
 	 */
 	public String beginRecording(){
-		recheckAublogSettings();//check if bluetooth is ready, use it if it is
+		//recheckAublogSettings();//check if bluetooth is ready, use it if it is
 		mAudioResultsFileStatus = "recordingstarted";
 		tracker.trackEvent(
 	            "Clicks",  // Category
@@ -904,6 +1037,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 * This is called if the user is playing audio while recording a new dictation. 
 			 * after the user hits stop record, it will reset the player to the new dictation.
 			 */
+			recheckAublogSettings();
 			preparePlayerAttachedAudioFile();
 		} else if (mMediaPlayer.isPlaying()) {
 			mMediaPlayer.pause();
@@ -916,12 +1050,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 * mMediaPlayer.seekTo(startPlayingFromSecond);
 			 * mMediaPlayer.prepare();
 			 */
+			mPlayingNow = false;
+			//TODO might be able to recheck audio settings here recheckAublogSettings();
 			return "Play";
 		}
 
 		// if its not playing, play it
 		try {
-
+			mPlayingNow = true;
 			mMediaPlayer.start();
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
@@ -962,7 +1098,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mRecordingNow=false;
 		Intent intent = new Intent(this, DictationRecorderService.class);
 		stopService(intent);
-	   	
+	   	//cannot savely recheck audio settings here, the service is still using the audio. instead do it in the prepare player function. recheckAublogSettings();
 	   	
 	   	
 	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
@@ -1016,8 +1152,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		 
 		startActivity(i);
 		*/
-		
-		preparePlayerAttachedAudioFile();
+		/*
+		 * TODO the prepartion of the player shoudl wait until the aduio file is ready.
+		 * What kind of listner is needed? 
+		 * -ContentObserver waiting until service has written final informatoin
+		 * -IO listener for the file to stop changing size?
+		 * -is there already a listener for when a service really ends? 
+		 */
+		//preparePlayerAttachedAudioFile();
+	   	//TODO grey out the play button so they cant click it until the broadcastreciever finds out the service is done. 
 		return "Attached "+mTimeAudioWasRecorded/100+"~ second Recording.\n";
 	}
 	
