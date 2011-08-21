@@ -29,7 +29,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -37,10 +36,6 @@ import android.preference.PreferenceScreen;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
-import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
-import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
-import ca.ilanguage.oprime.ui.ListofExperimentsActivity;
-import ca.ilanguage.oprime.ui.RunExperimentActivity;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
