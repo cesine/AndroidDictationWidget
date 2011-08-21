@@ -880,8 +880,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 	}
 	/**
-	 * Waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. Beware of security hasard of running code in this reviecer.
+	 * Inner class which waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. 
+	 * 
+	 * Notes:
+	 * -Beware of security hasard of running code in this reviecer.
 	 * In this case, ony rechecking the aduio setings and releaseing the media player and reattaching it. 
+	 * -Recievers should be registerd in the manifest, but this is an inner class so that it can access the member functions of EditBlogEntryActivity so it 
+	 * doesnt need to be registered in the manifest.xml.
 	 * 
 	 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
 	 * http://thinkandroid.wordpress.com/2010/02/02/custom-intents-and-broadcasting-with-receivers/
@@ -901,7 +906,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	        String tmep;
 	        tmep = "wait to see if error is here";
 			/*
-			 * error after this line, maybe dont need a reciever registered in the manifest?
+			 * error after this line, dont need a reciever registered in the manifest if its an inner class.
 			 * 
 			 * java.lang.ClassNotFoundException: ca.ilanguage.aublog.ui.EditBlogEntryActivity.AudioFileUpdateReceiver 
 			 * in loader dalvik.system.PathClassLoader[/mnt/asec/ca.ilanguage.aublog-1/pkg.apk]
