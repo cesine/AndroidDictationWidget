@@ -97,7 +97,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	//private Boolean mReturnedTranscription; //check on reload?
 	
 	
-	private static final int REQUEST_ENABLE_BLUETOOTH = 0;
+	
+	private static final int CHANGED_SETTINGS = 0;
 	int selectionStart;
 	int selectionEnd;
 	String mPostContent ="";
@@ -192,6 +193,25 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
     }
 
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case CHANGED_SETTINGS:
+			if(!mRecordingNow){
+				recheckAublogSettings();
+			}else{
+				/*
+				 * if recording now is true, don't change the audio settings.
+				 * instead after user clicks on stop then can change the audio
+				 * settings. maybe android is robust enough to start recording
+				 * for example with the blue tooth, then switch to normal mode
+				 * but dont want to risk it.
+				 */
+			}
+			break;
+		default:
+			break;
+		}
+	}
 	/**
 	 * Re-checks the audio settings and the installid from the settings.
 	 * 
@@ -445,7 +465,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
         }
         public void readToTTSJS(String message){
-        	recheckAublogSettings(); //if user turned off tts dont read it
+        	//recheckAublogSettings(); //if user turned off tts dont read it
         	if(mReadBlog){
         		readTTS(message);
         	}else{
@@ -578,7 +598,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     			            302);       // Value
         			Toast.makeText(EditBlogEntryActivity.this, "No Blogger account found.\n\nTaking you to the settings to \n\nConfigure a Blogger account.", Toast.LENGTH_LONG).show();
         			Intent i = new Intent(EditBlogEntryActivity.this, SetPreferencesActivity.class);
-            		startActivity(i);//TODO start for result, so that can immideatly check for audio changes
+        			startActivityForResult(i, CHANGED_SETTINGS);
         		}else{
         		
 	        		tracker.setCustomVar(1, "Navigation Type", "Button click", 22);
@@ -916,7 +936,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * @return an internal status message
 	 */
 	public String beginRecording(){
-		recheckAublogSettings();//check if bluetooth is ready, use it if it is
+		//recheckAublogSettings();//check if bluetooth is ready, use it if it is
 		mAudioResultsFileStatus = "recordingstarted";
 		tracker.trackEvent(
 	            "Clicks",  // Category
@@ -1016,7 +1036,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mRecordingNow=false;
 		Intent intent = new Intent(this, DictationRecorderService.class);
 		stopService(intent);
-	   	
+	   	//can savely recheck audio settings here, didnt let any changes take effect until user stopped recording.
+		recheckAublogSettings();
 	   	
 	   	
 	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
