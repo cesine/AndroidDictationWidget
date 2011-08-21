@@ -30,6 +30,7 @@ import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
@@ -51,7 +52,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	 * It is used to identify anonymously the install to the aublog webserver. It can be tied to an Aublog user id, if aublog user ids logic is added to the server side logic.
 	 */
 	private String mAuBlogInstallId;
-	
+	CheckBoxPreference mCheckBoxUseBluetooth;
 	@Override
 	  protected void onDestroy() {
 	    super.onDestroy();
@@ -59,43 +60,18 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    tracker.stop();
 	  }
 
-	@Override
-	protected void onStop() {
-		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		Boolean useBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
-		if (useBluetooth) {
-			/*
-			 * If the user clicked on usebluetooth, make sure that the bluetooth is enabled by asking user to 
-			 * enable it
-			 * REQUIRES: <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />TODO ?	
-			 */
-			BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-			if (!bluetoothAdapter.isEnabled()) {
-				Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-				startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
-			}else{
-				super.onStop();
-			}
-		}
-		
-
-	}
-
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
 		case REQUEST_ENABLE_BLUETOOTH:
 			if (resultCode == RESULT_CANCELED) {
 				/*
-				 * if the user cancels the request to enable bluetooth, or there
+				 * if the user cancels the request, or there
 				 * is no bluetooth on the system then uncheck the Use Bluetooth
 				 * box.
 				 */
-				SharedPreferences prefs = getSharedPreferences(
-						PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-				SharedPreferences.Editor editor = prefs.edit();
-				editor.putBoolean(
-						PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO,
-						false);
+				mCheckBoxUseBluetooth.setChecked(false);
+			}else if(resultCode==RESULT_OK) {
+				mCheckBoxUseBluetooth.setChecked(true);
 			}
 			break;
 		default:
@@ -130,7 +106,6 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         
         Preference exportTree = findPreference(PreferenceConstants.PREFERENCE_EMAIL_DRAFTS_TREE);
         exportTree.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-			
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
 				
@@ -152,7 +127,34 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 				return true;
 			}
 		});
-        
+        /*
+         * If the user trys to turn on bluetooth, ask them if they want to turn on the blue tooth connection.
+         */
+        mCheckBoxUseBluetooth = (CheckBoxPreference) findPreference(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO);
+        mCheckBoxUseBluetooth.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				
+				if (mCheckBoxUseBluetooth.isChecked() == false) {
+					/*
+					 * If the user is trying to use bluetooth in aublog, ask them to turn on their bluetooth connection.
+					 * REQUIRES: <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />TODO ?	
+					 */
+					BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+					if (!bluetoothAdapter.isEnabled()) {
+						Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+						startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
+						return false;
+					}else{
+						mCheckBoxUseBluetooth.setChecked(true);
+						return true;
+					}
+				}else{
+					mCheckBoxUseBluetooth.setChecked(false);
+					return false;
+				}
+			}
+		});
         
         Preference eraseGameButton = getPreferenceManager().findPreference("erasegame");
         if (eraseGameButton != null) {

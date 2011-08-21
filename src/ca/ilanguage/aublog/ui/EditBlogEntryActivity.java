@@ -252,7 +252,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 * else blue tooth is on, and nothing changed in the user preferences. it should still be on, so dont change any audio manager.
 			 * if other areas of the app turn off the blue tooth then this else might be needed to confirm that bluetooth is set up.
 			 */
-		}else if (oldBluetooth){
+		}else if (oldBluetooth != null && oldBluetooth){
 			/*
 			 * mUseBluetooth is off now, but it was ON then the user turned off
 			 * bluetooth 
@@ -281,7 +281,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mAudioManager.setSpeakerphoneOn(false);
 			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 			mAudioManager.setMode(AudioManager.MODE_IN_CALL);//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
-			mAudioSource = "internal microphone";
+			}
+			if (!mUseBluetooth){
+				mAudioSource = "internal microphone";
 			}
 		}else{
 			/*
@@ -576,7 +578,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     			            302);       // Value
         			Toast.makeText(EditBlogEntryActivity.this, "No Blogger account found.\n\nTaking you to the settings to \n\nConfigure a Blogger account.", Toast.LENGTH_LONG).show();
         			Intent i = new Intent(EditBlogEntryActivity.this, SetPreferencesActivity.class);
-            		startActivity(i);
+            		startActivity(i);//TODO start for result, so that can immideatly check for audio changes
         		}else{
         		
 	        		tracker.setCustomVar(1, "Navigation Type", "Button click", 22);
@@ -727,9 +729,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	@Override
 	protected void onDestroy() {
-		mTts.shutdown();
+		//mTts.shutdown();
 		// Log.i(TAG, "Method 'onDestroy()' launched");
 		tracker.stop();
+		mFreshEditScreen=false;
 		
 		/*
 		 * Stop the player if its playing, this must be in the ondestroy method,
