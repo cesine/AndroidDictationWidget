@@ -10,9 +10,11 @@ import java.util.Locale;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -77,7 +79,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private Boolean mUseEarPhones;
     private Boolean mUsePhoneEarPiece;
     private String mDateString ="";
-    
+    private AudioFileUpdateReceiver audioFileUpdateReceiver;
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private AudioManager mAudioManager;
     private MediaPlayer mMediaPlayer;
@@ -95,7 +97,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	
 	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
 	//private Boolean mReturnedTranscription; //check on reload?
-	
+	public static final String REFRESH_AUDIOFILE_INTENT = NonPublicConstants.NONPUBLIC_INTENT_AUDIOFILE_RECORDED_AND_SAVED;
 	
 	
 	private static final int CHANGED_SETTINGS = 0;
@@ -433,7 +435,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
      * 
      * Convention: methods in this interface are suffixed with JS to distinguish between Android methods and the JavaScript functions defined in the html
      * 
-     * @author gina
+     * @author cesine
      *
      */
     public class JavaScriptInterface {
@@ -741,11 +743,26 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            "event was paused: "+mAuBlogInstallId, // Label
 	            38);       // Value
     	mFreshEditScreen=false;
-    	
-
 		saveAsSelfToDB();
+		if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 		super.onPause();
 	}
+	/**
+	 * put back in an onResume override, watch out for loss of state side effects.
+	 */
+	@Override
+	protected void onResume() {
+		if (audioFileUpdateReceiver == null){
+			audioFileUpdateReceiver = new AudioFileUpdateReceiver();
+		}
+		IntentFilter intentFilter = new IntentFilter(REFRESH_AUDIOFILE_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentFilter);
+		super.onResume();
+	}
+
+
 	@Override
 	protected void onDestroy() {
 		//mTts.shutdown();
@@ -863,6 +880,27 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 	}
 	/**
+	 * Waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. Beware of security hasard of running code in this reviecer.
+	 * In this case, ony rechecking the aduio setings and releaseing the media player and reattaching it. 
+	 * 
+	 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
+	 * http://thinkandroid.wordpress.com/2010/02/02/custom-intents-and-broadcasting-with-receivers/
+	 * 
+	 * could pass data in the Intent instead of updating database tables
+	 * 
+	 * @author cesine
+	 */
+	public class AudioFileUpdateReceiver extends BroadcastReceiver {
+	    @Override
+	    public void onReceive(Context context, Intent intent) {
+	        if (intent.getAction().equals(REFRESH_AUDIOFILE_INTENT)) {
+	        //Do stuff - maybe update my view based on the changed DB contents
+	        	recheckAublogSettings();//if audio settings have changed use the new ones.
+	        	preparePlayerAttachedAudioFile();
+	        }
+	    }
+	}
+	/**
 	 * If the media player is instantiated, release it and make it null
 	 * 
 	 * Then instantiate it, set it to the audio file name and prepare it.
@@ -875,8 +913,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 		
 	   	try {
-	   		recheckAublogSettings();//if audio settings have changed use the new ones.
-
+	   		
 	   		/*
 	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
 	   		 * reinitialize it
@@ -979,6 +1016,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 * This is called if the user is playing audio while recording a new dictation. 
 			 * after the user hits stop record, it will reset the player to the new dictation.
 			 */
+			recheckAublogSettings();
 			preparePlayerAttachedAudioFile();
 		} else if (mMediaPlayer.isPlaying()) {
 			mMediaPlayer.pause();
@@ -1093,8 +1131,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		 
 		startActivity(i);
 		*/
-		
-		preparePlayerAttachedAudioFile();
+		/*
+		 * TODO the prepartion of the player shoudl wait until the aduio file is ready.
+		 * What kind of listner is needed? 
+		 * -ContentObserver waiting until service has written final informatoin
+		 * -IO listener for the file to stop changing size?
+		 * -is there already a listener for when a service really ends? 
+		 */
+		//preparePlayerAttachedAudioFile();
+	   	//TODO grey out the play button so they cant click it until the broadcastreciever finds out the service is done. 
 		return "Attached "+mTimeAudioWasRecorded/100+"~ second Recording.\n";
 	}
 	

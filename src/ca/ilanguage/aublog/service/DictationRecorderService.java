@@ -132,6 +132,12 @@ public class DictationRecorderService extends Service {
 	public void onDestroy() {
 		saveRecording();
 		mNM.cancel(NOTIFICATION);
+		/*
+		 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
+		 * 
+		 * could pass data in the Intent instead of updating database tables
+		 */
+		sendBroadcast(new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT));
 		super.onDestroy();
 		
 	}
@@ -141,6 +147,13 @@ public class DictationRecorderService extends Service {
 	@Override
 	public void onLowMemory() {
 		saveRecording();
+		mNM.cancel(NOTIFICATION);
+		/*
+		 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
+		 * 
+		 * could pass data in the Intent instead of updating database tables
+		 */
+		sendBroadcast(new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT));
 		super.onLowMemory();
 	}
 
