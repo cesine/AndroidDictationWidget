@@ -304,7 +304,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
 			mAudioManager.setMode(AudioManager.MODE_IN_CALL);//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
 			}
-			if (!mUseBluetooth){
+			if (!mAudioManager.isBluetoothScoOn()){
 				mAudioSource = "internal microphone";
 			}
 		}else{
@@ -898,6 +898,22 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	        	recheckAublogSettings();//if audio settings have changed use the new ones.
 	        	preparePlayerAttachedAudioFile();
 	        }
+	        String tmep;
+	        tmep = "wait to see if error is here";
+			/*
+			 * error after this line, maybe dont need a reciever registered in the manifest?
+			 * 
+			 * java.lang.ClassNotFoundException: ca.ilanguage.aublog.ui.EditBlogEntryActivity.AudioFileUpdateReceiver 
+			 * in loader dalvik.system.PathClassLoader[/mnt/asec/ca.ilanguage.aublog-1/pkg.apk]
+			 * 
+			 *  ReceiverData{intent=Intent {
+			 * act=ca.ilanguage
+			 * .aublog.intent.action.BROADCAST_DICTATIONSERVICE_FINISHED
+			 * cmp=ca.ilanguage
+			 * .aublog/.ui.EditBlogEntryActivity.AudioFileUpdateReceiver }
+			 * packageName=ca.ilanguage.aublog resultCode=-1 resultData=null
+			 * resultExtras=null}
+			 */
 	    }
 	}
 	/**

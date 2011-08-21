@@ -23,11 +23,11 @@
         <service android:name="ca.ilanguage.aublog.service.NotifyingTranscriptionService" />
         <service android:name="ca.ilanguage.aublog.service.NotifyingTranscriptionIntentService" />
         
-        <receiver android:name="ca.ilanguage.aublog.ui.EditBlogEntryActivity.AudioFileUpdateReceiver" android:enabled="true">
+        <!-- receiver android:name="ca.ilanguage.aublog.ui.EditBlogEntryActivity.AudioFileUpdateReceiver" android:enabled="true">
         	<intent-filter>
         		<action android:name="ca.ilanguage.aublog.intent.action.BROADCAST_DICTATIONSERVICE_FINISHED" />
         	</intent-filter>
-        </receiver>
+        </receiver>-->
         
         <activity android:name="ca.ilanguage.aublog.service.NotifyingController"
                   android:label="@string/app_name">
