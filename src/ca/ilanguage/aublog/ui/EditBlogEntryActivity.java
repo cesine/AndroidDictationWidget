@@ -103,6 +103,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	private static final int CHANGED_SETTINGS = 0;
 	int selectionStart;
 	int selectionEnd;
+	Bundle mWebViewsState;
 	String mPostContent ="";
 	String mPostTitle ="";
 	String mPostLabels ="";
@@ -112,6 +113,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	String mAudioResultsFileStatus;
 	Boolean mFreshEditScreen;
 	private Boolean mDeleted = false;
+	private Boolean mURIDeleted = false;
 	String mLongestEverContent ="";
 	private  String[] PROJECTION = new String[] {
 		AuBlogHistory._ID, //0
@@ -461,6 +463,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * 
          * 
          * */
+        public void zeroOutParentResultFileJS(){
+        	mAudioResultsFile="";
+        }
         public void showToastJS(String toast) {
             //readTTS(toast);
         	Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
@@ -620,6 +625,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       // This bundle will be passed to onCreate if the process is
       // killed and restarted.
     	mWebView.loadUrl("javascript:savePostToState()");
+    	//TODO 
+    	mWebView.saveState(mWebViewsState);
     	/*THIS PUTS IN THE OLD STUFF, SEEMS TO WORK WITH OUT IT.
 	      savedInstanceState.putString("title", mPostTitle);
 	      savedInstanceState.putString("content", mPostContent);
@@ -637,6 +644,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
+    	//TODO mWebView.restoreState(mWebViewsState);
+    	String would;
+    	would ="run here";
       super.onRestoreInstanceState(savedInstanceState);
       // Restore UI state from the savedInstanceState.
       // This bundle has also been passed to onCreate.
@@ -736,14 +746,18 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 */
 	@Override
 	protected void onPause() {
-    	mWebView.loadUrl("javascript:savePostToState()");
-    	tracker.trackEvent(
-	            "Event",  // Category
-	            "Pause",  // Action
-	            "event was paused: "+mAuBlogInstallId, // Label
-	            38);       // Value
-    	mFreshEditScreen=false;
-		saveAsSelfToDB();
+		if(mURIDeleted == true){
+			//do nothing
+		}else{
+	    	mWebView.loadUrl("javascript:savePostToState()");
+	    	tracker.trackEvent(
+		            "Event",  // Category
+		            "Pause",  // Action
+		            "event was paused: "+mAuBlogInstallId, // Label
+		            38);       // Value
+	    	mFreshEditScreen=false;
+			saveAsSelfToDB();
+		}
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
 		}
@@ -804,31 +818,25 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
     }
 	private void saveAsSelfToDB(){
-		if (mDeleted == true){
-			return ;
+		if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
+			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
 		}
+//		if (mDeleted == true){
+//			return ;
+//		} //alow users to edit deleted nodes. TODO if the node is deleted, change javascript buton onclic to undelete.
     	try{
-    		if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
-    			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
-    		}
-//    		if ( mLongestEverContent.length() <=3 ){ 
-//    			//delete the entry the blog entry is completely empty, or if the user never anything. this should prevent having empty entrys in the database, but keep entries that are zeroed out and had content before
-//    			deleteEntry(mUri);
-//    		}
-    		else{
-	    		ContentValues values = new ContentValues();
-	        	values.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
-	        	values.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
-	        	values.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
-	        	values.put(AuBlogHistory.TIME_EDITED, Long.valueOf(System.currentTimeMillis()));
-	        	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
-	        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
-	        	
-//	        	values.put(AuBlogHistory.USER_TOUCHED, "true"); TODO maybe make a field to indicate that the user never touched the entry, that way wont loose branches in the tree? 
-	    		getContentResolver().update(mUri, values,null, null);
-	    		Log.d(TAG, "Post saved to database.");
-	    		//Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
-    		}
+    		
+    		ContentValues values = new ContentValues();
+        	values.put(AuBlogHistory.ENTRY_TITLE, mPostTitle);
+        	values.put(AuBlogHistory.ENTRY_CONTENT, mPostContent);
+        	values.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
+        	values.put(AuBlogHistory.TIME_EDITED, Long.valueOf(System.currentTimeMillis()));
+        	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
+        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
+        	getContentResolver().update(mUri, values,null, null);
+    		Log.d(TAG, "Post saved to database.");
+    		//Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();
+    		
     	} catch (SQLException e) {
     		// Log.e(TAG,"SQLException (createPost(title, content))");
     		tracker.trackEvent(
@@ -1172,47 +1180,39 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	
 	
 	private void saveAsDaughterToDB(String strTitle, String strContent, String strLabels){
+		/*
+    	 * If it has no content, and no attached audio, save it as itself and return
+    	 */
+    	if ( (strTitle+strContent+strContent).length() < 2 && mAudioResultsFile.length() <5){
+			saveStateToActivity(strTitle, strContent, strLabels);
+			saveAsSelfToDB();
+			tracker.trackEvent(
+    	            "AuBlogLifeCycleEvent",  // Category
+    	            "Save",  // Action
+    	            "save as self:no new text: "+mAuBlogInstallId, // Label
+    	            311);       // Value
+			return;
+    	}
     	try{
-    		/*
-    		 * Create daughter
+    		
+        	/*
+        	 * else if it has content, then Create daughter
     		 */
         	ContentValues daughterValues = new ContentValues();
         	daughterValues.put(AuBlogHistory.ENTRY_TITLE, strTitle);
         	daughterValues.put(AuBlogHistory.ENTRY_CONTENT, strContent);
         	daughterValues.put(AuBlogHistory.ENTRY_LABELS, strLabels);
         	daughterValues.put(AuBlogHistory.LAST_MODIFIED, Long.valueOf(System.currentTimeMillis()));
-        	daughterValues.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
-        	daughterValues.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
-        	if ( (mPostTitle+mPostContent+mPostLabels).length() <= 0 ){
-        		if (mLongestEverContent.length() <= 0 ){
-        			saveStateToActivity(strTitle, strContent, strLabels);
-        			saveAsSelfToDB();
-        			tracker.trackEvent(
-            	            "AuBlogLifeCycleEvent",  // Category
-            	            "Save",  // Action
-            	            "save as self:no new text: "+mAuBlogInstallId, // Label
-            	            311);       // Value
-        			return;
-        		}
-        		//if the user blanked out the blog entry, probably they are restarting from scratch so set the parent to zero node
-        		daughterValues.put(AuBlogHistory.PARENT_ENTRY, AuBlogHistoryDatabase.ROOT_ID_DEFAULT);
-        		
-    		}else{
-    			daughterValues.put(AuBlogHistory.PARENT_ENTRY, mUri.getLastPathSegment());
-    		}
+        	daughterValues.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile); //TODO when to blank out the audio results file?
+        	daughterValues.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus); //TODO dont need to write the status ever from here?
+          	daughterValues.put(AuBlogHistory.PARENT_ENTRY, mUri.getLastPathSegment());	
     		Uri daughterUri = getContentResolver().insert(AuBlogHistory.CONTENT_URI, daughterValues);
     		tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "Save",  // Action
     	            "save as daughter: "+mAuBlogInstallId, // Label
     	            312);       // Value
-    		/*
-    		 * Save parent but just tell it has a daughter, dont put the new values into its entry.
-    		 * It should stay the way it was last saved when the user pushed the save button.
-    		 */
-//    		ContentValues parentValues = new ContentValues();
-//    		parentValues.put(AuBlogHistory.DELETED,"true");
-//    		getContentResolver().update(mUri, parentValues,null, null);
+
     		/*
     		 * Set the daughter to the active mUri, and reinitialize the state values to the daughers values
     		 */
@@ -1237,8 +1237,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            mSendForTranscription = false;
 	            mAudioResultsFileStatus="recordingsenttotranscriptionservice";
             }
-    		mFreshEditScreen=true;
+    		//mFreshEditScreen=true; //should the edit screen be fresh when creating a daughter?
     		mDeleted=false;
+    		//mAudioResultsFile=""; //TODO if i do this here, will it overwrite the starto record creation of the aduiofile?
     		mPostId=mUri.getLastPathSegment();
     		
 //    		mTts.speak("The text to speech is working. This means I can talk to you so that you don't have to look at the screen.",
@@ -1265,6 +1266,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	            3102);       // Value
     	}
     	flagDraftTreeAsNeedingToBeReGenerated();
+    	
 
 	}
 	private void flagDraftTreeAsNeedingToBeReGenerated(){
@@ -1279,6 +1281,40 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 //			mWebView.loadUrl("javascript:savePostToDB()");
+	    	if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
+	    		//if the longestevercontenttitle etc is shorter than the concatination of the current title and content, save the current as the longested ever. 
+				mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+			}
+	    	
+			if (mLongestEverContent.length() <= 2 && mAudioResultsFile.length() < 5) {
+				// delete the entry the blog entry  if the user
+				// never added anything and there is no attached audio file. this should prevent having empty entrys
+				// in the database, but stillkeep entries that are zeroed out and had
+				// content before, or more imprtantly, had daughters.
+				/*
+				 * find all nodes with this node as its parent, if it has no
+				 * daughters, just delete it.
+				 */
+				Cursor cursor = managedQuery(AuBlogHistory.CONTENT_URI,
+						PROJECTION, AuBlogHistory.PARENT_ENTRY + "=" + mUri.getLastPathSegment(),
+						null, null);
+				if (cursor.getCount() < 1) {
+					Toast.makeText(
+							EditBlogEntryActivity.this,
+							"Deleting " + mUri.getLastPathSegment()
+									+ " it's empty and it has no daughters.",
+							Toast.LENGTH_LONG).show();
+					getContentResolver().delete(mUri, null, null);
+					mURIDeleted = true;
+					flagDraftTreeAsNeedingToBeReGenerated();
+				} else {
+					Toast.makeText(
+							EditBlogEntryActivity.this,
+							"Not Deleting " + mUri.getLastPathSegment()
+									+ " it has" + cursor.getCount()
+									+ " daughters.", Toast.LENGTH_LONG).show();
+				}
+			}
 		}
 //		if (keyCode == KeyEvent.KEYCODE_MENU) {
 //			int tmp1 = 0, tmp2 = 0;

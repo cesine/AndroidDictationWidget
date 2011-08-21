@@ -169,6 +169,7 @@ $(document).ready(function()	{
     }
     function saveButton(){
     	readTTSPost();
+    	Android.zeroOutParentResultFileJS();
     	Android.savePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function savePostToDB(){
