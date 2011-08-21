@@ -73,8 +73,11 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			if (!bluetoothAdapter.isEnabled()) {
 				Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 				startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
+			}else{
+				super.onStop();
 			}
 		}
+		
 
 	}
 
