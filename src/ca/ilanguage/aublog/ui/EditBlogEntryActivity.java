@@ -196,16 +196,16 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
 		case CHANGED_SETTINGS:
-			if(!mRecordingNow){
-				recheckAublogSettings();
-			}else{
+			if(mRecordingNow  || mPlayingNow){
 				/*
-				 * if recording now is true, don't change the audio settings.
+				 * if recording now, or playing now is true, don't change the audio settings.
 				 * instead after user clicks on stop then can change the audio
 				 * settings. maybe android is robust enough to start recording
 				 * for example with the blue tooth, then switch to normal mode
 				 * but dont want to risk it.
 				 */
+			}else{
+				recheckAublogSettings();
 			}
 			break;
 		default:
@@ -327,12 +327,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        
-//        mMediaPlayer = new MediaPlayer();
-//        mMediaPlayer.setLooping(true); //only initalize media player when user clicks on play incase they dont want to play the audio
-        mRecordingNow = false;
-        
-        
+
+	    
         tracker = GoogleAnalyticsTracker.getInstance();
 
 	    // Start the tracker in manual dispatch mode...
@@ -342,10 +338,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
 		
         
+	    mRecordingNow = false;
+	    mPlayingNow = false;
+	    recheckAublogSettings();
+	    
         mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
 	    mDateString = mDateString.replaceAll("/","-").replaceAll(" ","-");
      
-	    recheckAublogSettings();
         
         setContentView(R.layout.main_webview);
         mWebView = (WebView) findViewById(R.id.webview);
@@ -766,6 +765,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mMediaPlayer.release();
 			mMediaPlayer = null;
 		}
+		mPlayingNow = false;
 		//saveOrUpdateToDB();
 //		mWebView.loadUrl("javascript:savePostToDB()");
 		super.onDestroy();
@@ -873,8 +873,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mMediaPlayer.release();
 	   		mMediaPlayer = null;
 		}
+		
 	   	try {
-	   		//TODO recheckAublogSettings();//if audio settings have changed use the new ones.
+	   		recheckAublogSettings();//if audio settings have changed use the new ones.
 
 	   		/*
 	   		 * bug: was not changing the data source here, so decided to reset the audio player completely and
@@ -990,12 +991,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 * mMediaPlayer.seekTo(startPlayingFromSecond);
 			 * mMediaPlayer.prepare();
 			 */
+			mPlayingNow = false;
+			//TODO might be able to recheck audio settings here recheckAublogSettings();
 			return "Play";
 		}
 
 		// if its not playing, play it
 		try {
-
+			mPlayingNow = true;
 			mMediaPlayer.start();
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
@@ -1036,8 +1039,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mRecordingNow=false;
 		Intent intent = new Intent(this, DictationRecorderService.class);
 		stopService(intent);
-	   	//can savely recheck audio settings here, didnt let any changes take effect until user stopped recording.
-		recheckAublogSettings();
+	   	//cannot savely recheck audio settings here, the service is still using the audio. instead do it in the prepare player function. recheckAublogSettings();
 	   	
 	   	
 	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
