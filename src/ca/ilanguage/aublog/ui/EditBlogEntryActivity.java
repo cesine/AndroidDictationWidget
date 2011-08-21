@@ -10,7 +10,6 @@ import java.util.Locale;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -81,7 +80,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private AudioManager mAudioManager;
-    private BluetoothAdapter mBluetoothAdapter;
     private MediaPlayer mMediaPlayer;
     Boolean mRecordingNow;
     Boolean mPlayingNow;
@@ -307,8 +305,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		
+        
 //        mMediaPlayer = new MediaPlayer();
 //        mMediaPlayer.setLooping(true); //only initalize media player when user clicks on play incase they dont want to play the audio
         mRecordingNow = false;

@@ -39,6 +39,8 @@ import android.widget.Toast;
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
+import ca.ilanguage.oprime.ui.ListofExperimentsActivity;
+import ca.ilanguage.oprime.ui.RunExperimentActivity;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
@@ -61,75 +63,46 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    // Stop the tracker when it is no longer needed.
 	    tracker.stop();
 	  }
-	@Override
-	protected void onStop(){
-		
-		 
-		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		
-        Boolean useBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
-        if(useBluetooth){
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (!mBluetoothAdapter.isEnabled()) {
-			    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
-			}
-        }
-			/*
-		 * TODO remove the logic to change the audio manager in the settings. instead, recheck the settings at key points in the Edit blog activity, and set all to normal in the ondestroy of main menu
-		 * 
-		 /*
-		 * Always set audio to normal when the preferecnes activty goes off screen, only turn on earpiece or bluetooth if 
-		 * check boxes are checked when user leaves. 
-		 
-		mAudioManager.setMode(AudioManager.MODE_NORMAL);
-        mAudioManager.setSpeakerphoneOn(true);
-    	
-	    Boolean usePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
-	   
-		if(useBluetooth){
-			/*
-	    	 * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
-	    	 Even if a SCO connection is established, the following restrictions apply on audio output streams so that they can be routed to SCO headset: - the stream type must be STREAM_VOICE_CALL - the format must be mono - the sampling must be 16kHz or 8kHz
 
-				Similarly, if a call is received or sent while an application is using the SCO connection, the connection will be lost for the application and NOT returned automatically when the call ends.
-			* Notes:
-			* Use of the blue tooth does not affect the ability to recieve a call while using the app,
-			* However, the app will not have control of hte bluetooth connection when teh phone call comes back. The user must exit the Edit Blog activity.
-			* 
-	    	 
-	    	mAudioManager.startBluetoothSco();
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	mAudioManager.setBluetoothScoOn(true);
-	    	
-	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	String release = Build.VERSION.RELEASE;
-		    if(release.equals("2.2")){
-		    	Toast.makeText(SetPreferencesActivity.this, 
-		    	 		"Warning: before you turn off your bluetooth connection, exit AuBlog.", Toast.LENGTH_LONG).show();
-			 }
-	    	/*
-	    	 * then use the media player as usual
-	    	 
-		}
-		if(usePhoneEarPiece){
+	@Override
+	protected void onStop() {
+		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		Boolean useBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
+		if (useBluetooth) {
 			/*
-	    	 * This works.
-	    	 * 
-	    	 * This constant ROUTE_EARPIECE is deprecated. Do not set audio routing directly, use setSpeakerphoneOn(), setBluetoothScoOn() methods instead.
-	    	 
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	//routes to earpiece by default when speaker phone is off. 
-	    	//mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
-	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	/*
-	    	 * then the app can use the media player as usual
-	    	 
-		}*/
-		super.onStop();
-		
+			 * If the user clicked on usebluetooth, make sure that the bluetooth is enabled by asking user to 
+			 * enable it
+			 * REQUIRES: <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />TODO ?	
+			 */
+			BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+			if (!bluetoothAdapter.isEnabled()) {
+				Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+				startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
+			}
+		}
+
+	}
+
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+		case REQUEST_ENABLE_BLUETOOTH:
+			if (resultCode == RESULT_CANCELED) {
+				/*
+				 * if the user cancels the request to enable bluetooth, or there
+				 * is no bluetooth on the system then uncheck the Use Bluetooth
+				 * box.
+				 */
+				SharedPreferences prefs = getSharedPreferences(
+						PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+				SharedPreferences.Editor editor = prefs.edit();
+				editor.putBoolean(
+						PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO,
+						false);
+			}
+			break;
+		default:
+			break;
+		}
 	}
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
