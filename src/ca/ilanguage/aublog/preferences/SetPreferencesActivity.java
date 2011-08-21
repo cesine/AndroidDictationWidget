@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,6 +42,7 @@ import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {
+	private static final int REQUEST_ENABLE_BLUETOOTH = 0;
 	GoogleAnalyticsTracker tracker;
 	private AudioManager mAudioManager;
     
@@ -61,15 +63,28 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	  }
 	@Override
 	protected void onStop(){
+		
+		 
 		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		/*
+		
+        Boolean useBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
+        if(useBluetooth){
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (!mBluetoothAdapter.isEnabled()) {
+			    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BLUETOOTH);
+			}
+        }
+			/*
+		 * TODO remove the logic to change the audio manager in the settings. instead, recheck the settings at key points in the Edit blog activity, and set all to normal in the ondestroy of main menu
+		 * 
+		 /*
 		 * Always set audio to normal when the preferecnes activty goes off screen, only turn on earpiece or bluetooth if 
 		 * check boxes are checked when user leaves. 
-		 */
+		 
 		mAudioManager.setMode(AudioManager.MODE_NORMAL);
         mAudioManager.setSpeakerphoneOn(true);
     	
-        Boolean useBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
 	    Boolean usePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
 	   
 		if(useBluetooth){
@@ -82,7 +97,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			* Use of the blue tooth does not affect the ability to recieve a call while using the app,
 			* However, the app will not have control of hte bluetooth connection when teh phone call comes back. The user must exit the Edit Blog activity.
 			* 
-	    	 */
+	    	 
 	    	mAudioManager.startBluetoothSco();
 	    	mAudioManager.setSpeakerphoneOn(false);
 	    	mAudioManager.setBluetoothScoOn(true);
@@ -96,14 +111,14 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			 }
 	    	/*
 	    	 * then use the media player as usual
-	    	 */
+	    	 
 		}
 		if(usePhoneEarPiece){
 			/*
 	    	 * This works.
 	    	 * 
 	    	 * This constant ROUTE_EARPIECE is deprecated. Do not set audio routing directly, use setSpeakerphoneOn(), setBluetoothScoOn() methods instead.
-	    	 */
+	    	 
 	    	mAudioManager.setSpeakerphoneOn(false);
 	    	//routes to earpiece by default when speaker phone is off. 
 	    	//mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
@@ -111,8 +126,8 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 	    	/*
 	    	 * then the app can use the media player as usual
-	    	 */
-		}
+	    	 
+		}*/
 		super.onStop();
 		
 	}

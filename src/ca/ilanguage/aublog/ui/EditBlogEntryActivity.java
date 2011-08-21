@@ -10,6 +10,7 @@ import java.util.Locale;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -74,12 +75,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     private Long mTimeAudioWasRecorded;
     private String mAudioSource;//bluetooth(record,play), phone(recordmic, play earpiece) for privacy, speaker(record mic, play speaker)
     private Boolean mUseBluetooth;
+    private Boolean mUseEarPhones;
     private Boolean mUsePhoneEarPiece;
     private String mDateString ="";
     
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private AudioManager mAudioManager;
-    
+    private BluetoothAdapter mBluetoothAdapter;
     private MediaPlayer mMediaPlayer;
     Boolean mRecordingNow;
     Boolean mPlayingNow;
@@ -96,8 +98,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
 	//private Boolean mReturnedTranscription; //check on reload?
 	
-	private static final int GROUP_BASIC = 0;
-	private static final int GROUP_FORMAT = 1;
+	
+	private static final int REQUEST_ENABLE_BLUETOOTH = 0;
 	int selectionStart;
 	int selectionEnd;
 	String mPostContent ="";
@@ -191,70 +193,122 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       Toast.makeText(EditBlogEntryActivity.this, "Configuration changed ", Toast.LENGTH_LONG).show();
 
     }
-    
-    private void recheckAublogSettings(){
-    	SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-	    mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
-	    mUseBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
-	    mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
-	   
-	    if(mUseBluetooth){
-			/*
-	    	 * As the SCO connection establishment can take several seconds, applications should not rely on the connection to be available when the method returns but instead register to receive the intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to be SCO_AUDIO_STATE_CONNECTED.
-	    	 Even if a SCO connection is established, the following restrictions apply on audio output streams so that they can be routed to SCO headset: - the stream type must be STREAM_VOICE_CALL - the format must be mono - the sampling must be 16kHz or 8kHz
 
-				Similarly, if a call is received or sent while an application is using the SCO connection, the connection will be lost for the application and NOT returned automatically when the call ends.
-			* Notes:
-			* Use of the blue tooth does not affect the ability to recieve a call while using the app,
-			* However, the app will not have control of hte bluetooth connection when teh phone call comes back. The user must exit the Edit Blog activity.
-			* 
-	    	 */
-	    	mAudioManager.startBluetoothSco();
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	mAudioManager.setBluetoothScoOn(true);
-	    	
-	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	String release = Build.VERSION.RELEASE;
-//		    if(release.equals("2.2")){
-//		    	Toast.makeText(EditBlogEntryActivity.this, "Warning: Bluetooth bug in Android 2.2." +
-//	    	 		"\n\nExit Aublog before you turn off your bluetooth headset.", Toast.LENGTH_LONG).show();
-//		    }
-		    mAudioSource= "maybebluetooth";
-			
-	    	/*
-	    	 * then use the media player as usual
-	    	 */
-		}
-		if(mUsePhoneEarPiece){
-			/*
-	    	 * This works.
-	    	 * 
-	    	 * This constant ROUTE_EARPIECE is deprecated. Do not set audio routing directly, use setSpeakerphoneOn(), setBluetoothScoOn() methods instead.
-	    	 */
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	//routes to earpiece by default when speaker phone is off. 
-	    	//mAudioManager.setRouting(AudioManager.MODE_NORMAL, AudioManager.ROUTE_EARPIECE, AudioManager.ROUTE_ALL); 
-	    	setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	mAudioSource= "microphone";
-			
-	    	/*
-	    	 * then the app can use the media player as usual
-	    	 */
-		}
+	/**
+	 * Re-checks the audio settings and the installid from the settings.
+	 * 
+	 */
+	private void recheckAublogSettings() {
+		Boolean oldBluetooth=mUseBluetooth;
+		Boolean oldEarphones=mUseEarPhones;  
+		Boolean oldPhoneEarPiece=mUsePhoneEarPiece;
+		SharedPreferences prefs = getSharedPreferences(
+				PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		/*
 		 * set the installid for appending to the labels
 		 */
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+		mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
 		
-    	
-    }
+		mUseBluetooth = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO, false);
+		//mUseEarPhones = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_EARPHONES_AUDIO, false);
+		//controlled properly by Android, dont need to use but included here for completeness.
+		mUseEarPhones = mAudioManager.isWiredHeadsetOn();
+		mUsePhoneEarPiece = prefs.getBoolean(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO, false);
+		
+		if (mUseBluetooth){
+			
+			if( (mAudioManager.isBluetoothScoOn() == false ) || (oldBluetooth ==null ) || (mUseBluetooth != oldBluetooth) )  {
+		
+			/*
+			 * If the user wants bluetooth, but it wasnt set up yet, 
+			 * or the user changed the bluetooth to on...
+			 * 
+			 * TODO As the SCO connection establishment can take several seconds,
+			 * applications should not rely on the connection to be available
+			 * when the method returns but instead register to receive the
+			 * intent ACTION_SCO_AUDIO_STATE_CHANGED and wait for the state to
+			 * be SCO_AUDIO_STATE_CONNECTED. Even if a SCO connection is
+			 * established, the following restrictions apply on audio output
+			 * streams so that they can be routed to SCO headset: - the stream
+			 * type must be STREAM_VOICE_CALL - the format must be mono - the
+			 * sampling must be 16kHz or 8kHz
+			 * 
+			 * Similarly, if a call is received or sent while an application is
+			 * using the SCO connection, the connection will be lost for the
+			 * application and NOT returned automatically when the call ends.
+			 * Notes: Use of the blue tooth does not affect the ability to
+			 * recieve a call while using the app, However, the app will not
+			 * have control of hte bluetooth connection when teh phone call
+			 * comes back. Aublog refreshes the settings at key recording/play situations to reestablish the connection.
+			 */
+			mAudioManager.startBluetoothSco();
+			mAudioManager.setSpeakerphoneOn(false);
+			mAudioManager.setBluetoothScoOn(true);
+
+			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+			mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+			mAudioSource = "maybe bluetooth";
+			}//end iff to change bluetooth settings
+			/*
+			 * else blue tooth is on, and nothing changed in the user preferences. it should still be on, so dont change any audio manager.
+			 * if other areas of the app turn off the blue tooth then this else might be needed to confirm that bluetooth is set up.
+			 */
+		}else if (oldBluetooth){
+			/*
+			 * mUseBluetooth is off now, but it was ON then the user turned off
+			 * bluetooth 
+			 * 
+			 * NOTE: in Android 2.2 (fixed in Android 2.2.1) stop
+			 * bluetooth doest completely release it. the only way to release it
+			 * is to kill the process that called it, this is why AuBlog kills
+			 * it self in the ondestroy of the main menu, it doesnt have to kill
+			 * itself in the on destroy of the notification controller (which
+			 * can be called without running the main menu) because it doesnt do anything with the audio manager.
+			 */
+			mAudioManager.setMode(AudioManager.MODE_NORMAL);
+			mAudioManager.setSpeakerphoneOn(true);
+			mAudioManager.setBluetoothScoOn(false);
+			mAudioManager.stopBluetoothSco();
+		}
+		/*
+		 * regardless of whether user wants either bluetooth or the phone's internal incall speaker
+		 * the speakerphone and audiomanager settings are the same 
+		 */
+		if (mUsePhoneEarPiece || mUseBluetooth){
+			if ((oldPhoneEarPiece ==null)||(mUsePhoneEarPiece != oldPhoneEarPiece)) {
+			/*
+			 * If user wants to play audio through the phone's in-call speaker,
+			 */
+			mAudioManager.setSpeakerphoneOn(false);
+			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+			mAudioManager.setMode(AudioManager.MODE_IN_CALL);//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
+			mAudioSource = "internal microphone";
+			}
+		}else{
+			/*
+			 * if mUseBluetooth and the Phones earpiece are supposed to be off,
+			 * This sets audio values to normal
+			 * 
+			 * This is all that is needed to enable the Headset/earphones
+			 * option. As the earphones settings are controlled by simply
+			 * plugging them in. The android, if in normal mode, will switch to
+			 * earphones mode.
+			 */
+			mAudioManager.setMode(AudioManager.MODE_NORMAL);
+			mAudioManager.setSpeakerphoneOn(true);
+		}
+		/*
+		 * then the app can use the media player, and the recorder as usual
+		 */
+	}
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+		
 //        mMediaPlayer = new MediaPlayer();
 //        mMediaPlayer.setLooping(true); //only initalize media player when user clicks on play incase they dont want to play the audio
         mRecordingNow = false;

@@ -36,10 +36,11 @@
 <string name="preference_enable_bluetooth_audio">Use Bluetooth for Audio Recording/Playback</string>
 <string name="preference_enable_bluetooth_audio_summary">If checked the app will use a paired bluetooth headset to record and play audio, if no device is connected it will play through the earpiece of the phone so that the app wont unexpectedly use the speaker.</string>
 
+<string name="preference_enable_earphones_audio">Use Earphones/Headset for Audio Recording/Playback</string>
+<string name="preference_enable_earphones_audio_summary">If a headset is plugged in, by default the app will use the headset to record and play audio</string>
 
-<string name="preference_enable_phone_earpiece_audio">Use Phone Earpiece for Audio Playback</string>
+<string name="preference_enable_phone_earpiece_audio">Use In-call Speaker for Audio Playback</string>
 <string name="preference_enable_phone_earpiece_audio_summary">If checked the app will play audio through the phone earpiece, rather than through the speaker.</string>
-
 
 <string name="preference_safe_mode">Safe Mode</string>
 <string name="preference_safe_mode_summary">Enables safety hacks for broken devices (Cliq, etc), but causes some visual artifacts. Try this if you have problems.</string>

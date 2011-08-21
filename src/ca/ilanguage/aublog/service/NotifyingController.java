@@ -22,6 +22,7 @@ package ca.ilanguage.aublog.service;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -55,7 +56,22 @@ public class NotifyingController extends Activity {
         button.setOnClickListener(mStopListener);
     }
 
-    private OnClickListener mStartListener = new OnClickListener() {
+    @Override
+	protected void onDestroy() {
+    	String release = Build.VERSION.RELEASE;
+	    
+		super.onDestroy();
+		/*
+		if(release.equals("2.2")){
+	    	//this does not show a force close, but does sucessfully allow the user to disconnect the bluetooth after they close aublog. 
+	    	//if they have android 2.2 and they disconnect the bluetooth without quitting aublog then the device will reboot.
+	    	 android.os.Process.killProcess(android.os.Process.myPid());
+	    }else{
+	    	//do nothing, bluetooth issue is fixed in 2.2.1 and above
+	    }*/
+	}
+
+	private OnClickListener mStartListener = new OnClickListener() {
         public void onClick(View v) {
         	Intent intent = new Intent(NotifyingController.this, NotifyingTranscriptionService.class);
         	intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, "/sdcard/AuBlog/test.mp3");
