@@ -8316,7 +8316,7 @@
 					overridable : true,
 					width : 3,
 					height : 3,
-					color : "#444"
+					color : "#f00"
 				},
 				Label : {
 					textAlign : "center",
