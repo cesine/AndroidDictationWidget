@@ -25,6 +25,7 @@
 
 </style>
 <script>
+var mfreshdata;
 $(function() {
     $(this.textBox)
         .change(autoSize)
@@ -46,7 +47,9 @@ function autoSize() {
 <script type="text/javascript">
 <!--
 $(document).ready(function()	{
-	fillFromAndroidActivity();
+	if(mfreshdata != false){
+		fillFromAndroidActivity();
+	}
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
 	$('#markItUp').markItUp(mySettings);
@@ -182,6 +185,7 @@ $(document).ready(function()	{
     	Android.publishPostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function fillFromAndroidActivity(){
+    	mfreshData=false;
     	document.getElementById('f-title').value= Android.fetchPostTitleJS();
     	document.getElementById('markItUp').value= Android.fetchPostContentJS();
     	document.getElementById('post-labels').value= Android.fetchPostLabelsJS();

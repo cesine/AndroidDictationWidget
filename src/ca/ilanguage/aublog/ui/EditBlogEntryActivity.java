@@ -370,7 +370,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             mCursor.moveToFirst();
 			try {
 				//if the edit blog entry screen is fresh (ie, made from some external ativity not from an on puase or rotate screen, then get the values from the db
-				if(mPostId.equals("")|| mFreshEditScreen==true){
+				if(mPostId.equals("") || mFreshEditScreen != false){
 					mFreshEditScreen = false;
 					mPostId = mCursor.getString(0);
 					mPostTitle = mCursor.getString(1);
@@ -627,8 +627,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       // Save UI state changes to the savedInstanceState.
       // This bundle will be passed to onCreate if the process is
       // killed and restarted.
-    	mWebView.loadUrl("javascript:savePostToState()");
+    	//mWebView.loadUrl("javascript:savePostToState()");
     	//TODO 
+    	
+    	mFreshEditScreen = false; 
     	mWebView.saveState(savedInstanceState);//http://stackoverflow.com/questions/4726637/android-how-to-savestate-of-a-webview-with-an-addjavascriptinterface-attached
     	/*THIS PUTS IN THE OLD STUFF, SEEMS TO WORK WITH OUT IT.
 	      savedInstanceState.putString("title", mPostTitle);
@@ -647,9 +649,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-    	//if !=null mWebView.restoreState(savedInstanceState);
-    	String would;
-    	would ="run here";
+    	if(savedInstanceState != null){
+    		mWebView.restoreState(savedInstanceState);
+    	}
+    	
       super.onRestoreInstanceState(savedInstanceState);
       // Restore UI state from the savedInstanceState.
       // This bundle has also been passed to onCreate.
@@ -750,17 +753,18 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	@Override
 	protected void onPause() {
 		mFreshEditScreen=false;
+		tracker.trackEvent(
+	            "Event",  // Category
+	            "Pause",  // Action
+	            "event was paused: "+mAuBlogInstallId, // Label
+	            38);       // Value
+    	
 		if(mURIDeleted == true){
 			//do nothing
 		}else{
-	    	mWebView.loadUrl("javascript:savePostToState()");
-	    	tracker.trackEvent(
-		            "Event",  // Category
-		            "Pause",  // Action
-		            "event was paused: "+mAuBlogInstallId, // Label
-		            38);       // Value
+	    	//mWebView.loadUrl("javascript:savePostToState()");
 	    	
-			saveAsSelfToDB();
+			//saveAsSelfToDB();
 		}
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
@@ -817,8 +821,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	mPostContent= strContent;
     	mPostTitle=strTitle;
     	mPostLabels=strLabels;
-    	if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
-			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+    	if (mLongestEverContent.length() < (strTitle+strContent+strLabels).length() ){
+			mLongestEverContent=strContent+strContent+strLabels;
 		}
     }
 	private void saveAsSelfToDB(){
@@ -861,17 +865,21 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	public void deleteEntry(Uri uri){
     	mDeleted = true;
-    	/*
-		 * Flag entry as deleted
-		 */
-    	
     	tracker.trackEvent(
 	            "AuBlogLifeCycleEvent",  // Category
 	            "Delete",  // Action
 	            "entry was flagged as deleted in the database"+uri.getLastPathSegment()+" : "+mAuBlogInstallId, // Label
 	            39);       // Value
+    	/*
+		 * Flag entry as deleted
+		 */
 		ContentValues values = new ContentValues();
 		values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
+		/*
+		 * TODO decide if want to change the parent node to "trash" so that the entry appears as deleted.
+		 * ** if it has children then its children will be "deleted" too.
+		 * 
+		 */
 		getContentResolver().update(uri, values,null, null);
 //		getContentResolver().delete(uri, null, null);
 		flagDraftTreeAsNeedingToBeReGenerated();
@@ -882,14 +890,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * An android method to wrap a call to the TTS engine, the logic of if the app should use text to speech (based on settings check box) is handled in the javascript interface. 
 	 */
 	public void readTTS(String message){
-		
 		tracker.trackEvent(
 	            "TTS",  // Category
 	            "Use",  // Action
 	            "spoke message: "+message+" : "+mAuBlogInstallId, // Label
 	            361);       // Value
-		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);
-		
+		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);	
 	}
 	/**
 	 * Inner class which waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. 
@@ -960,13 +966,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mMediaPlayer.prepareAsync();
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (IllegalStateException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	public Boolean hasAudioFileAttached(){
@@ -1310,7 +1316,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 							Toast.LENGTH_LONG).show();
 					getContentResolver().delete(mUri, null, null);
 					mURIDeleted = true;
-					flagDraftTreeAsNeedingToBeReGenerated();
+					flagDraftTreeAsNeedingToBeReGenerated();//activity finishes when mURI is deleted so no problems
 				} else {
 					Toast.makeText(
 							EditBlogEntryActivity.this,
