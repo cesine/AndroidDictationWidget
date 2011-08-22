@@ -329,6 +329,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState ==null){
+        	mFreshEditScreen=true;
+        }
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
@@ -371,7 +374,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			try {
 				//if the edit blog entry screen is fresh (ie, made from some external ativity not from an on puase or rotate screen, then get the values from the db
 				if(mPostId.equals("") || mFreshEditScreen != false){
-					mFreshEditScreen = false;
+					//mFreshEditScreen = false;
 					mPostId = mCursor.getString(0);
 					mPostTitle = mCursor.getString(1);
 					mPostContent = mCursor.getString(2);
@@ -468,6 +471,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * */
         public void zeroOutParentResultFileJS(){
         	mAudioResultsFile="";
+        }
+        public Boolean findOutIfFreshDataJS(){
+        	return mFreshEditScreen;
         }
         public void showToastJS(String toast) {
             //readTTS(toast);
@@ -826,6 +832,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
     }
 	private void saveAsSelfToDB(){
+		mFreshEditScreen = false;
 		if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
 			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
 		}
@@ -1190,6 +1197,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	
 	
 	private void saveAsDaughterToDB(String strTitle, String strContent, String strLabels){
+		mFreshEditScreen = false;
 		/*
     	 * If it has no content, and no attached audio, save it as itself and return
     	 */

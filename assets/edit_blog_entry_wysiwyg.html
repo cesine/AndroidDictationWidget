@@ -25,7 +25,7 @@
 
 </style>
 <script>
-var mfreshdata;
+
 $(function() {
     $(this.textBox)
         .change(autoSize)
@@ -125,6 +125,7 @@ $(document).ready(function()	{
     		*/
     		Android.startToRecordJS();
 	    	document.getElementById('recordButton').value="Stop Dictation";
+	    	//TODO hide the play button.
     	}
     }
     /*
@@ -185,10 +186,20 @@ $(document).ready(function()	{
     	Android.publishPostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function fillFromAndroidActivity(){
-    	mfreshData=false;
-    	document.getElementById('f-title').value= Android.fetchPostTitleJS();
-    	document.getElementById('markItUp').value= Android.fetchPostContentJS();
-    	document.getElementById('post-labels').value= Android.fetchPostLabelsJS();
+    	window.mfreshData=Android.findOutIfFreshDataJS();
+    	if(window.mFreshData == true){
+    		/* if javascript variables are null, get them from the activity*/
+	    	window.mtitle=Android.fetchPostTitleJS();
+	    	window.mcontent=Android.fetchPostContentJS();
+	    	window.mlabels= Android.fetchPostLabelsJS();
+    	}
+    	/*load content from javascript variables*/
+    	document.getElementById('f-title').value=window.mtitle;
+    	document.getElementById('post-labels').value=window.mlabels;
+    	if(window.mcontent != ""){
+    		document.getElementById('markItUp').value= window.mcontent;
+    	}
+    	/* play button */
     	var doit = Android.hasAudioFileJS();
     	if (doit == "true" ){
     		displayPlayButton();
