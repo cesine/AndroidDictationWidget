@@ -25,7 +25,6 @@
 
 </style>
 <script>
-
 $(function() {
     $(this.textBox)
         .change(autoSize)
@@ -47,9 +46,7 @@ function autoSize() {
 <script type="text/javascript">
 <!--
 $(document).ready(function()	{
-	if(mfreshdata != false){
-		fillFromAndroidActivity();
-	}
+	fillFromAndroidActivity();
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
 	$('#markItUp').markItUp(mySettings);
@@ -125,7 +122,7 @@ $(document).ready(function()	{
     		*/
     		Android.startToRecordJS();
 	    	document.getElementById('recordButton').value="Stop Dictation";
-	    	//TODO hide the play button.
+	    	
     	}
     }
     /*
@@ -174,6 +171,7 @@ $(document).ready(function()	{
     function saveButton(){
     	readTTSPost();
     	Android.zeroOutParentResultFileJS();
+    	//hide play button
     	Android.savePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function savePostToDB(){
@@ -186,20 +184,9 @@ $(document).ready(function()	{
     	Android.publishPostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function fillFromAndroidActivity(){
-    	window.mfreshData=Android.findOutIfFreshDataJS();
-    	if(window.mFreshData == true){
-    		/* if javascript variables are null, get them from the activity*/
-	    	window.mtitle=Android.fetchPostTitleJS();
-	    	window.mcontent=Android.fetchPostContentJS();
-	    	window.mlabels= Android.fetchPostLabelsJS();
-    	}
-    	/*load content from javascript variables*/
-    	document.getElementById('f-title').value=window.mtitle;
-    	document.getElementById('post-labels').value=window.mlabels;
-    	if(window.mcontent != ""){
-    		document.getElementById('markItUp').value= window.mcontent;
-    	}
-    	/* play button */
+    	document.getElementById('f-title').value= Android.fetchPostTitleJS();
+    	document.getElementById('markItUp').value= Android.fetchPostContentJS();
+    	document.getElementById('post-labels').value= Android.fetchPostLabelsJS();
     	var doit = Android.hasAudioFileJS();
     	if (doit == "true" ){
     		displayPlayButton();

@@ -104,17 +104,17 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	int selectionStart;
 	int selectionEnd;
 	Bundle mWebViewsState;
-	String mPostContent ="";
-	String mPostTitle ="";
-	String mPostLabels ="";
-	String mPostParent ="";
-	String mPostId ="";
+	String mPostContent;
+	String mPostTitle;
+	String mPostLabels;
+	String mPostParent;
+	String mPostId;
 	String mAudioResultsFile;
 	String mAudioResultsFileStatus;
 	Boolean mFreshEditScreen;
-	private Boolean mDeleted = false;
-	private Boolean mURIDeleted = false;
-	String mLongestEverContent ="";
+	private Boolean mDeleted;
+	private Boolean mURIDeleted =false;;
+	String mLongestEverContent;
 	private  String[] PROJECTION = new String[] {
 		AuBlogHistory._ID, //0
 		AuBlogHistory.ENTRY_TITLE, 
@@ -373,7 +373,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             mCursor.moveToFirst();
 			try {
 				//if the edit blog entry screen is fresh (ie, made from some external ativity not from an on puase or rotate screen, then get the values from the db
-				if(mPostId.equals("") || mFreshEditScreen != false){
+				if(mFreshEditScreen == true){//TODO change to true now that true is being set on first create only
 					//mFreshEditScreen = false;
 					mPostId = mCursor.getString(0);
 					mPostTitle = mCursor.getString(1);
@@ -553,6 +553,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	return "Id: "+mPostId+" Parent: "+mPostParent+" Deleted: "+mDeleted.toString()+" LongestEverString:"+mLongestEverContent;
         }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
+        	mPostContent=strContent;
+        	mPostTitle=strTitle;
+        	mPostLabels=strLabels;
+        	
         	tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "saveSTate",  // Action
@@ -633,7 +637,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       // Save UI state changes to the savedInstanceState.
       // This bundle will be passed to onCreate if the process is
       // killed and restarted.
-    	//mWebView.loadUrl("javascript:savePostToState()");
+    	mWebView.loadUrl("javascript:savePostToState()");
     	//TODO 
     	
     	mFreshEditScreen = false; 
@@ -818,9 +822,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
 	}
 	private void saveStateToActivity(String strTitle, String strContent, String strLabels){
-    	if(mDeleted == true){
-    		return;
-    	}
+//    	if(mDeleted == true){
+//    		return;
+//    	} //let user edit deleted posts
     	if (!(mPostTitle.equals(strTitle)) ){
     		flagDraftTreeAsNeedingToBeReGenerated();
     	}
@@ -1333,6 +1337,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 									+ " daughters.", Toast.LENGTH_LONG).show();
 				}
 			}
+			mFreshEditScreen =true;
 		}
 //		if (keyCode == KeyEvent.KEYCODE_MENU) {
 //			int tmp1 = 0, tmp2 = 0;
