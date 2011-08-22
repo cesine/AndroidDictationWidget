@@ -384,6 +384,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		    			//SET the media player to point to this audio file so that the play button will work. 
 //			    		mMediaPlayer.setDataSource(mAudioResultsFile);
 //			    		mMediaPlayer.prepareAsync();
+		    			if(mPostTitle.length() <1){
+		    				mPostTitle= "(Audio only)";
+		    			}
 		    			preparePlayerAttachedAudioFile();
 					}
 					if("0".equals(mCursor.getString(5))){ 
@@ -626,7 +629,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       // killed and restarted.
     	mWebView.loadUrl("javascript:savePostToState()");
     	//TODO 
-    	mWebView.saveState(mWebViewsState);
+    	mWebView.saveState(savedInstanceState);//http://stackoverflow.com/questions/4726637/android-how-to-savestate-of-a-webview-with-an-addjavascriptinterface-attached
     	/*THIS PUTS IN THE OLD STUFF, SEEMS TO WORK WITH OUT IT.
 	      savedInstanceState.putString("title", mPostTitle);
 	      savedInstanceState.putString("content", mPostContent);
@@ -644,7 +647,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-    	//TODO mWebView.restoreState(mWebViewsState);
+    	//if !=null mWebView.restoreState(savedInstanceState);
     	String would;
     	would ="run here";
       super.onRestoreInstanceState(savedInstanceState);
@@ -746,6 +749,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 */
 	@Override
 	protected void onPause() {
+		mFreshEditScreen=false;
 		if(mURIDeleted == true){
 			//do nothing
 		}else{
@@ -755,7 +759,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		            "Pause",  // Action
 		            "event was paused: "+mAuBlogInstallId, // Label
 		            38);       // Value
-	    	mFreshEditScreen=false;
+	    	
 			saveAsSelfToDB();
 		}
 		if (audioFileUpdateReceiver != null) {
@@ -823,7 +827,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 //		if (mDeleted == true){
 //			return ;
-//		} //alow users to edit deleted nodes. TODO if the node is deleted, change javascript buton onclic to undelete.
+//		} //alow users to edit deleted nodes. TODO if the node is deleted, change javascript buton onclick to undelete.
     	try{
     		
     		ContentValues values = new ContentValues();
