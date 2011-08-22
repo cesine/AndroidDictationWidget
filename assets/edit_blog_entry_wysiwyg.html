@@ -122,6 +122,7 @@ $(document).ready(function()	{
     		*/
     		Android.startToRecordJS();
 	    	document.getElementById('recordButton').value="Stop Dictation";
+	    	
     	}
     }
     /*
@@ -170,6 +171,7 @@ $(document).ready(function()	{
     function saveButton(){
     	readTTSPost();
     	Android.zeroOutParentResultFileJS();
+    	//hide play button
     	Android.savePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function savePostToDB(){

@@ -104,17 +104,17 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	int selectionStart;
 	int selectionEnd;
 	Bundle mWebViewsState;
-	String mPostContent ="";
-	String mPostTitle ="";
-	String mPostLabels ="";
-	String mPostParent ="";
-	String mPostId ="";
+	String mPostContent;
+	String mPostTitle;
+	String mPostLabels;
+	String mPostParent;
+	String mPostId;
 	String mAudioResultsFile;
 	String mAudioResultsFileStatus;
 	Boolean mFreshEditScreen;
-	private Boolean mDeleted = false;
-	private Boolean mURIDeleted = false;
-	String mLongestEverContent ="";
+	private Boolean mDeleted;
+	private Boolean mURIDeleted =false;;
+	String mLongestEverContent;
 	private  String[] PROJECTION = new String[] {
 		AuBlogHistory._ID, //0
 		AuBlogHistory.ENTRY_TITLE, 
@@ -188,14 +188,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 	 */
     
-    
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-      super.onConfigurationChanged(newConfig);
-//      setContentView(R.layout.myLayout);
-      Toast.makeText(EditBlogEntryActivity.this, "Configuration changed ", Toast.LENGTH_LONG).show();
 
-    }
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
@@ -329,6 +322,41 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(savedInstanceState ==null){
+        	mFreshEditScreen=true;
+        }else{
+        	/*
+    		 * make sure non of the variables are still null. they should have been filled in by the cursor or by the onrestorestate
+    		 */
+    		
+        	//mWebView.restoreState(savedInstanceState);
+            //super.onRestoreInstanceState(savedInstanceState);
+        	
+    		if(mPostTitle ==null){
+    			mPostTitle = "";
+    		}
+    		if(mPostContent == null){
+    			mPostContent = "";
+    		}
+    		if(mPostLabels == null){
+    			mPostLabels = "";
+    		}
+    		if(mDeleted == null){
+    			mDeleted = false;
+    		}
+    		if( mLongestEverContent ==null){
+    			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+    		}
+    		if(mAudioResultsFile == null){
+    			mAudioResultsFile = "";
+    		}
+    		if(mAudioResultsFileStatus == null){
+    			mAudioResultsFileStatus = "";
+    		}
+    		if(mTimeAudioWasRecorded ==null){
+    			mTimeAudioWasRecorded = (long) 0;
+    		}
+        }//end else to control if its the first oncreate (then fetch from database)
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
@@ -370,12 +398,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             mCursor.moveToFirst();
 			try {
 				//if the edit blog entry screen is fresh (ie, made from some external ativity not from an on puase or rotate screen, then get the values from the db
-				if(mPostId.equals("")|| mFreshEditScreen==true){
-					mFreshEditScreen = false;
+				if(mFreshEditScreen == true){//TODO change to true now that true is being set on first create only
+					//mFreshEditScreen = false;
 					mPostId = mCursor.getString(0);
 					mPostTitle = mCursor.getString(1);
 					mPostContent = mCursor.getString(2);
 					mPostLabels =mCursor.getString(3);
+					mLongestEverContent =mPostTitle+mPostContent+mPostLabels;
 					mPostParent = mCursor.getString(6);
 					mAudioResultsFile = mCursor.getString(10);
 					mAudioResultsFileStatus = mCursor.getString(11);
@@ -384,6 +413,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		    			//SET the media player to point to this audio file so that the play button will work. 
 //			    		mMediaPlayer.setDataSource(mAudioResultsFile);
 //			    		mMediaPlayer.prepareAsync();
+		    			if(mPostTitle.length() <1){
+		    				mPostTitle= "(Audio only)";
+		    			}
 		    			preparePlayerAttachedAudioFile();
 					}
 					if("0".equals(mCursor.getString(5))){ 
@@ -398,6 +430,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				}else{//else, use the saved state variables
 					String tmp = "";
 					tmp = "dont look in the db for the values, get them from the state";
+					
 					//Toast.makeText(EditBlogEntryActivity.this, "Returning from rotate, no info should be lost. ", Toast.LENGTH_LONG).show();
 				}
 
@@ -422,9 +455,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			//this should never be executed
 			//this is geting executed when click on a view drafts tree and edit !! not supposed to, the uri came in properly
 //			mPostContent="";
-			mPostLabels="";
+//			mPostLabels="";
 //			mPostTitle="";
+			
 		}
+		
 		mWebView.loadUrl("file:///android_asset/edit_blog_entry_wysiwyg.html");
     }
     /**
@@ -465,6 +500,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * */
         public void zeroOutParentResultFileJS(){
         	mAudioResultsFile="";
+        }
+        public Boolean findOutIfFreshDataJS(){
+        	return mFreshEditScreen;
         }
         public void showToastJS(String toast) {
             //readTTS(toast);
@@ -530,20 +568,35 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public String hasAudioFileJS(){
         	return hasAudioFileAttached().toString();
         }
-        
         public String fetchPostContentJS(){
-        	return mPostContent;
+        	if (mPostContent == null){
+        		return "";
+        	}else{
+        		return mPostContent;
+        	}        	
         }
         public String fetchPostTitleJS(){
-        	return mPostTitle;
+        	if (mPostTitle == null){
+        		return "";
+        	}else{
+        		return mPostTitle;
+        	}
         }
         public String fetchPostLabelsJS(){
-        	return mPostLabels;
+        	if (mPostLabels == null){
+        		return "";
+        	}else{
+        		return mPostLabels;
+        	}
         }
         public String fetchDebugInfoJS(){
         	return "Id: "+mPostId+" Parent: "+mPostParent+" Deleted: "+mDeleted.toString()+" LongestEverString:"+mLongestEverContent;
         }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
+        	mPostContent=strContent;
+        	mPostTitle=strTitle;
+        	mPostLabels=strLabels;
+        	
         	tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "saveSTate",  // Action
@@ -621,44 +674,59 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }//end javascript interface
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
+    	//CAREFUL: you need to call super.onSaveInstanceState(savedInstanceState) before adding your values to the Bundle, or they will get wiped out on that call 
+    	//http://stackoverflow.com/questions/151777/how-do-i-save-an-android-applications-state
+    	mWebView.loadUrl("javascript:savePostToState()");
+    	super.onSaveInstanceState(savedInstanceState);
       // Save UI state changes to the savedInstanceState.
       // This bundle will be passed to onCreate if the process is
       // killed and restarted.
-    	mWebView.loadUrl("javascript:savePostToState()");
     	//TODO 
-    	mWebView.saveState(mWebViewsState);
+    	
+    	mFreshEditScreen = false; 
+    	//mWebView.saveState(savedInstanceState);//http://stackoverflow.com/questions/4726637/android-how-to-savestate-of-a-webview-with-an-addjavascriptinterface-attached
     	/*THIS PUTS IN THE OLD STUFF, SEEMS TO WORK WITH OUT IT.
+    	 * 
+    	 */
 	      savedInstanceState.putString("title", mPostTitle);
 	      savedInstanceState.putString("content", mPostContent);
 	      savedInstanceState.putString("labels", mPostLabels);
 	      savedInstanceState.putString("longestcontentever", mLongestEverContent);
+	      savedInstanceState.putString("audiofile",mAudioResultsFile);
+	      savedInstanceState.putBoolean("fresheditscreen",mFreshEditScreen);
+	      savedInstanceState.putString("audiofilestatus",mAudioResultsFileStatus);
 	      savedInstanceState.putBoolean("deleted", mDeleted);
 	      savedInstanceState.putString("parentid", mPostParent);
 	      savedInstanceState.putString("id",mPostId);
 //	      savedInstanceState.putString("uri", mUri.getPath());
- * 
- */
+ 
       
       // etc.
-      super.onSaveInstanceState(savedInstanceState);
+     
     }
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-    	//TODO mWebView.restoreState(mWebViewsState);
-    	String would;
-    	would ="run here";
-      super.onRestoreInstanceState(savedInstanceState);
+    	super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState != null){
+    		//mWebView.restoreState(savedInstanceState);
+    	}
+    	
       // Restore UI state from the savedInstanceState.
       // This bundle has also been passed to onCreate.
       /*THIS PUTS UP THE OLD VERSION
+       * */
+       
       mPostTitle = savedInstanceState.getString("title");
       mPostContent = savedInstanceState.getString("content");
       mPostLabels = savedInstanceState.getString("labels");
       mLongestEverContent = savedInstanceState.getString("longestcontentever");
+      mAudioResultsFile = savedInstanceState.getString("audiofile");
+      mFreshEditScreen = savedInstanceState.getBoolean("fresheditscreen");
+      mAudioResultsFileStatus = savedInstanceState.getString("audiofilestatus");
       mDeleted = savedInstanceState.getBoolean("deleted");
       mPostParent = savedInstanceState.getString("parentid");
       mPostId = savedInstanceState.getString("id");
-      */
+      
 //      mUri = new Uri(savedInstanceState.getString("uri"));
     }
     /* dont import transcriptions in android, do it in javascript
@@ -746,17 +814,18 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 */
 	@Override
 	protected void onPause() {
+		mFreshEditScreen=false;
+		tracker.trackEvent(
+	            "Event",  // Category
+	            "Pause",  // Action
+	            "event was paused: "+mAuBlogInstallId, // Label
+	            38);       // Value
+    	
 		if(mURIDeleted == true){
 			//do nothing
 		}else{
 	    	mWebView.loadUrl("javascript:savePostToState()");
-	    	tracker.trackEvent(
-		            "Event",  // Category
-		            "Pause",  // Action
-		            "event was paused: "+mAuBlogInstallId, // Label
-		            38);       // Value
-	    	mFreshEditScreen=false;
-			saveAsSelfToDB();
+	    	saveAsSelfToDB();
 		}
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
@@ -804,26 +873,27 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
 	}
 	private void saveStateToActivity(String strTitle, String strContent, String strLabels){
-    	if(mDeleted == true){
-    		return;
-    	}
+//    	if(mDeleted == true){
+//    		return;
+//    	} //let user edit deleted posts
     	if (!(mPostTitle.equals(strTitle)) ){
     		flagDraftTreeAsNeedingToBeReGenerated();
     	}
     	mPostContent= strContent;
     	mPostTitle=strTitle;
     	mPostLabels=strLabels;
-    	if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
-			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+    	if (mLongestEverContent.length() < (strTitle+strContent+strLabels).length() ){
+			mLongestEverContent=strContent+strContent+strLabels;
 		}
     }
 	private void saveAsSelfToDB(){
+		mFreshEditScreen = false;
 		if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
 			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
 		}
 //		if (mDeleted == true){
 //			return ;
-//		} //alow users to edit deleted nodes. TODO if the node is deleted, change javascript buton onclic to undelete.
+//		} //alow users to edit deleted nodes. TODO if the node is deleted, change javascript buton onclick to undelete.
     	try{
     		
     		ContentValues values = new ContentValues();
@@ -857,17 +927,21 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	public void deleteEntry(Uri uri){
     	mDeleted = true;
-    	/*
-		 * Flag entry as deleted
-		 */
-    	
     	tracker.trackEvent(
 	            "AuBlogLifeCycleEvent",  // Category
 	            "Delete",  // Action
 	            "entry was flagged as deleted in the database"+uri.getLastPathSegment()+" : "+mAuBlogInstallId, // Label
 	            39);       // Value
+    	/*
+		 * Flag entry as deleted
+		 */
 		ContentValues values = new ContentValues();
 		values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
+		/*
+		 * TODO decide if want to change the parent node to "trash" so that the entry appears as deleted.
+		 * ** if it has children then its children will be "deleted" too.
+		 * 
+		 */
 		getContentResolver().update(uri, values,null, null);
 //		getContentResolver().delete(uri, null, null);
 		flagDraftTreeAsNeedingToBeReGenerated();
@@ -878,14 +952,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * An android method to wrap a call to the TTS engine, the logic of if the app should use text to speech (based on settings check box) is handled in the javascript interface. 
 	 */
 	public void readTTS(String message){
-		
 		tracker.trackEvent(
 	            "TTS",  // Category
 	            "Use",  // Action
 	            "spoke message: "+message+" : "+mAuBlogInstallId, // Label
 	            361);       // Value
-		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);
-		
+		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);	
 	}
 	/**
 	 * Inner class which waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. 
@@ -956,13 +1028,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mMediaPlayer.prepareAsync();
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (IllegalStateException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 	public Boolean hasAudioFileAttached(){
@@ -1180,10 +1252,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	
 	
 	private void saveAsDaughterToDB(String strTitle, String strContent, String strLabels){
+		mFreshEditScreen = false;
 		/*
     	 * If it has no content, and no attached audio, save it as itself and return
     	 */
-    	if ( (strTitle+strContent+strContent).length() < 2 && mAudioResultsFile.length() <5){
+    	if ( ( (mPostTitle+mPostContent+mPostTitle).length() < 2 || (strTitle+strContent+strLabels).length()< 2 ) && mAudioResultsFile.length() <5){
 			saveStateToActivity(strTitle, strContent, strLabels);
 			saveAsSelfToDB();
 			tracker.trackEvent(
@@ -1301,20 +1374,16 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				if (cursor.getCount() < 1) {
 					Toast.makeText(
 							EditBlogEntryActivity.this,
-							"Deleting " + mUri.getLastPathSegment()
-									+ " it's empty and it has no daughters.",
+							"Discarding entry " + mUri.getLastPathSegment(),// + " it's empty and it has no daughters.",
 							Toast.LENGTH_LONG).show();
 					getContentResolver().delete(mUri, null, null);
 					mURIDeleted = true;
-					flagDraftTreeAsNeedingToBeReGenerated();
+					flagDraftTreeAsNeedingToBeReGenerated();//activity finishes when mURI is deleted so no problems
 				} else {
-					Toast.makeText(
-							EditBlogEntryActivity.this,
-							"Not Deleting " + mUri.getLastPathSegment()
-									+ " it has" + cursor.getCount()
-									+ " daughters.", Toast.LENGTH_LONG).show();
+					//Toast.makeText(EditBlogEntryActivity.this,"Not Deleting " + mUri.getLastPathSegment()+ " it has" + cursor.getCount()+ " daughters.", Toast.LENGTH_LONG).show();
 				}
 			}
+			mFreshEditScreen =true;
 		}
 //		if (keyCode == KeyEvent.KEYCODE_MENU) {
 //			int tmp1 = 0, tmp2 = 0;
