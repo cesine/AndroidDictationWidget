@@ -330,7 +330,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		 */
     		
         	//mWebView.restoreState(savedInstanceState);
-            super.onRestoreInstanceState(savedInstanceState);
+            //super.onRestoreInstanceState(savedInstanceState);
         	
     		if(mPostTitle ==null){
     			mPostTitle = "";
@@ -674,28 +674,35 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }//end javascript interface
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
+    	//CAREFUL: you need to call super.onSaveInstanceState(savedInstanceState) before adding your values to the Bundle, or they will get wiped out on that call 
+    	//http://stackoverflow.com/questions/151777/how-do-i-save-an-android-applications-state
+    	mWebView.loadUrl("javascript:savePostToState()");
+    	super.onSaveInstanceState(savedInstanceState);
       // Save UI state changes to the savedInstanceState.
       // This bundle will be passed to onCreate if the process is
       // killed and restarted.
-    	mWebView.loadUrl("javascript:savePostToState()");
     	//TODO 
     	
     	mFreshEditScreen = false; 
     	//mWebView.saveState(savedInstanceState);//http://stackoverflow.com/questions/4726637/android-how-to-savestate-of-a-webview-with-an-addjavascriptinterface-attached
     	/*THIS PUTS IN THE OLD STUFF, SEEMS TO WORK WITH OUT IT.
+    	 * 
+    	 */
 	      savedInstanceState.putString("title", mPostTitle);
 	      savedInstanceState.putString("content", mPostContent);
 	      savedInstanceState.putString("labels", mPostLabels);
 	      savedInstanceState.putString("longestcontentever", mLongestEverContent);
+	      savedInstanceState.putString("audiofile",mAudioResultsFile);
+	      savedInstanceState.putBoolean("fresheditscreen",mFreshEditScreen);
+	      savedInstanceState.putString("audiofilestatus",mAudioResultsFileStatus);
 	      savedInstanceState.putBoolean("deleted", mDeleted);
 	      savedInstanceState.putString("parentid", mPostParent);
 	      savedInstanceState.putString("id",mPostId);
 //	      savedInstanceState.putString("uri", mUri.getPath());
- * 
- */
+ 
       
       // etc.
-      super.onSaveInstanceState(savedInstanceState);
+     
     }
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -707,14 +714,19 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       // Restore UI state from the savedInstanceState.
       // This bundle has also been passed to onCreate.
       /*THIS PUTS UP THE OLD VERSION
+       * */
+       
       mPostTitle = savedInstanceState.getString("title");
       mPostContent = savedInstanceState.getString("content");
       mPostLabels = savedInstanceState.getString("labels");
       mLongestEverContent = savedInstanceState.getString("longestcontentever");
+      mAudioResultsFile = savedInstanceState.getString("audiofile");
+      mFreshEditScreen = savedInstanceState.getBoolean("fresheditscreen");
+      mAudioResultsFileStatus = savedInstanceState.getString("audiofilestatus");
       mDeleted = savedInstanceState.getBoolean("deleted");
       mPostParent = savedInstanceState.getString("parentid");
       mPostId = savedInstanceState.getString("id");
-      */
+      
 //      mUri = new Uri(savedInstanceState.getString("uri"));
     }
     /* dont import transcriptions in android, do it in javascript
@@ -1245,7 +1257,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		/*
     	 * If it has no content, and no attached audio, save it as itself and return
     	 */
-    	if ( (strTitle+strContent+strContent).length() < 2 && mAudioResultsFile.length() <5){
+    	if ( (mPostTitle+mPostContent+mPostTitle).length() < 2 && mAudioResultsFile.length() <5){
 			saveStateToActivity(strTitle, strContent, strLabels);
 			saveAsSelfToDB();
 			tracker.trackEvent(
