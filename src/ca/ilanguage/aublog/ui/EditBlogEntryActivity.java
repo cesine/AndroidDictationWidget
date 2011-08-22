@@ -824,9 +824,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		if(mURIDeleted == true){
 			//do nothing
 		}else{
-	    	//mWebView.loadUrl("javascript:savePostToState()");
-	    	
-			//saveAsSelfToDB();
+	    	mWebView.loadUrl("javascript:savePostToState()");
+	    	saveAsSelfToDB();
 		}
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
@@ -1257,7 +1256,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		/*
     	 * If it has no content, and no attached audio, save it as itself and return
     	 */
-    	if ( (mPostTitle+mPostContent+mPostTitle).length() < 2 && mAudioResultsFile.length() <5){
+    	if ( ( (mPostTitle+mPostContent+mPostTitle).length() < 2 || (strTitle+strContent+strLabels).length()< 2 ) && mAudioResultsFile.length() <5){
 			saveStateToActivity(strTitle, strContent, strLabels);
 			saveAsSelfToDB();
 			tracker.trackEvent(
@@ -1375,18 +1374,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				if (cursor.getCount() < 1) {
 					Toast.makeText(
 							EditBlogEntryActivity.this,
-							"Deleting " + mUri.getLastPathSegment()
-									+ " it's empty and it has no daughters.",
+							"Discarding entry " + mUri.getLastPathSegment(),// + " it's empty and it has no daughters.",
 							Toast.LENGTH_LONG).show();
 					getContentResolver().delete(mUri, null, null);
 					mURIDeleted = true;
 					flagDraftTreeAsNeedingToBeReGenerated();//activity finishes when mURI is deleted so no problems
 				} else {
-					Toast.makeText(
-							EditBlogEntryActivity.this,
-							"Not Deleting " + mUri.getLastPathSegment()
-									+ " it has" + cursor.getCount()
-									+ " daughters.", Toast.LENGTH_LONG).show();
+					//Toast.makeText(EditBlogEntryActivity.this,"Not Deleting " + mUri.getLastPathSegment()+ " it has" + cursor.getCount()+ " daughters.", Toast.LENGTH_LONG).show();
 				}
 			}
 			mFreshEditScreen =true;
