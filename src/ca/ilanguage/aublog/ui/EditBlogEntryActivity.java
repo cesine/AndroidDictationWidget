@@ -188,14 +188,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 	 */
     
-    
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-      super.onConfigurationChanged(newConfig);
-//      setContentView(R.layout.myLayout);
-      Toast.makeText(EditBlogEntryActivity.this, "Configuration changed ", Toast.LENGTH_LONG).show();
 
-    }
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
@@ -331,7 +324,39 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         super.onCreate(savedInstanceState);
         if(savedInstanceState ==null){
         	mFreshEditScreen=true;
-        }
+        }else{
+        	/*
+    		 * make sure non of the variables are still null. they should have been filled in by the cursor or by the onrestorestate
+    		 */
+    		
+        	//mWebView.restoreState(savedInstanceState);
+            super.onRestoreInstanceState(savedInstanceState);
+        	
+    		if(mPostTitle ==null){
+    			mPostTitle = "";
+    		}
+    		if(mPostContent == null){
+    			mPostContent = "";
+    		}
+    		if(mPostLabels == null){
+    			mPostLabels = "";
+    		}
+    		if(mDeleted == null){
+    			mDeleted = false;
+    		}
+    		if( mLongestEverContent ==null){
+    			mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+    		}
+    		if(mAudioResultsFile == null){
+    			mAudioResultsFile = "";
+    		}
+    		if(mAudioResultsFileStatus == null){
+    			mAudioResultsFileStatus = "";
+    		}
+    		if(mTimeAudioWasRecorded ==null){
+    			mTimeAudioWasRecorded = (long) 0;
+    		}
+        }//end else to control if its the first oncreate (then fetch from database)
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
@@ -379,6 +404,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					mPostTitle = mCursor.getString(1);
 					mPostContent = mCursor.getString(2);
 					mPostLabels =mCursor.getString(3);
+					mLongestEverContent =mPostTitle+mPostContent+mPostLabels;
 					mPostParent = mCursor.getString(6);
 					mAudioResultsFile = mCursor.getString(10);
 					mAudioResultsFileStatus = mCursor.getString(11);
@@ -404,6 +430,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				}else{//else, use the saved state variables
 					String tmp = "";
 					tmp = "dont look in the db for the values, get them from the state";
+					
 					//Toast.makeText(EditBlogEntryActivity.this, "Returning from rotate, no info should be lost. ", Toast.LENGTH_LONG).show();
 				}
 
@@ -428,9 +455,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			//this should never be executed
 			//this is geting executed when click on a view drafts tree and edit !! not supposed to, the uri came in properly
 //			mPostContent="";
-			mPostLabels="";
+//			mPostLabels="";
 //			mPostTitle="";
+			
 		}
+		
 		mWebView.loadUrl("file:///android_asset/edit_blog_entry_wysiwyg.html");
     }
     /**
@@ -539,15 +568,26 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public String hasAudioFileJS(){
         	return hasAudioFileAttached().toString();
         }
-        
         public String fetchPostContentJS(){
-        	return mPostContent;
+        	if (mPostContent == null){
+        		return "";
+        	}else{
+        		return mPostContent;
+        	}        	
         }
         public String fetchPostTitleJS(){
-        	return mPostTitle;
+        	if (mPostTitle != null){
+        		return "";
+        	}else{
+        		return mPostTitle;
+        	}
         }
         public String fetchPostLabelsJS(){
-        	return mPostLabels;
+        	if (mPostLabels != null){
+        		return "";
+        	}else{
+        		return mPostLabels;
+        	}
         }
         public String fetchDebugInfoJS(){
         	return "Id: "+mPostId+" Parent: "+mPostParent+" Deleted: "+mDeleted.toString()+" LongestEverString:"+mLongestEverContent;
@@ -641,7 +681,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	//TODO 
     	
     	mFreshEditScreen = false; 
-    	mWebView.saveState(savedInstanceState);//http://stackoverflow.com/questions/4726637/android-how-to-savestate-of-a-webview-with-an-addjavascriptinterface-attached
+    	//mWebView.saveState(savedInstanceState);//http://stackoverflow.com/questions/4726637/android-how-to-savestate-of-a-webview-with-an-addjavascriptinterface-attached
     	/*THIS PUTS IN THE OLD STUFF, SEEMS TO WORK WITH OUT IT.
 	      savedInstanceState.putString("title", mPostTitle);
 	      savedInstanceState.putString("content", mPostContent);
@@ -659,11 +699,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     }
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
-    	if(savedInstanceState != null){
-    		mWebView.restoreState(savedInstanceState);
+    	super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState != null){
+    		//mWebView.restoreState(savedInstanceState);
     	}
     	
-      super.onRestoreInstanceState(savedInstanceState);
       // Restore UI state from the savedInstanceState.
       // This bundle has also been passed to onCreate.
       /*THIS PUTS UP THE OLD VERSION
