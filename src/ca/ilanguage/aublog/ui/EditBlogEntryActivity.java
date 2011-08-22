@@ -576,14 +576,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	}        	
         }
         public String fetchPostTitleJS(){
-        	if (mPostTitle != null){
+        	if (mPostTitle == null){
         		return "";
         	}else{
         		return mPostTitle;
         	}
         }
         public String fetchPostLabelsJS(){
-        	if (mPostLabels != null){
+        	if (mPostLabels == null){
         		return "";
         	}else{
         		return mPostLabels;
