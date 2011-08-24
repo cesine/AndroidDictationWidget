@@ -498,6 +498,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * 
          * 
          * */
+        public String getTranscriptionAPIKEYJS(){
+        	return NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_API_KEY;
+        }
+        public String getTranscriptionUrlJS(){
+        	return NonPublicConstants.NONPUBLIC_TRANSCRIPTION_RESULT_URL+"test.mp3";//mAudioResultsFile.replace("/sdcard/Android/audio/","").replace(".mp3",".srt");
+        }
         public void zeroOutParentResultFileJS(){
         	mAudioResultsFile="";
         }

@@ -47,6 +47,7 @@ function autoSize() {
 <!--
 $(document).ready(function()	{
 	fillFromAndroidActivity();
+	importTranscription();
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
 	$('#markItUp').markItUp(mySettings);
@@ -193,11 +194,25 @@ $(document).ready(function()	{
     		document.getElementById('recordButton').value="New Dictation";
     	}
     }
+    /*
+	Ask server for transcription file
+	*/
+	function UrlExists(url)
+	{
+	    var http = new XMLHttpRequest();
+	    http.open('HEAD', url, false);
+	    http.send();
+	    return http.status!=404;
+	}
 	function importTranscription(){
-		/*
-		Ask server for transcription file
-		*/
+		
 		//If positive response
+		var transcriptionURL = Android.getTranscriptionUrlJS();
+		if( UrlExists(transcriptionURL) ){
+			document.getElementById("fileStatusArea").appendChild(document.createTextNode("Transcription file is ready."+transcriptionURL) );
+		}else{
+			document.getElementById("fileStatusArea").appendChild(document.createTextNode("No transcription found."+transcriptionURL) );	
+		}
 		/*
 		prompt user do you want to import
 		*/
@@ -226,7 +241,8 @@ $(document).ready(function()	{
 </td></tr>
 <tr><td ><input type="text" name="postLabels" value="" class="text" size="48" id="post-labels" tabindex="2" dir="ltr"></td></tr>
 </tbody></table>
-
+<span id="fileStatusArea">
+</span>
 	<textarea id="markItUp" >
 Type your text here. You can select text and then hit the button you want, or you can hit the button type and then hit the button to turn it off. You can use new paragraphs:
 
