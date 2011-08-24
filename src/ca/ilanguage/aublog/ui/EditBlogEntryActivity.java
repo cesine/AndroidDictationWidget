@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Locale;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.google.gdata.client.youtube.YouTubeQuery.SafeSearch;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -1125,7 +1126,25 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mDateString = mDateString.replaceAll("/","-");
 		mAudioResultsFile = mAuBlogDirectory+"audio/";
 		new File(mAudioResultsFile).mkdirs();
-		mAudioResultsFile=mAudioResultsFile+mAuBlogInstallId+"_"+mDateString+"_"+System.currentTimeMillis()+"_"+mPostTitle+".mp3"; 
+		/* Characters that are OK in a file are described
+        by regular expressions as:
+
+         \w - alphanumeric (A-Za-z0-9)
+         \. - dot
+         \- - dash
+         \: - colon
+         \; - semicolon
+         \# - number sign
+         \_ - underscore
+
+       Each \ above must be escaped to allow javac to parse
+       it correctly. That's why it looks so bad below.
+
+       Since we want to replace things that are not the above,
+       set negation ([^ and ]) is used.
+     */  
+		String safePostTitleForFileName =  mPostTitle.replaceAll("[^\\w\\.\\-\\_]", "_");
+		mAudioResultsFile=mAudioResultsFile+mAuBlogInstallId+"_"+mDateString+"_"+System.currentTimeMillis()+"_"+safePostTitleForFileName+".mp3"; 
 		mAudioResultsFile=mAudioResultsFile.replaceAll(" ","-");
 
 		//Start dictation service
