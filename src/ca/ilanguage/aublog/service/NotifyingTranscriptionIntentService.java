@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.location.GpsStatus.NmeaListener;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.NetworkInfo.State;
@@ -42,7 +43,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
     public NotifyingTranscriptionIntentService() {
 		super(TAG);
 	}
-
+    private int NOTIFICATION = 7030;
+    
 	private NotificationManager mNM;
 	private Boolean mTranscriptionReturned =false;
     private int mMaxFileUploadOverMobileNetworkSize = 0;
@@ -135,7 +137,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
  */
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		
+		if (mNM != null){
+			mNM.cancelAll();//should get rid of all notifications in app
+		}
 		/*
 		 * get data from extras bundle, store it in the member variables
 		 */
@@ -229,7 +233,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	        	mNotificationMessage = firstLine + "\nSelect to import transcription.";
 			} catch (Exception e) {
 				//Log.e(e.getClass().getName(), e.getMessage(), e);
-				mNotificationMessage = "SDCard File/Connection error.";// null;
+				mNotificationMessage = "Transcription not sent.";// null;
 			}
 			
 			
@@ -248,7 +252,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					outSRT = new FileOutputStream(outSRTFile);
 					outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
 					outSRT.write(mAudioResultsFileStatus.getBytes());
-					outSRT.write("\n".getBytes());
+					outSRT.write("\n\n".getBytes());
 					/*
 					 * Append time codes SRT array to srt file.
 					 * the time codes and transcription are read line by line from the in the server's response. 
@@ -273,7 +277,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		}else{
 			//no wifi, and the file is larger than the users settings for upload over mobile network.
 			mNotificationMessage = "Dication was not sent for transcription: no wifi or too long. Check settings.";
-			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription wasn't set, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
+			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription wasn't sent, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 			saveMetaDataToDatabase();
 			if(mAudioFilePath.endsWith(".mp3")){
 				//overwrite the srt file witht he most recent status message, saying why the file wasn't sent for transcription.
@@ -283,7 +287,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					outSRT = new FileOutputStream(outSRTFile);
 					outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
 					outSRT.write(mAudioResultsFileStatus.getBytes());
-					outSRT.write("\n".getBytes());
+					outSRT.write("\n\n".getBytes());
 					outSRT.flush();
 					outSRT.close();
 				} catch (IOException e) {
@@ -296,6 +300,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 
 		if(mAudioFilePath.endsWith(".srt")){
 			Intent i = new Intent(EditBlogEntryActivity.REFRESH_TRANSCRIPTION_INTENT);
+			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+			sendBroadcast(i);
+		}else{
+			Intent i = new Intent(EditBlogEntryActivity.DICTATION_SENT_INTENT);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 		}

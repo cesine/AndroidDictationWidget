@@ -100,7 +100,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	//private Boolean mReturnedTranscription; //check on reload?
 	public static final String REFRESH_AUDIOFILE_INTENT = NonPublicConstants.NONPUBLIC_INTENT_AUDIOFILE_RECORDED_AND_SAVED;
 	public static final String REFRESH_TRANSCRIPTION_INTENT = NonPublicConstants.NONPUBLIC_INTENT_TRANSCRIPTION_RECEIVED;
-	
+	public static final String DICTATION_SENT_INTENT = NonPublicConstants.NONPUBLIC_INTENT_DICTATION_SENT;
 	
 	private static final int CHANGED_SETTINGS = 0;
 	int selectionStart;
@@ -508,7 +508,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         }
         public String importTranscriptionJS(){
         	if(mTranscription == null){
-        		return mAudioResultsFileStatus+"\n\nTranscription has not been processed.";
+        		return mAudioResultsFileStatus;
         	}else{
         		return mAudioResultsFileStatus+"\n\n"+mTranscription;
         	}
@@ -1007,17 +1007,18 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				preparePlayerAttachedAudioFile();
 				// request transcription from the server, normally put this in a
 				// timer in javascript
+			}
+			if (intent.getAction().equals(DICTATION_SENT_INTENT)) {
+				/* find out the status */
+				mAudioResultsFileStatus = intent.getExtras().getString(
+						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 				downloadTranscription();
 			}
 			if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
-				mAudioResultsFileStatus = intent.getExtras().getString(
-						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				// Do stuff - maybe update my view based on the changed DB
-				// contents
 				/* open the srt and extract the text */
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				mTranscription = "this is what came back from the server.";
+				mTranscription = "TODO this is what came back from the server.";
 				mWebView.loadUrl("javascript:importTranscription()");
 				/* tell javascript to fill in the transcription stuff */
 			}
