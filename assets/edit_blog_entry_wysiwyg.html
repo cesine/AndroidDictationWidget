@@ -212,7 +212,7 @@ $(document).ready(function()	{
 		//If positive response
 		var transcriptionContents = Android.importTranscriptionJS();
 		if( transcriptionContents != "" ){
-			document.getElementById("fileStatusArea").appendChild(document.createTextNode("Transcription file is ready."+transcriptionContents) );
+			document.getElementById("fileStatusArea").appendChild(document.createTextNode("Transcription file is ready."+transcriptionContents.split(":::").join("\n")) );
 		}else{
 			document.getElementById("fileStatusArea").appendChild(document.createTextNode("No transcription found."+transcriptionContents) );	
 		}

@@ -507,7 +507,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         }
         public String importTranscriptionJS(){
         	if(mTranscription == null){
-        		return "its null right now.";
+        		return mAudioResultsFileStatus+"\n\nTranscription has not been processed.";
         	}else{
         		return mAudioResultsFileStatus+"\n\n"+mTranscription;
         	}
