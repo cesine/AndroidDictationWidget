@@ -237,9 +237,12 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			 * Append fake time codes for testing purposes
 			 */
 			splitOnSilence();
-
+			File outSRTFile;
 			if(mAudioFilePath.endsWith(".mp3")){
-				File outSRTFile =  new File(mAudioFilePath.replace(".mp3",".srt"));
+				outSRTFile =  new File(mAudioFilePath.replace(".mp3","_client.srt"));
+			}else{
+				outSRTFile =  new File(mAudioFilePath.replace("_client.srt","_server.srt"));
+			}
 				FileOutputStream outSRT;
 				try {
 					outSRT = new FileOutputStream(outSRTFile);
@@ -252,8 +255,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					 */
 					for(int i = 0; i < mTimeCodes.size(); i++){
 						outSRT.write(mTimeCodes.get(i).getBytes());
-						outSRT.write("--Unknown--".getBytes());
-						outSRT.write("\n".getBytes());
+						outSRT.write("\n--Unknown--".getBytes());
+						outSRT.write("\n\n".getBytes());
 					}
 					outSRT.flush();
 					outSRT.close();
@@ -266,7 +269,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					//e.printStackTrace();
 					mNotificationMessage ="Cannot write results to SDCARD";
 				}
-			}//end if to only create .srt for mp3 files. 
 			
 		}else{
 			//no wifi, and the file is larger than the users settings for upload over mobile network.
@@ -275,7 +277,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			saveMetaDataToDatabase();
 			if(mAudioFilePath.endsWith(".mp3")){
 				//overwrite the srt file witht he most recent status message, saying why the file wasn't sent for transcription.
-				File outSRTFile =  new File(mAudioFilePath.replace(".mp3",".srt"));
+				File outSRTFile =  new File(mAudioFilePath.replace(".mp3","_client.srt"));
 				FileOutputStream outSRT;
 				try {
 					outSRT = new FileOutputStream(outSRTFile);

@@ -1144,6 +1144,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
        set negation ([^ and ]) is used.
      */  
 		String safePostTitleForFileName =  mPostTitle.replaceAll("[^\\w\\.\\-\\_]", "_");
+		if(safePostTitleForFileName.length() >= 50){
+			safePostTitleForFileName = safePostTitleForFileName.substring(0,49)+"...";
+		}
 		mAudioResultsFile=mAudioResultsFile+mAuBlogInstallId+"_"+mDateString+"_"+System.currentTimeMillis()+"_"+safePostTitleForFileName+".mp3"; 
 		mAudioResultsFile=mAudioResultsFile.replaceAll(" ","-");
 
@@ -1411,7 +1414,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Requested transcription result at "+System.currentTimeMillis();
 		Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
 		intent.setData(mUri);
-        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile.replace(".mp3",".srt"));
+        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile.replace(".mp3","_client.srt"));
         intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
         intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
         startService(intent); 

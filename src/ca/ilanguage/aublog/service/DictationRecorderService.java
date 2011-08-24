@@ -183,7 +183,8 @@ public class DictationRecorderService extends Service {
 		if (mAudioResultsFile.length() > 0) {
 			mAudioResultsFileStatus= mAudioResultsFileStatus+":::Audio file name: "+mAudioResultsFile;
 		}else{
-			mAudioResultsFileStatus =mAudioResultsFileStatus +":::"+"Nofile";
+			mAudioResultsFile="/sdcard/temp.mp3";
+			mAudioResultsFileStatus =mAudioResultsFileStatus +":::"+"Audio file name: No file recieved from AuBlog using: "+mAudioResultsFile;
 		}
 		/*
 		 * Set up bluetooth or phone mic recording device
@@ -233,7 +234,7 @@ public class DictationRecorderService extends Service {
 		 */
 		mRecordingNow = true;
 		mStartTime=System.currentTimeMillis();
-		mAudioResultsFileStatus = mAudioResultsFileStatus+":::"+"Recording started."+":::"+mAudioSource+":::"+mStartTime;
+		mAudioResultsFileStatus = mAudioResultsFileStatus+":::"+"Recording started."+":::Audio source: "+mAudioSource+":::Start time: "+mStartTime;
 		
 		saveMetaDataToDatabase();
 		mRecorder = new MediaRecorder();
@@ -359,13 +360,13 @@ public class DictationRecorderService extends Service {
 	private void sendForTranscription(){
 		mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Sent to transcription service.";
 		/*create an empty subtitles file */
-		File outSRTFile =  new File(mAudioResultsFile.replace(".mp3",".srt"));
+		File outSRTFile =  new File(mAudioResultsFile.replace(".mp3","_client.srt"));
 		FileOutputStream outSRT;
 		try {
 			outSRT = new FileOutputStream(outSRTFile);
 			outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
 			outSRT.write(mAudioResultsFileStatus.getBytes());
-			outSRT.write("\n".getBytes());
+			outSRT.write("\n\n".getBytes());
 			outSRT.flush();
 			outSRT.close();
 		} catch (IOException e) {
