@@ -1,5 +1,7 @@
 package ca.ilanguage.aublog.service;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
@@ -78,7 +80,7 @@ public class DictationRecorderService extends Service {
 	private Long mStartTime;
     private Long mEndTime;
     private Long mTimeAudioWasRecorded;
-    private String mAudioSource;//bluetooth(record,play), phone(recordmic, play earpiece) for privacy, speaker(record mic, play speaker)
+    private String mAudioSource ="internal mic";;//bluetooth(record,play), phone(recordmic, play earpiece) for privacy, speaker(record mic, play speaker)
     private Boolean mUseBluetooth;
     private Boolean mUsePhoneEarPiece;
     private String mDateString ="";
@@ -179,7 +181,7 @@ public class DictationRecorderService extends Service {
 			//Toast.makeText(SRTGeneratorActivity.this, "Error "+e,Toast.LENGTH_LONG).show();
 		}
 		if (mAudioResultsFile.length() > 0) {
-			mAudioResultsFileStatus= mAudioResultsFileStatus+":::"+mAudioResultsFile;
+			mAudioResultsFileStatus= mAudioResultsFileStatus+":::Audio file name: "+mAudioResultsFile;
 		}else{
 			mAudioResultsFileStatus =mAudioResultsFileStatus +":::"+"Nofile";
 		}
@@ -204,14 +206,18 @@ public class DictationRecorderService extends Service {
 	    	mAudioManager.setSpeakerphoneOn(false);
 	    	mAudioManager.setBluetoothScoOn(true);
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	mAudioSource= "maybebluetooth";
+	    	mAudioSource= "maybe bluetooth";
 
 		}
 		if(mUsePhoneEarPiece){
 	    	mAudioManager.setSpeakerphoneOn(false);
 	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-	    	mAudioSource= "microphone";
+	    	mAudioSource= "internal mic";
 		}
+		if(mAudioManager.isWiredHeadsetOn()){
+			mAudioSource = mAudioSource + "or maybe headset";
+		}
+		
 		/*
 		 * set the installid for appending to the labels
 		 */
@@ -352,6 +358,21 @@ public class DictationRecorderService extends Service {
 	}
 	private void sendForTranscription(){
 		mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Sent to transcription service.";
+		/*create an empty subtitles file */
+		File outSRTFile =  new File(mAudioResultsFile.replace(".mp3",".srt"));
+		FileOutputStream outSRT;
+		try {
+			outSRT = new FileOutputStream(outSRTFile);
+			outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
+			outSRT.write(mAudioResultsFileStatus.getBytes());
+			outSRT.write("\n".getBytes());
+			outSRT.flush();
+			outSRT.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			
+		}
 		Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
 		intent.setData(mUri);
         intent.putExtra(EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);

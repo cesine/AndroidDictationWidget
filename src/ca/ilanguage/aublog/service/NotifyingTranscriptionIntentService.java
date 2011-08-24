@@ -229,7 +229,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	        	mNotificationMessage = firstLine + "\nSelect to import transcription.";
 			} catch (Exception e) {
 				//Log.e(e.getClass().getName(), e.getMessage(), e);
-				mNotificationMessage = "File/Connection error.";// null;
+				mNotificationMessage = "SDCard File/Connection error.";// null;
 			}
 			
 			
@@ -238,36 +238,58 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			 */
 			splitOnSilence();
 
-			File outSRTFile =  new File(mAudioFilePath.replace(".mp3",".srt"));
-			FileOutputStream outSRT;
-			try {
-				outSRT = new FileOutputStream(outSRTFile);
-				outSRT.write(mFileNameOnServer.getBytes());
-				outSRT.write("\n".getBytes());
-				/*
-				 * Append time codes SRT array to srt file.
-				 * the time codes and transcription are read line by line from the in the server's response. 
-				 */
-				for(int i = 0; i < mTimeCodes.size(); i++){
-					outSRT.write(mTimeCodes.get(i).getBytes());
+			if(mAudioFilePath.endsWith(".mp3")){
+				File outSRTFile =  new File(mAudioFilePath.replace(".mp3",".srt"));
+				FileOutputStream outSRT;
+				try {
+					outSRT = new FileOutputStream(outSRTFile);
+					outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
+					outSRT.write(mAudioResultsFileStatus.getBytes());
 					outSRT.write("\n".getBytes());
+					/*
+					 * Append time codes SRT array to srt file.
+					 * the time codes and transcription are read line by line from the in the server's response. 
+					 */
+					for(int i = 0; i < mTimeCodes.size(); i++){
+						outSRT.write(mTimeCodes.get(i).getBytes());
+						outSRT.write("--Unknown--".getBytes());
+						outSRT.write("\n".getBytes());
+					}
+					outSRT.flush();
+					outSRT.close();
+					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription server response saved as .srt in the AuBlog folder.";
+					mTranscriptionReturned = true;
+					saveMetaDataToDatabase();
+					//mNotificationMessage = "Select to import transcription.";
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+					mNotificationMessage ="Cannot write results to SDCARD";
 				}
-
-				outSRT.flush();
-				outSRT.close();
-				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription server response saved as .srt in the AuBlog folder.";
-				mTranscriptionReturned = true;
-				saveMetaDataToDatabase();
-				//mNotificationMessage = "Select to import transcription.";
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-				mNotificationMessage ="Cannot write results to SDCARD";
-			}
-			}else{
-				//no wifi, and the file is larger than the users settings for upload over mobile network.
-				mNotificationMessage = "Dication was not sent for transcription: no wifi or too long. Check settings.";
-				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription wasn't set, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
+			}//end if to only create .srt for mp3 files. 
+			
+		}else{
+			//no wifi, and the file is larger than the users settings for upload over mobile network.
+			mNotificationMessage = "Dication was not sent for transcription: no wifi or too long. Check settings.";
+			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription wasn't set, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
+			saveMetaDataToDatabase();
+			if(mAudioFilePath.endsWith(".mp3")){
+				//overwrite the srt file witht he most recent status message, saying why the file wasn't sent for transcription.
+				File outSRTFile =  new File(mAudioFilePath.replace(".mp3",".srt"));
+				FileOutputStream outSRT;
+				try {
+					outSRT = new FileOutputStream(outSRTFile);
+					outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
+					outSRT.write(mAudioResultsFileStatus.getBytes());
+					outSRT.write("\n".getBytes());
+					outSRT.flush();
+					outSRT.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+					mNotificationMessage ="Cannot write null results to SDCARD";
+				}
+			}//end if to make an empty srt file if the mp3 was not uploaded
 		}//end if for max file size for upload
 
 		if(mAudioFilePath.endsWith(".srt")){
