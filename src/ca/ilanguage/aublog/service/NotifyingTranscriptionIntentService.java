@@ -271,7 +271,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		}//end if for max file size for upload
 
 		if(mAudioFilePath.endsWith(".srt")){
-			sendBroadcast(new Intent(EditBlogEntryActivity.REFRESH_TRANSCRIPTION_INTENT));
+			Intent i = new Intent(EditBlogEntryActivity.REFRESH_TRANSCRIPTION_INTENT);
+			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+			sendBroadcast(i);
 		}
 		showNotification(R.drawable.stat_aublog,  mNotificationMessage);
 		

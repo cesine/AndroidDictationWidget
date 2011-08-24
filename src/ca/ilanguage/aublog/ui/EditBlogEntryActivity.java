@@ -509,7 +509,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	if(mTranscription == null){
         		return "its null right now.";
         	}else{
-        		return mTranscription;
+        		return mAudioResultsFileStatus+"\n\n"+mTranscription;
         	}
         }
         public void zeroOutParentResultFileJS(){
@@ -995,20 +995,31 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public class AudioFileUpdateReceiver extends BroadcastReceiver {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
-	        if (intent.getAction().equals(REFRESH_AUDIOFILE_INTENT)) {
-	        //Do stuff - maybe update my view based on the changed DB contents
-	        	recheckAublogSettings();//if audio settings have changed use the new ones.
-	        	preparePlayerAttachedAudioFile();
-	        	//request transcription from the server, normally put this in a timer in javascript
-	        	downloadTranscription();
-	        }
-	        if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
-		        //Do stuff - maybe update my view based on the changed DB contents
-	        		/*open the srt and extract the text */
-	        		mTranscription = "this is what came back from the server.";
-	        		mWebView.loadUrl("javascript:importTranscription()");
-		        	/*tell javascript to fill in the transcription stuff */
-		        }
+			if (intent.getAction().equals(REFRESH_AUDIOFILE_INTENT)) {
+				mAudioResultsFileStatus = intent.getExtras().getString(
+						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
+
+				// Do stuff - maybe update my view based on the changed DB
+				// contents
+				recheckAublogSettings();// if audio settings have changed use
+										// the new ones.
+				preparePlayerAttachedAudioFile();
+				// request transcription from the server, normally put this in a
+				// timer in javascript
+				downloadTranscription();
+			}
+			if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
+				mAudioResultsFileStatus = intent.getExtras().getString(
+						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
+				// Do stuff - maybe update my view based on the changed DB
+				// contents
+				/* open the srt and extract the text */
+				mAudioResultsFileStatus = intent.getExtras().getString(
+						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
+				mTranscription = "this is what came back from the server.";
+				mWebView.loadUrl("javascript:importTranscription()");
+				/* tell javascript to fill in the transcription stuff */
+			}
 	        String tmep;
 	        tmep = "wait to see if error is here";
 			/*

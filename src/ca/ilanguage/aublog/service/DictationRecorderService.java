@@ -137,7 +137,9 @@ public class DictationRecorderService extends Service {
 		 * 
 		 * could pass data in the Intent instead of updating database tables
 		 */
-		sendBroadcast(new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT));
+		Intent i = new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
+		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+		sendBroadcast(i);
 		super.onDestroy();
 		
 	}
@@ -153,7 +155,9 @@ public class DictationRecorderService extends Service {
 		 * 
 		 * could pass data in the Intent instead of updating database tables
 		 */
-		sendBroadcast(new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT));
+		Intent i = new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
+		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+		sendBroadcast(i);
 		super.onLowMemory();
 	}
 
