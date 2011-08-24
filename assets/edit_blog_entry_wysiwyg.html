@@ -106,6 +106,8 @@ $(document).ready(function()	{
     		//Android.preparePlayerJS(); //set up the medial player with the current value of the audio file. this wasnt workign because the service hadnt saved the file completely before showing the button.
     		//right now the media player is only prepared if hte user clicks on the play button. 
     		displayPlayButton();
+    		/*todo, add a timer to find out if there is a transcription ready once every minute?
+    		Android.downloadTranscriptionFromServerJS(); */
     	}else{
     		//If the button says something else, record
     		/*
@@ -159,6 +161,7 @@ $(document).ready(function()	{
 		Android.getTimeRecordedJS();
 	    Android.showToastJS(toast);
 	    Android.getAudioResultsFileStatusJS(); TODO?
+	    Android.downloadTranscriptionFromServerJS();
 	*/
     
     
@@ -207,11 +210,11 @@ $(document).ready(function()	{
 	function importTranscription(){
 		
 		//If positive response
-		var transcriptionURL = Android.getTranscriptionUrlJS();
-		if( UrlExists(transcriptionURL) ){
-			document.getElementById("fileStatusArea").appendChild(document.createTextNode("Transcription file is ready."+transcriptionURL) );
+		var transcriptionContents = Android.importTranscriptionJS();
+		if( transcriptionContents != "" ){
+			document.getElementById("fileStatusArea").appendChild(document.createTextNode("Transcription file is ready."+transcriptionContents) );
 		}else{
-			document.getElementById("fileStatusArea").appendChild(document.createTextNode("No transcription found."+transcriptionURL) );	
+			document.getElementById("fileStatusArea").appendChild(document.createTextNode("No transcription found."+transcriptionContents) );	
 		}
 		/*
 		prompt user do you want to import

@@ -81,7 +81,7 @@ public class NotifyingController extends Activity {
 
     private OnClickListener mStopListener = new OnClickListener() {
         public void onClick(View v) {
-        	Intent intent = new Intent(NotifyingController.this, NotifyingTranscriptionService.class);
+        	Intent intent = new Intent(NotifyingController.this, DictationRecorderService.class);
         	intent.putExtra("error", "user clicked cancel");
             stopService(intent);
         }

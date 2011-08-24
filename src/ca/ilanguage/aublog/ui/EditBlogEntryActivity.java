@@ -98,6 +98,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
 	//private Boolean mReturnedTranscription; //check on reload?
 	public static final String REFRESH_AUDIOFILE_INTENT = NonPublicConstants.NONPUBLIC_INTENT_AUDIOFILE_RECORDED_AND_SAVED;
+	public static final String REFRESH_TRANSCRIPTION_INTENT = NonPublicConstants.NONPUBLIC_INTENT_TRANSCRIPTION_RECEIVED;
 	
 	
 	private static final int CHANGED_SETTINGS = 0;
@@ -111,6 +112,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	String mPostId;
 	String mAudioResultsFile;
 	String mAudioResultsFileStatus;
+	String mTranscription;
 	Boolean mFreshEditScreen;
 	private Boolean mDeleted;
 	private Boolean mURIDeleted =false;;
@@ -498,11 +500,17 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * 
          * 
          * */
-        public String getTranscriptionAPIKEYJS(){
-        	return NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_API_KEY;
+        
+        public String downloadTranscriptionFromServerJS(){
+        	return downloadTranscription();
+        	
         }
-        public String getTranscriptionUrlJS(){
-        	return NonPublicConstants.NONPUBLIC_TRANSCRIPTION_RESULT_URL+"test.mp3";//mAudioResultsFile.replace("/sdcard/Android/audio/","").replace(".mp3",".srt");
+        public String importTranscriptionJS(){
+        	if(mTranscription == null){
+        		return "its null right now.";
+        	}else{
+        		return mTranscription;
+        	}
         }
         public void zeroOutParentResultFileJS(){
         	mAudioResultsFile="";
@@ -848,6 +856,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 		IntentFilter intentFilter = new IntentFilter(REFRESH_AUDIOFILE_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentFilter);
+		IntentFilter intentFilterTrans = new IntentFilter(REFRESH_TRANSCRIPTION_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentFilterTrans);
+		
 		super.onResume();
 	}
 
@@ -988,7 +999,16 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	        //Do stuff - maybe update my view based on the changed DB contents
 	        	recheckAublogSettings();//if audio settings have changed use the new ones.
 	        	preparePlayerAttachedAudioFile();
+	        	//request transcription from the server, normally put this in a timer in javascript
+	        	downloadTranscription();
 	        }
+	        if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
+		        //Do stuff - maybe update my view based on the changed DB contents
+	        		/*open the srt and extract the text */
+	        		mTranscription = "this is what came back from the server.";
+	        		mWebView.loadUrl("javascript:importTranscription()");
+		        	/*tell javascript to fill in the transcription stuff */
+		        }
 	        String tmep;
 	        tmep = "wait to see if error is here";
 			/*
@@ -1356,6 +1376,17 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	SharedPreferences.Editor editor = prefs.edit();
     	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false);
     	editor.commit();
+	}
+	private String downloadTranscription(){
+		mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Requested transcription result at "+System.currentTimeMillis();
+		Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
+		intent.setData(mUri);
+        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile.replace(".mp3",".srt"));
+        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
+        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+        startService(intent); 
+		return "Waiting for service to complete.";
+		
 	}
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {

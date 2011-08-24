@@ -22,6 +22,7 @@ import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
+import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -52,7 +53,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
     private String mAudioFilePath ="";
     private String mAudioResultsFileStatus="";
     private Uri mUri;
-	
+    private String mAuBlogInstallId;
+    
     private String mDBLastModified="";
 	private Cursor mCursor;
 	private  String[] PROJECTION = new String[] {
@@ -157,6 +159,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		 * preference settings
 		 */
 		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		mMaxFileUploadOverMobileNetworkSize = prefs.getInt(PreferenceConstants.PREFERENCE_MAX_UPLOAD_ON_MOBILE_NETWORK, 2000000);
 		Boolean wifiOnly = prefs.getBoolean(PreferenceConstants.PREFERENCE_UPLOAD_WAIT_FOR_WIFI, true);
 		File audioFile = new File(mAudioFilePath);
@@ -168,12 +171,14 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		if ( audioFile.length() < mMaxUploadFileSize && 
 				( 	    	(audioFile.length() < mMaxFileUploadOverMobileNetworkSize || wifiOnly == false ) 
 						|| (wifi == State.CONNECTED || wifi == State.CONNECTING) 
+						|| mAudioFilePath.endsWith(".srt")
 				) 
 			){
 			//if the audio file 
 			//   A: is  smaller than max upload size, and
 			//   either B: smaller than the limit allowed on mobile, or user doesnt care about being connected to wifi
 			//   or C: the wifi is on
+			//	or D: its a subtitle so send it always
 			//then, upload it for transcription. otherwise say it was too big to upload
 
 			/*
@@ -183,7 +188,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				HttpClient httpClient = new DefaultHttpClient();
 				HttpContext localContext = new BasicHttpContext();
 				Long uniqueId = System.currentTimeMillis();
-				HttpPost httpPost = new HttpPost(NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_URL+"stuff"+uniqueId.toString());
+				HttpPost httpPost = new HttpPost(NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_URL+NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_API_KEY+mAuBlogInstallId+uniqueId.toString());
+				
 
 				MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 				
@@ -264,8 +270,11 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription wasn't set, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 		}//end if for max file size for upload
 
-
+		if(mAudioFilePath.endsWith(".srt")){
+			sendBroadcast(new Intent(EditBlogEntryActivity.REFRESH_TRANSCRIPTION_INTENT));
+		}
 		showNotification(R.drawable.stat_aublog,  mNotificationMessage);
+		
 
 	}//end onhandle intent
 	private void saveMetaDataToDatabase(){
