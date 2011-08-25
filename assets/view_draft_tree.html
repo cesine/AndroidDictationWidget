@@ -91,6 +91,7 @@
 	    }
 	    function setCenterTree(id){
 	    	centeredNodeFromAndroid=id;
+	    	st.onClick(Android.getCenteredNode());
 	    }
 	    function loadJsonData(){
 	    	 Android.loadData();
@@ -121,8 +122,12 @@
 				}else{
 					//do nothingst.onClick("1");
 				} */
-			   /* st.onClick(97);
+			   /* http://thejit.org/static/v20/Docs/files/Visualizations/Spacetree-js.html#ST.onClick
+			   st.onClick(97);
 				Android.showToast(JSON.stringify(st)); */
+				//setTimeout("st.onClick(97)",2000);
+				//setTimeout("setCenterTree(centeredNodeFromAndroid)",2000);
+				//http://weltermann17.wordpress.com/2009/07/02/jit-gwt-a-low-cost-solution-2/
 			});
 	}else{
 		$.getScript("draft_tree_data.js", function(){
