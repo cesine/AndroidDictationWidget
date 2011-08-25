@@ -217,7 +217,7 @@ $(document).ready(function()	{
 		if( transcriptionContents != "" ){
 			document.getElementById("fileStatusArea").appendChild(document.createTextNode(transcriptionContents.split(":::").join("\n")) );
 		}else{
-			document.getElementById("fileStatusArea").appendChild(document.createTextNode("Transcription status unknown.") );	
+			document.getElementById("fileStatusArea").appendChild(document.createTextNode("") );	
 		}
 		/*
 		prompt user do you want to import

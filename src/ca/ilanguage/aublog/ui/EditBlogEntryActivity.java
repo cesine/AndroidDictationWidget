@@ -857,6 +857,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		}
 		IntentFilter intentFilter = new IntentFilter(REFRESH_AUDIOFILE_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentFilter);
+		IntentFilter intentDictSent = new IntentFilter(DICTATION_SENT_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentDictSent);
 		IntentFilter intentFilterTrans = new IntentFilter(REFRESH_TRANSCRIPTION_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentFilterTrans);
 		

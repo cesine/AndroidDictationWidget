@@ -138,9 +138,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
  */
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		if (mNM != null){
-			mNM.cancelAll();//should get rid of all notifications in app
-		}
+//		if (mNM != null){
+//			mNM.cancelAll();
+//		}
 		/*
 		 * get data from extras bundle, store it in the member variables
 		 */
@@ -235,10 +235,11 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				}
 				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
 				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
-	        	mNotificationMessage = firstLine + "\nSelect to import transcription.";
+	        	mNotificationMessage = firstLine;//+ "\nSelect to import transcription.";
 			} catch (Exception e) {
 				//Log.e(e.getClass().getName(), e.getMessage(), e);
-				mNotificationMessage = "Transcription not sent.";// null;
+				//this is showing up for when the audio is not sent, but the client srt is...
+				mNotificationMessage = "Dictation audio not sent: no wifi or too long. Check settings.";// null;
 			}
 			
 			
@@ -273,7 +274,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					}
 					outSRT.flush();
 					outSRT.close();
-					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription server response saved as .srt in the AuBlog folder.";
+					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription server response was saved as _server.srt in the AuBlog folder.";
 					mTranscriptionReturned = true;
 					saveMetaDataToDatabase();
 					//mNotificationMessage = "Select to import transcription.";
@@ -286,7 +287,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		}else{
 			//no wifi, and the file is larger than the users settings for upload over mobile network.
 			mNotificationMessage = "Dication was not sent for transcription: no wifi or too long. Check settings.";
-			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription wasn't sent, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
+			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Dictation audio wasn't sent for transcription, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 			saveMetaDataToDatabase();
 			if(mAudioFilePath.endsWith(".mp3")){
 				//overwrite the srt file witht he most recent status message, saying why the file wasn't sent for transcription.
