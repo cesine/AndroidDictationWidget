@@ -56,6 +56,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
     private String mAudioResultsFileStatus="";
     private Uri mUri;
     private String mAuBlogInstallId;
+    private String mPostContents="";
     
     private String mDBLastModified="";
 	private Cursor mCursor;
@@ -147,6 +148,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mUri = intent.getData();
 			mAudioFilePath = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH);
 			mAudioResultsFileStatus = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
+			mPostContents=intent.getExtras().getString(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS);
+			if (mPostContents == null){
+				mPostContents="";
+			}
 			mSplitType = intent.getExtras().getInt(EXTRA_SPLIT_TYPE);
 			
 		} catch (Exception e) {
@@ -253,6 +258,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
 					outSRT.write(mAudioResultsFileStatus.getBytes());
 					outSRT.write("\n\n".getBytes());
+					
+					outSRT.write("0:00:01.000,0:00:01.000\n".getBytes());
+					outSRT.write(mPostContents.getBytes());
+					outSRT.write("\n\n".getBytes());
 					/*
 					 * Append time codes SRT array to srt file.
 					 * the time codes and transcription are read line by line from the in the server's response. 
@@ -287,6 +296,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					outSRT = new FileOutputStream(outSRTFile);
 					outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
 					outSRT.write(mAudioResultsFileStatus.getBytes());
+					outSRT.write("\n\n".getBytes());
+					
+					outSRT.write("0:00:01.000,0:00:01.000\n".getBytes());
+					outSRT.write(mPostContents.getBytes());
 					outSRT.write("\n\n".getBytes());
 					outSRT.flush();
 					outSRT.close();

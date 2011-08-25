@@ -207,6 +207,9 @@ $(document).ready(function()	{
 	    http.send();
 	    return http.status!=404;
 	}
+    function downloadTranscription(){
+    	Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
+    }
 	function importTranscription(){
 		
 		//If positive response
@@ -226,6 +229,7 @@ $(document).ready(function()	{
 		/*TODO in future relase do more complicated diff to integrate user's edits with the transcription contents.
 		*/
 	}
+	
 	function regexReplace(){
 		/*TODO allow user to do regex replacements in blog contents, log to frequent rules to automate if they want
 		*/

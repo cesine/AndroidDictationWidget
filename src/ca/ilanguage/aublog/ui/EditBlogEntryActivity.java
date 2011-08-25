@@ -95,7 +95,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	private Uri mUri;
 	private Cursor mCursor;
 	//savedInstanceState
-	
+	public static final String EXTRA_CURRENT_CONTENTS ="currentContents";
 	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
 	//private Boolean mReturnedTranscription; //check on reload?
 	public static final String REFRESH_AUDIOFILE_INTENT = NonPublicConstants.NONPUBLIC_INTENT_AUDIOFILE_RECORDED_AND_SAVED;
@@ -502,8 +502,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * 
          * */
         
-        public String downloadTranscriptionFromServerJS(){
-        	return downloadTranscription();
+        public String downloadTranscriptionFromServerJS(String strContents){
+        	return downloadTranscription(strContents);
         	
         }
         public String importTranscriptionJS(){
@@ -1012,7 +1012,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				/* find out the status */
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				downloadTranscription();
+				mWebView.loadUrl("javascript:downloadTranscription()");
 			}
 			if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
 				/* open the srt and extract the text */
@@ -1411,11 +1411,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false);
     	editor.commit();
 	}
-	private String downloadTranscription(){
+	private String downloadTranscription(String strContents){
 		mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Requested transcription result at "+System.currentTimeMillis();
 		Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
 		intent.setData(mUri);
-        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile.replace(".mp3","_client.srt"));
+        intent.putExtra(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS,strContents);
+		intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile.replace(".mp3","_client.srt"));
         intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
         intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
         startService(intent); 
