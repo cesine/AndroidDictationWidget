@@ -87,6 +87,11 @@
 				android:summary="You can add a signature if you want" android:dialogTitle="Enter Your blog signature"
 				android:defaultValue="Posted using my Android"
 				android:persistent="true"/>
+			<EditTextPreference 
+				android:title="Center Tree on Node"
+				android:key="lastSelectedDraftNode"  
+				android:defaultValue="1"
+				android:persistent="true"/>
         </PreferenceScreen>
             
                 

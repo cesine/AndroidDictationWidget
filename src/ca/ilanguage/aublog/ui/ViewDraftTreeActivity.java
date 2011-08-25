@@ -99,7 +99,7 @@ public class ViewDraftTreeActivity extends Activity {
         */
 	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
-		mSelectedDraftId = prefs.getString(PreferenceConstants.PREFERENCE_LAST_SELECTED_DRAFT_NODE,"1");
+		mSelectedDraftId = prefs.getString(PreferenceConstants.PREFERENCE_LAST_SELECTED_DRAFT_NODE,"4");
 
 		mMediaPlayer = new MediaPlayer();
 
@@ -150,6 +150,8 @@ public class ViewDraftTreeActivity extends Activity {
 
         
 		mWebView.loadUrl("file:///android_asset/view_draft_tree.html");
+		
+		
     }
     public class JavaScriptInterface {
         Context mContext;
@@ -165,11 +167,19 @@ public class ViewDraftTreeActivity extends Activity {
             
         }
         public void showToast(String toast) {
-            Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, toast, Toast.LENGTH_LONG).show();
         }
         public void setSelectedId(String id){
         	mUri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
+        	mSelectedDraftId = id;
         	//playNode();
+        }
+        public String getCenteredNode(){
+        	if (mSelectedDraftId == null){
+        		return "1";
+        	}else{
+        		return mSelectedDraftId;
+        	}
         }
         public void playSelectedId(){
         	//mUri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();

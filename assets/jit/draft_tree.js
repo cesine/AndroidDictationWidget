@@ -61,14 +61,14 @@ children: []
 } ]
 } ]
 };
-
+//var st;
 function init(dataIn){
     //init data
 var json = dataIn;
     //end
     //init Spacetree
     //Create a new ST instance
-    var st = new $jit.ST({
+    st = new $jit.ST({
     	orientation: "top",
     	indent:10,
         //id of viz container element
@@ -182,7 +182,13 @@ var json = dataIn;
     //optional: make a translation of the tree
     st.geom.translate(new $jit.Complex(-200, 0), "current");
     //emulate a click on the root node.
+    
+//    if(centeredNodeFromAndroid != null){
+//    	st.onClick(centeredNodeFromAndroid);
+//    }else{
     st.onClick(st.root);
+//    }
+    
     //end
     
     //Add event handlers to switch spacetree orientation.

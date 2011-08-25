@@ -10,6 +10,20 @@
 <!-- jQuery -->
  
 <meta http-equiv="Content-script-type" content="text/javascript" />
+
+<script language="javascript" type="text/javascript" >
+//Global variables.
+//http://stackoverflow.com/questions/3113429/how-can-i-fire-an-event-when-i-right-click-on-a-div-inside-a-canvas-with-jquery
+	/*
+	Code to detect long clicks on nodes. 
+	Generally if longclick >500 its a long click
+	*/
+	var downclick;
+	var upclick;
+	var longclick;
+	var centeredNodeFromAndroid =1;
+	var st;
+</script>
 <script type="text/javascript" src="js/jquery-1.5.1.min.js"></script>
 
 <!-- JIT Library File --> 
@@ -19,14 +33,7 @@
 <!-- Include different space trees depending on viewing frome Chrome or from Android WebView with Aublog appended to the user Agent -->
 <script language="javascript" type="text/javascript" >
 //http://stackoverflow.com/questions/3113429/how-can-i-fire-an-event-when-i-right-click-on-a-div-inside-a-canvas-with-jquery
-	/*
-	Code to detect long clicks on nodes. 
-	Generally if longclick >500 its a long click
-	*/
-	var downclick;
-	var upclick;
-	var longclick;
-	
+
 	$(document).ready(function() {
 		
 		$(document)[0].oncontextmenu = function() {
@@ -82,6 +89,9 @@
 	    function deleteId(id){
 	    	Android.deleteId(id);
 	    }
+	    function setCenterTree(id){
+	    	centeredNodeFromAndroid=id;
+	    }
 	    function loadJsonData(){
 	    	 Android.loadData();
 	    }
@@ -100,7 +110,19 @@
 			*/
 			//alert("Finished loading.");
 			   // here you can use anything you defined in the loaded script
-				init(draftTreeData);
+				centeredNodeFromAndroid = Android.getCenteredNode();
+			   init(draftTreeData);
+			   /*
+			   resume the tree in the last position that a node was edited (either in the view tree, or in the edit activity)
+			   */
+			   
+				/* if(centeredNodeFromAndroid != null){
+					st.onClick(centeredNodeFromAndroid);
+				}else{
+					//do nothingst.onClick("1");
+				} */
+			   /* st.onClick(97);
+				Android.showToast(JSON.stringify(st)); */
 			});
 	}else{
 		$.getScript("draft_tree_data.js", function(){
