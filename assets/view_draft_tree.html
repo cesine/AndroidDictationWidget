@@ -18,6 +18,21 @@
 
 <!-- Include different space trees depending on viewing frome Chrome or from Android WebView with Aublog appended to the user Agent -->
 <script language="javascript" type="text/javascript" >
+//http://stackoverflow.com/questions/3113429/how-can-i-fire-an-event-when-i-right-click-on-a-div-inside-a-canvas-with-jquery
+$(document).ready(function(){ 
+    $(document)[0].oncontextmenu = function() {return false;} 
+
+    $("#infovis").delegate('.node','mousedown',function(e){ 
+      if( e.button == 2 ) { 
+         e.stopPropagation()
+         alert('Right mouse button!'); 
+         return false; 
+       } else { 
+         return true; 
+        } 
+
+    }); 
+});
 
 	function isNativeApp() {
 	    return /AuBlog\/[0-9\.]+$/.test(navigator.userAgent);

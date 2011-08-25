@@ -1,6 +1,7 @@
 package ca.ilanguage.aublog.ui;
 
 import java.io.File;
+import java.io.IOException;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
@@ -12,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,8 +50,8 @@ public class ViewDraftTreeActivity extends Activity {
 	//uri of the entry being edited.
 	private Uri mUri;
 	private Cursor mCursor;
-	private OnLongClickListener mLongClickPlayAudio;
-	
+	private MediaPlayer mMediaPlayer;
+   
 	int selectionStart;
 	int selectionEnd;
 	String mPostContent ="";
@@ -97,24 +99,11 @@ public class ViewDraftTreeActivity extends Activity {
 	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
-		/**
-		 * Uses the value of the id clicked on to retrieve the audio file name from the database, turn off the media player and turn it on again with that audio file. 
-		 */
-		mLongClickPlayAudio = new OnLongClickListener(){
-
-			@Override
-			public boolean onLongClick(View v) {
-				// TODO Auto-generated method stub
-				
-				return false;
-			}
-			
-		};
-        
+		mMediaPlayer = new MediaPlayer();
+		
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
-        mWebView.setLongClickable(true);
-       	mWebView.setOnLongClickListener(mLongClickPlayAudio);
+       
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setSavePassword(false);
         webSettings.setSaveFormData(false);
@@ -177,8 +166,12 @@ public class ViewDraftTreeActivity extends Activity {
         }
         public void setSelectedId(String id){
         	mUri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
+        	playNode();
         }
-        
+        public void playSelectedId(String id){
+        	mUri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
+        	playNode();
+        }
         public void editId(String id){
         	tracker.trackPageView("/editBlogEntryScreen");
         	tracker.trackEvent(
@@ -249,7 +242,61 @@ public class ViewDraftTreeActivity extends Activity {
 	    }
         
         
-    }
+    }//end javascript interface.
+    private void playNode(){
+    	if (mUri != null){
+    		mCursor = managedQuery(mUri, PROJECTION, null, null, null);
+    		if (mCursor != null) {
+    			// Requery in case something changed while paused (such as the title)
+    			mCursor.requery();
+                // Make sure we are at the one and only row in the cursor.
+                mCursor.moveToFirst();
+    			try {
+    				String audioResultsFile = mCursor.getString(10);
+					if (audioResultsFile.length() > 5){
+		    			if(mMediaPlayer != null){
+							if(mMediaPlayer.isPlaying()== true){
+								mMediaPlayer.stop();
+							}
+							mMediaPlayer.release();
+					   		mMediaPlayer = null;
+						}
+					   	try {
+					   		mMediaPlayer = new MediaPlayer();
+					        //mMediaPlayer.setLooping(true);
+							mMediaPlayer.setDataSource(audioResultsFile);
+							mMediaPlayer.prepareAsync();
+							mMediaPlayer.start();
+						} catch (IllegalArgumentException e) {
+							Toast.makeText(ViewDraftTreeActivity.this, "Problem with opening the audio file "+e, Toast.LENGTH_LONG).show();
+						} catch (IllegalStateException e) {
+							Toast.makeText(ViewDraftTreeActivity.this, "Problem with opening the audio file "+e, Toast.LENGTH_LONG).show();
+						} catch (IOException e) {
+							Toast.makeText(ViewDraftTreeActivity.this, "Problem with opening the audio file "+e, Toast.LENGTH_LONG).show();
+						}
+					}else{
+						Toast.makeText(ViewDraftTreeActivity.this, "No attached audio file ", Toast.LENGTH_LONG).show();
+					}
+    			}catch (IllegalArgumentException e) {
+    				// Log.e(TAG, "IllegalArgumentException (DataBase failed)");
+    				tracker.trackEvent(
+    			            "Database",  // Category
+    			            "Bug",  // Action
+    			            "Retrieval from DB failed with an illegal argument exception "+e+" : "+mAuBlogInstallId, // Label
+    			            201);       // Value
+    				Toast.makeText(ViewDraftTreeActivity.this, "Retrieval from DB failed with an illegal argument exception "+e, Toast.LENGTH_LONG).show();
+    			}catch (Exception e) {
+    				// Log.e(TAG, "Exception (DataBase failed)");
+    				tracker.trackEvent(
+    			            "Database",  // Category
+    			            "Bug",  // Action
+    			            "The cursor returned is "+e+" : "+mAuBlogInstallId, // Label
+    			            202);       // Value
+    				//Toast.makeText(EditBlogEntryActivity.this, "The cursor returned is "+e, Toast.LENGTH_LONG).show();
+    			}
+    		}//end if for cursor not null
+    	}//end if for muri not null
+    }//end playnode
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
       // Save UI state changes to the savedInstanceState.
@@ -270,9 +317,12 @@ public class ViewDraftTreeActivity extends Activity {
 	}
 	@Override
 	protected void onDestroy() {
+		if(mMediaPlayer != null){
+			mMediaPlayer.release();
+	   		mMediaPlayer = null;
+		}
 		super.onDestroy();
 		tracker.stop();
-
 	}
 
     /**
