@@ -17,6 +17,33 @@
 
 <!-- Include different space trees depending on viewing frome Chrome or from Android WebView with Aublog appended to the user Agent -->
 <script language="javascript" type="text/javascript" >
+			$(document).ready(function() {
+		var downclick;
+		var upclick;
+		var longclick;
+		$(document)[0].oncontextmenu = function() {
+			return false;
+		}
+
+		$("#infovis").delegate('.node', 'mousedown', function(e) {
+			var d = new Date();
+			downclick = d.getTime();
+			e.stopPropagation()
+			//alert('mouse down!'); 
+			//return false;
+
+		});
+		$("#infovis").delegate('.node', 'mouseup', function(e) {
+			var d = new Date();
+			upclick = d.getTime();
+			e.stopPropagation();
+			longclick=upclick-downclick;
+			//alert('mouse up!' + longclick );
+			//return false;
+
+		});
+	});
+
 	/*
 	this function is only called in the web version of the sript
 	*/
@@ -96,6 +123,7 @@
 	
 </script>
  
+
 </head> 
  
 <body > 

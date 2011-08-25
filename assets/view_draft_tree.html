@@ -19,20 +19,42 @@
 <!-- Include different space trees depending on viewing frome Chrome or from Android WebView with Aublog appended to the user Agent -->
 <script language="javascript" type="text/javascript" >
 //http://stackoverflow.com/questions/3113429/how-can-i-fire-an-event-when-i-right-click-on-a-div-inside-a-canvas-with-jquery
-$(document).ready(function(){ 
-    $(document)[0].oncontextmenu = function() {return false;} 
+	/*
+	Code to detect long clicks on nodes. 
+	Generally if longclick >500 its a long click
+	*/
+	var downclick;
+	var upclick;
+	var longclick;
+	
+	$(document).ready(function() {
+		
+		$(document)[0].oncontextmenu = function() {
+			return false;
+		}
 
-    $("#infovis").delegate('.node','mousedown',function(e){ 
-      if( e.button == 2 ) { 
-         e.stopPropagation()
-         alert('Right mouse button!'); 
-         return false; 
-       } else { 
-         return true; 
-        } 
+		$("#infovis").delegate('.node', 'mousedown', function(e) {
+			var d = new Date();
+			downclick = d.getTime();
+			e.stopPropagation()
+			//alert('mouse down!'); 
+			//return false;
 
-    }); 
-});
+		});
+		$("#infovis").delegate('.node', 'mouseup', function(e) {
+			var d = new Date();
+			upclick = d.getTime();
+			e.stopPropagation();
+			longclick=upclick-downclick;
+			if (longclick > 500){
+				playSelectedId();
+			}
+			//alert('mouse up!' + longclick );
+			//return false;
+
+		});
+	});
+
 
 	function isNativeApp() {
 	    return /AuBlog\/[0-9\.]+$/.test(navigator.userAgent);
@@ -49,6 +71,12 @@ $(document).ready(function(){
 	    }
 	    function editId(id){
 	    	Android.editId(id);
+	    }
+	    function playSelectedId(){
+	    	Android.playSelectedId();
+	    }
+	    function setSelectedId(id){
+	    	Android.setSelectedId(id);
 	    }
 	    function deleteId(id){
 	    	Android.deleteId(id);

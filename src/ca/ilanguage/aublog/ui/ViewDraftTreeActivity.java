@@ -166,10 +166,10 @@ public class ViewDraftTreeActivity extends Activity {
         }
         public void setSelectedId(String id){
         	mUri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
-        	playNode();
+        	//playNode();
         }
-        public void playSelectedId(String id){
-        	mUri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
+        public void playSelectedId(){
+        	//mUri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
         	playNode();
         }
         public void editId(String id){
