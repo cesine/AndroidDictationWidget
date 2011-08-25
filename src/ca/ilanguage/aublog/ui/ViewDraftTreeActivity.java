@@ -53,6 +53,7 @@ public class ViewDraftTreeActivity extends Activity {
 	private String mAuBlogInstallId;
     private static final String TAG = "CreateBlogEntryActivity";
 
+    private String mSelectedDraftId;
 	//uri of the entry being edited.
 	private Uri mUri;
 	private Cursor mCursor;
@@ -101,7 +102,7 @@ public class ViewDraftTreeActivity extends Activity {
         */
 	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
-		
+		mSelectedDraftId = prefs.getString(PreferenceConstants.PREFERENCE_LAST_SELECTED_DRAFT_NODE,"1");
         
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
@@ -257,6 +258,11 @@ public class ViewDraftTreeActivity extends Activity {
 	}
 	@Override
 	protected void onDestroy() {
+		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+    	SharedPreferences.Editor editor = prefs.edit();
+    	editor.putString(PreferenceConstants.PREFERENCE_LAST_SELECTED_DRAFT_NODE,mSelectedDraftId);
+    	editor.commit();
+    	
 		super.onDestroy();
 		tracker.stop();
 

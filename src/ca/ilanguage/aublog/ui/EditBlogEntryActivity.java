@@ -872,7 +872,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		// Log.i(TAG, "Method 'onDestroy()' launched");
 		tracker.stop();
 		mFreshEditScreen=false;
-		
+		if(!mURIDeleted){
+			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+	    	SharedPreferences.Editor editor = prefs.edit();
+	    	editor.putString(PreferenceConstants.PREFERENCE_LAST_SELECTED_DRAFT_NODE,mPostId);
+	    	editor.commit();
+		}
 		/*
 		 * Stop the player if its playing, this must be in the ondestroy method,
 		 * not the onpause method Reason: onpause is called when user opens the
