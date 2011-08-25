@@ -97,10 +97,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	//savedInstanceState
 	public static final String EXTRA_CURRENT_CONTENTS ="currentContents";
 	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
+	public static final String EXTRA_FROM_NOTIFICATION_RECORDING_STILL_RUNNING ="recordingStillRunning";
 	//private Boolean mReturnedTranscription; //check on reload?
 	public static final String REFRESH_AUDIOFILE_INTENT = NonPublicConstants.NONPUBLIC_INTENT_AUDIOFILE_RECORDED_AND_SAVED;
 	public static final String REFRESH_TRANSCRIPTION_INTENT = NonPublicConstants.NONPUBLIC_INTENT_TRANSCRIPTION_RECEIVED;
 	public static final String DICTATION_SENT_INTENT = NonPublicConstants.NONPUBLIC_INTENT_DICTATION_SENT;
+	public static final String DICTATION_STILL_RECORDING_INTENT = NonPublicConstants.NON_PUBLIC_INTENT_DICTATION_STILL_RECORDING;
 	
 	private static final int CHANGED_SETTINGS = 0;
 	int selectionStart;
@@ -886,6 +888,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		registerReceiver(audioFileUpdateReceiver, intentFilter);
 		IntentFilter intentDictSent = new IntentFilter(DICTATION_SENT_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentDictSent);
+		IntentFilter intentDictRunning = new IntentFilter(DICTATION_STILL_RECORDING_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentDictRunning);
 		IntentFilter intentFilterTrans = new IntentFilter(REFRESH_TRANSCRIPTION_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentFilterTrans);
 		
@@ -1047,6 +1051,21 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 				mWebView.loadUrl("javascript:downloadTranscription()");
+			}
+			if (intent.getAction().equals(DICTATION_STILL_RECORDING_INTENT)) {
+				/* if the uri is the uri we are editing, then set its recording to true so the user can click stop 
+				 * case 1: we are editing and click home, then open notification and click on it. it takes us to the notifying controller, we click stop, it takes us back to the 
+				 * same edit activty that was open (probelm without this is that user can potentially have two versions of edit editing the same muri, where the old one overwrites changes to the new one.
+				 * 
+				 * case 2: we have left the edit activity, so it no longer has an instance state taht says its recording. if we click on the notification it will(open a new edit?) load the edit from the database
+				 * and then call this section whereby the stop button is displayed?
+				 * 
+				 * case 3: we are in the middle of editing another uri, click home, click on the notification, click on stop and it brings us here, but this is the wrong uri, so nothing happens. and the only way to stop the uri is to have a stop button and an open button. */
+				Uri uri = intent.getData();
+				if (mUri == uri){
+					mRecordingNow = true;
+					mWebView.loadUrl("javascript:checkRecordingNow()");
+				}
 			}
 			if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
 				/* open the srt and extract the text */
