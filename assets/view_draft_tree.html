@@ -32,8 +32,8 @@
 		$(document)[0].oncontextmenu = function() {
 			return false;
 		}
-
-		$("#infovis").delegate('.node', 'mousedown', function(e) {
+		//http://m14i.wordpress.com/2009/10/25/javascript-touch-and-gesture-events-iphone-and-android/
+		$("#infovis").delegate('.node', 'touchstart', function(e) {
 			var d = new Date();
 			downclick = d.getTime();
 			e.stopPropagation()
@@ -41,13 +41,14 @@
 			//return false;
 
 		});
-		$("#infovis").delegate('.node', 'mouseup', function(e) {
+		$("#infovis").delegate('.node', 'touchend', function(e) {
 			var d = new Date();
 			upclick = d.getTime();
 			e.stopPropagation();
 			longclick=upclick-downclick;
 			if (longclick > 500){
-				playSelectedId();
+				//play the audio file after selected has fired so that the proper post id is played.
+				setTimeout("playSelectedId()",1000);
 			}
 			//alert('mouse up!' + longclick );
 			//return false;
