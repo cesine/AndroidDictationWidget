@@ -359,6 +359,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     		if(mTimeAudioWasRecorded ==null){
     			mTimeAudioWasRecorded = (long) 0;
     		}
+    		
         }//end else to control if its the first oncreate (then fetch from database)
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -373,10 +374,22 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
 		
         
-	    mRecordingNow = false;
 	    mPlayingNow = false;
-	    recheckAublogSettings();
-	    
+	    if(mRecordingNow == null){
+			mRecordingNow = false;
+		}
+	    if(mRecordingNow == false){
+	    	recheckAublogSettings();
+	    }else{
+	    	//just check the settings whcih are safe to change when recording in background
+	    	SharedPreferences prefs = getSharedPreferences(
+					PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+			/*
+			 * set the installid for appending to the labels
+			 */
+			mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+			mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
+	    }
         mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
 	    mDateString = mDateString.replaceAll("/","-").replaceAll(" ","-");
      
@@ -504,6 +517,18 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         
         public String downloadTranscriptionFromServerJS(String strContents){
         	return downloadTranscription(strContents);
+        	
+        }
+        public int getValueRecordingNowJS(){
+        	if(mRecordingNow==null){
+        		return 0;
+        	}else{
+        		if(mRecordingNow){
+        			return 1;
+        		}else{
+        			return 0;
+        		}
+        	}
         	
         }
         public String importTranscriptionJS(){
@@ -711,6 +736,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	      savedInstanceState.putBoolean("fresheditscreen",mFreshEditScreen);
 	      savedInstanceState.putString("audiofilestatus",mAudioResultsFileStatus);
 	      savedInstanceState.putBoolean("deleted", mDeleted);
+	      savedInstanceState.putBoolean("recordingNow", mRecordingNow);
 	      savedInstanceState.putString("parentid", mPostParent);
 	      savedInstanceState.putString("id",mPostId);
 //	      savedInstanceState.putString("uri", mUri.getPath());
@@ -738,6 +764,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       mAudioResultsFile = savedInstanceState.getString("audiofile");
       mFreshEditScreen = savedInstanceState.getBoolean("fresheditscreen");
       mAudioResultsFileStatus = savedInstanceState.getString("audiofilestatus");
+      mRecordingNow = savedInstanceState.getBoolean("recordingNow");
       mDeleted = savedInstanceState.getBoolean("deleted");
       mPostParent = savedInstanceState.getString("parentid");
       mPostId = savedInstanceState.getString("id");
@@ -927,7 +954,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	values.put(AuBlogHistory.ENTRY_LABELS, mPostLabels);
         	values.put(AuBlogHistory.TIME_EDITED, Long.valueOf(System.currentTimeMillis()));
         	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
-        	values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
+        	//values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
         	getContentResolver().update(mUri, values,null, null);
     		Log.d(TAG, "Post saved to database.");
     		//Toast.makeText(EditBlogEntryActivity.this, "Post " +mUri.getLastPathSegment()+" saved as self to database\n\nTitle: "+mPostTitle+"\nLabels: "+mPostLabels+"\n\nPost: "+mPostContent, Toast.LENGTH_LONG).show();

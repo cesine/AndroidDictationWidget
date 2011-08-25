@@ -48,6 +48,7 @@ function autoSize() {
 $(document).ready(function()	{
 	fillFromAndroidActivity();
 	importTranscription();
+	checkRecordingNow();
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
 	$('#markItUp').markItUp(mySettings);
@@ -170,7 +171,6 @@ $(document).ready(function()	{
     }
     function deletePost(){
     	Android.deletePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
-    	
     }
     function saveButton(){
     	readTTSPost();
@@ -195,6 +195,11 @@ $(document).ready(function()	{
     	if (doit == "true" ){
     		displayPlayButton();
     		document.getElementById('recordButton').value="New Dictation";
+    	}
+    }
+    function checkRecordingNow(){
+    	if (Android.getValueRecordingNowJS() == 1){
+    		document.getElementById('recordButton').value="Stop Dictation";
     	}
     }
     /*
