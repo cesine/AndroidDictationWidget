@@ -47,8 +47,8 @@
 			e.stopPropagation();
 			longclick=upclick-downclick;
 			if (longclick > 500){
-				//play the audio file after selected has fired so that the proper post id is played.
-				setTimeout("playSelectedId()",1000);
+				//play the audio file after selected has fired so that the proper post id is played. timer is set to 500 as it is most likley after the select node is called.
+				setTimeout("playSelectedId()",500);
 			}
 			//alert('mouse up!' + longclick );
 			//return false;
