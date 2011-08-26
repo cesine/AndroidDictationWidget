@@ -539,7 +539,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	
         }
         public String importTranscriptionJS(String strContents){
-        	return askUserIfImport(strContents);
+        	askUserIfImport(strContents);
+        	return mTranscriptionAndContents;
 //        	if(mTranscription == null){
 //        		return mAudioResultsFileStatus;
 //        	}else{
@@ -1574,12 +1575,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				.setNegativeButton("Don't Import", no)
 				.setMessage("Here is the what your entry will look like.\n\n"+mTranscription+currentPostContents).create();
 				dialog.show();
-				
-				
-		
 			}
 		}
-		return mTranscriptionAndContents;
+		return "";
 	}
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
