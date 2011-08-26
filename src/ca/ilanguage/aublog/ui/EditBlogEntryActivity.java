@@ -399,7 +399,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
 	    }
 	    
-        mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_HH.mm", new java.util.Date());
+        mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_kk.mm", new java.util.Date());
 	    mDateString = mDateString.replaceAll("/","-").replaceAll(" ","-");
      
         
@@ -1216,7 +1216,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            34);       // Value
 
 		mStartTime=System.currentTimeMillis();
-		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_HH.mm", new java.util.Date());
+		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_kk.mm", new java.util.Date());
 		mDateString = mDateString.replaceAll("/","-");
 		mAudioResultsFile = mAuBlogDirectory+"audio/";
 		new File(mAudioResultsFile).mkdirs();
