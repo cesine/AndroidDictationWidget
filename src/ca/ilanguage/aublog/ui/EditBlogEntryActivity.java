@@ -717,8 +717,16 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * @param strLabels
          */
         public void publishPostJS(String strTitle, String strContent, String strLabels){
-        	//act like publish is both save+publish
-        	saveAsDaughterToDB(strTitle, strContent, strLabels);
+        	//act like publish is both save+publish why? 
+        	//changing it to act like save as self
+        	if (!(mPostTitle.equals(strTitle)) ){
+        		flagDraftTreeAsNeedingToBeReGenerated();
+        	}
+        	mPostContent=strContent;
+        	mPostTitle=strTitle;
+        	mPostLabels=strLabels;
+        	
+        	saveAsSelfToDB();//(strTitle, strContent, strLabels);
         	if ((mPostTitle.length() == 0)
         			|| (mPostTitle == null)
         			|| (mPostContent.length() == 0)
@@ -1433,6 +1441,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					311); // Value
 			return;
 		}
+		
     	try{
     		
         	/*
@@ -1443,8 +1452,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	daughterValues.put(AuBlogHistory.ENTRY_CONTENT, strContent);
         	daughterValues.put(AuBlogHistory.ENTRY_LABELS, strLabels);
         	daughterValues.put(AuBlogHistory.LAST_MODIFIED, Long.valueOf(System.currentTimeMillis()));
-        	daughterValues.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile); //TODO when to blank out the audio results file?
-        	daughterValues.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus); //TODO dont need to write the status ever from here?
+//        	daughterValues.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile); //TODO when to blank out the audio results file?
+//        	daughterValues.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus); //TODO dont need to write the status ever from here?
           	daughterValues.put(AuBlogHistory.PARENT_ENTRY, mUri.getLastPathSegment());	
     		Uri daughterUri = getContentResolver().insert(AuBlogHistory.CONTENT_URI, daughterValues);
     		tracker.trackEvent(
