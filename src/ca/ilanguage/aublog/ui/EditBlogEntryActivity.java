@@ -654,9 +654,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		mPostContent=strContent;
             	mPostTitle=strTitle;
             	mPostLabels=strLabels;
-            	
+            	saveStateToActivity(strTitle, strContent, strLabels);
         		saveAsSelfToDB();
         		saveAsDaughterToDB(strTitle, strContent, strLabels);
+        		
         	}else{
         		/*
         		 * if it is not the case that the text is longer than one, nor it is also not the case that the result file is longer than 5, 
@@ -665,7 +666,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		mPostContent=strContent;
             	mPostTitle=strTitle;
             	mPostLabels=strLabels;
-            	
+            	saveStateToActivity(strTitle, strContent, strLabels);
         		saveAsSelfToDB();
         	}
         }
@@ -1525,8 +1526,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-//			mWebView.loadUrl("javascript:savePostToDB()");
-	    	if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
+			if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
 	    		//if the longestevercontenttitle etc is shorter than the concatination of the current title and content, save the current as the longested ever. 
 				mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
 			}
@@ -1554,6 +1554,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				} else {
 					//Toast.makeText(EditBlogEntryActivity.this,"Not Deleting " + mUri.getLastPathSegment()+ " it has" + cursor.getCount()+ " daughters.", Toast.LENGTH_LONG).show();
 				}
+			}else{
+				//backbutton acts as save as self to database.
+				mWebView.loadUrl("javascript:savePostToState()");
+		    	saveAsSelfToDB();
 			}
 			mFreshEditScreen =true;
 		}
