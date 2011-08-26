@@ -643,6 +643,26 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public String fetchDebugInfoJS(){
         	return "Id: "+mPostId+" Parent: "+mPostParent+" Deleted: "+mDeleted.toString()+" LongestEverString:"+mLongestEverContent;
         }
+        public void saveDaughterForRecordingJS(String strTitle, String strContent, String strLabels){
+        	/*
+        	 * If the current information has either some text, or a file, then create a daughter.
+        	 */
+        	if ( ( (mPostTitle+mPostContent+mPostLabels).length() > 1  )
+    				|| mAudioResultsFile.length() > 5  ) {
+        		mPostContent=strContent;
+            	mPostTitle=strTitle;
+            	mPostLabels=strLabels;
+            	
+        		saveAsSelfToDB();
+        		saveAsDaughterToDB(strTitle, strContent, strLabels);
+        	}else{
+        		/*
+        		 * if it is not the case that the text is longer than one, nor it is also not the case that the result file is longer than 5, 
+        		 * then just save as self to the databse.
+        		 */
+            	saveAsDaughterToDB(strTitle, strContent, strLabels);
+        	}
+        }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
         	mPostContent=strContent;
         	mPostTitle=strTitle;
@@ -1382,18 +1402,24 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	private void saveAsDaughterToDB(String strTitle, String strContent, String strLabels){
 		mFreshEditScreen = false;
 		/*
-    	 * If it has no content, and no attached audio, save it as itself and return
+    	 * If it has no content,
+    	 * or 
+    	 * If it didn't change, 
+    	 * 
+    	 * and no attached audio, save it as itself. 
     	 */
-    	if ( ( (mPostTitle+mPostContent+mPostTitle).length() < 2 || (strTitle+strContent+strLabels).length()< 2 ) && mAudioResultsFile.length() <5){
+		if ( ( (mPostTitle + mPostContent + mPostTitle).length() < 2 || 
+				(strTitle + strContent + strLabels).length() < 2   ||
+				(mPostTitle+mPostContent+mPostLabels).equals(strTitle+strContent+strLabels) )
+				&& mAudioResultsFile.length() < 5  ) {
 			saveStateToActivity(strTitle, strContent, strLabels);
 			saveAsSelfToDB();
-			tracker.trackEvent(
-    	            "AuBlogLifeCycleEvent",  // Category
-    	            "Save",  // Action
-    	            "save as self:no new text: "+mAuBlogInstallId, // Label
-    	            311);       // Value
+			tracker.trackEvent("AuBlogLifeCycleEvent", // Category
+					"Save", // Action
+					"save as self:no new text: " + mAuBlogInstallId, // Label
+					311); // Value
 			return;
-    	}
+		}
     	try{
     		
         	/*

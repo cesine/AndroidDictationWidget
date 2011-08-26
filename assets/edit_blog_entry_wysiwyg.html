@@ -111,16 +111,17 @@ $(document).ready(function()	{
     		Android.downloadTranscriptionFromServerJS(); */
     	}else{
     		//If the button says something else, record
+    		Android.saveDaughterForRecordingJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     		/*
     		1. save what the user sees to this post.
     		*/
-    		savePostToState(); //so that the title of the audio file will correspond with the current title in the javascript
+    		//savePostToState(); //so that the title of the audio file will correspond with the current title in the javascript
     		/*
     		2. create a new daughter post with the same content 
     		so that the edits teh user makes between turning on the recording 
     		and stopping the reocording go with the recording. 
     		*/
-    		savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
+    		//savePostToDB(); //each audio file corresponds to save operation, and most often a daughter entry. Any text changes made durring the recording will be saevd with the recording.
     		/*
     		3. start the recording
     		*/
