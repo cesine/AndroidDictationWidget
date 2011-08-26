@@ -671,13 +671,16 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	}
         }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
+        	Boolean flag = false;
         	if (!(mPostTitle.equals(strTitle)) ){
-        		flagDraftTreeAsNeedingToBeReGenerated();
+        		flag=true;
         	}
         	mPostContent=strContent;
         	mPostTitle=strTitle;
         	mPostLabels=strLabels;
-        	
+        	if(flag){
+        		flagDraftTreeAsNeedingToBeReGenerated();
+        	}
         	tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "saveSTate",  // Action
