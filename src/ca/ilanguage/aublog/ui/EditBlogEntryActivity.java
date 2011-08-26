@@ -1575,11 +1575,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				.setMessage("Here is the what your entry will look like.\n\n"+mTranscription+currentPostContents).create();
 				dialog.show();
 				
-				return mTranscriptionAndContents;
+				
 		
 			}
 		}
-		return "";
+		return mTranscriptionAndContents;
 	}
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {

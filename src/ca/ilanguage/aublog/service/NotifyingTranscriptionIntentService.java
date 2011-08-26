@@ -125,6 +125,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
+		mNM.cancel(NOTIFICATION);
+		
 		super.onDestroy();
 	}
 /**
