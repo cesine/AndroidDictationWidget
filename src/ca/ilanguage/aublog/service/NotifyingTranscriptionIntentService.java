@@ -123,12 +123,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 
 	@Override
 	public void onCreate() {
-		super.onCreate();
-		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-		if(mKillAuBlog == null){
-			mKillAuBlog = false;
-		}
 		if(mKillAublogReceiver == null){
 			mKillAublogReceiver = new KillAuBlogReciever();
 		}
@@ -137,6 +131,13 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		IntentFilter intentDictRunning = new IntentFilter(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT);
 		registerReceiver(mKillAublogReceiver, intentDictRunning);
 		
+		super.onCreate();
+		
+		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+		if(mKillAuBlog == null){
+			mKillAuBlog = false;
+		}
 	}
 	
 	public class KillAuBlogReciever extends BroadcastReceiver {
@@ -210,6 +211,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mAudioFilePath = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH);
 			mAudioResultsFileStatus = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 			mPostContents=intent.getExtras().getString(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS);
+			mKillAuBlog=intent.getExtras().getBoolean(DictationRecorderService.EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU);
 			if (mPostContents == null){
 				mPostContents="";
 			}
@@ -296,6 +298,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					mTimeCodes.add(line);
 					
 				}
+				reader.close();
 				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
 				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
 	        	mNotificationMessage = firstLine;//+ "\nSelect to import transcription.";

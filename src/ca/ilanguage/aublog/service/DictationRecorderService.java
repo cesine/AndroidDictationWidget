@@ -77,6 +77,7 @@ public class DictationRecorderService extends Service {
 	private String mAudioResultsFileStatus ="";
 	public static final String EXTRA_AUDIOFILE_FULL_PATH = "audioFilePath";
 	public static final String EXTRA_AUDIOFILE_STATUS = "audioFileStatus";
+	public static final String EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU ="killAublog";
 	
 
 	private Long mStartTime;
@@ -154,8 +155,6 @@ public class DictationRecorderService extends Service {
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
 		}
-		
-		super.onDestroy();
 		/*pass on the kill aublog message to the transcription server*/
 		if (mKillAuBlog != null){
 			if(mKillAuBlog){
@@ -163,7 +162,7 @@ public class DictationRecorderService extends Service {
 				sendBroadcast(intent);
 			}
 		}
-		
+		super.onDestroy();
 	}
 
 
@@ -177,6 +176,13 @@ public class DictationRecorderService extends Service {
 		sendBroadcast(i);
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
+		}
+		/*pass on the kill aublog message to the transcription server*/
+		if (mKillAuBlog != null){
+			if(mKillAuBlog){
+				Intent intent = new Intent(MainMenuActivity.KILL_AUBLOG_INTENT);
+				sendBroadcast(intent);
+			}
 		}
 		super.onLowMemory();
 	}
@@ -418,9 +424,12 @@ public class DictationRecorderService extends Service {
 		intent.setData(mUri);
         intent.putExtra(EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
         intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
+        /*pass on the kill aublog message to the transcription server*/
         intent.putExtra(EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+        intent.putExtra(EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU, mKillAuBlog);
         startService(intent); 
-       
+        
+		
 	}
 
 }
