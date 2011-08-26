@@ -731,13 +731,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       // Save UI state changes to the savedInstanceState.
       // This bundle will be passed to onCreate if the process is
       // killed and restarted.
-    	//TODO 
     	
     	mFreshEditScreen = false; 
     	//mWebView.saveState(savedInstanceState);//http://stackoverflow.com/questions/4726637/android-how-to-savestate-of-a-webview-with-an-addjavascriptinterface-attached
-    	/*THIS PUTS IN THE OLD STUFF, SEEMS TO WORK WITH OUT IT.
-    	 * 
-    	 */
+
 	      savedInstanceState.putString("title", mPostTitle);
 	      savedInstanceState.putString("content", mPostContent);
 	      savedInstanceState.putString("labels", mPostLabels);
@@ -764,9 +761,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	
       // Restore UI state from the savedInstanceState.
       // This bundle has also been passed to onCreate.
-      /*THIS PUTS UP THE OLD VERSION
-       * */
-       
       mPostTitle = savedInstanceState.getString("title");
       mPostContent = savedInstanceState.getString("content");
       mPostLabels = savedInstanceState.getString("labels");
@@ -1042,7 +1036,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public class AudioFileUpdateReceiver extends BroadcastReceiver {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(REFRESH_AUDIOFILE_INTENT)) {
+	    	//refresh audiofile REFRESH_AUDIOFILE_INTENT is too soon to check because the transcription service 
+	    	//will be in the middle of sending the .mp3 when we want to listen to it. instead, wait until the transcription service replys
+			if (intent.getAction().equals(DICTATION_SENT_INTENT)) {
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 
@@ -1079,9 +1075,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				/* open the srt and extract the text */
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				mTranscription = "TODO this is what came back from the server.";
-				mWebView.loadUrl("javascript:importTranscription(document.getElementById('markItUp').value)");
-				/* tell javascript to fill in the transcription stuff */
+				if(intent.getData() == mUri){
+					mTranscription = "TODO this is what came back from the server.";
+					mWebView.loadUrl("javascript:importTranscription(document.getElementById('markItUp').value)");
+					
+					/* tell javascript to fill in the transcription stuff */
+				}else{
+					Toast.makeText(EditBlogEntryActivity.this, "Transcription for post "+intent.getData().getLastPathSegment()+" received.", Toast.LENGTH_LONG).show();
+					//TODO perhaps give user the option of importing the transcription here, since this is most likely a daughter of the transcription sent since roughly 1-2 minutes have passed.
+				}
 			}
 	        String tmep;
 	        tmep = "wait to see if error is here";
