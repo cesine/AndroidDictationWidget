@@ -678,6 +678,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	mPostContent=strContent;
         	mPostTitle=strTitle;
         	mPostLabels=strLabels;
+        	if (mLongestEverContent.length() < (strTitle+strContent+strLabels).length() ){
+    			mLongestEverContent=strContent+strContent+strLabels;
+    		}
         	if(flag){
         		flagDraftTreeAsNeedingToBeReGenerated();
         	}
@@ -686,7 +689,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	            "saveSTate",  // Action
     	            "state was saved via javascript "+strTitle+" : "+strLabels+" : "+strContent+" : "+mAuBlogInstallId, // Label
     	            34);       // Value
-        	saveStateToActivity(strTitle, strContent, strLabels);
+        	//takes too long saveStateToActivity(strTitle, strContent, strLabels);
         }
         /**
          * Wrapper for the edit blog activty save post as a daughter to the database method. TODO rename method to reflect its action as saving a daughter.
@@ -910,7 +913,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            38);       // Value
     	
 		if(mURIDeleted == true){
-			//do nothing
+			Toast.makeText(
+					EditBlogEntryActivity.this,
+					"Discarding entry " + mUri.getLastPathSegment(),// + " it's empty and it has no daughters.",
+					Toast.LENGTH_LONG).show();
 		}else{
 	    	mWebView.loadUrl("javascript:savePostToState()");
 	    	saveAsSelfToDB();
@@ -1430,8 +1436,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	 * and no attached audio, save it as itself. 
     	 */
 		if ( ( (mPostTitle + mPostContent + mPostTitle).length() < 2 || 
-				(strTitle + strContent + strLabels).length() < 2   ||
-				(mPostTitle+mPostContent+mPostLabels).equals(strTitle+strContent+strLabels) )
+				(strTitle + strContent + strLabels).length() < 2    )
 				&& mAudioResultsFile.length() < 5  ) {
 			saveStateToActivity(strTitle, strContent, strLabels);
 			saveAsSelfToDB();
@@ -1541,12 +1546,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			mWebView.loadUrl("javascript:savePostToState()");
 			if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
 	    		//if the longestevercontenttitle etc is shorter than the concatination of the current title and content, save the current as the longested ever. 
 				mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
 			}
 	    	
-			if (mLongestEverContent.length() <= 2 && mAudioResultsFile.length() < 5) {
+			if ( mLongestEverContent.length() <= 1 && mAudioResultsFile.length() < 5) {
 				// delete the entry the blog entry  if the user
 				// never added anything and there is no attached audio file. this should prevent having empty entrys
 				// in the database, but stillkeep entries that are zeroed out and had
@@ -1559,10 +1565,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 						PROJECTION, AuBlogHistory.PARENT_ENTRY + "=" + mUri.getLastPathSegment(),
 						null, null);
 				if (cursor.getCount() < 1) {
-					Toast.makeText(
-							EditBlogEntryActivity.this,
-							"Discarding entry " + mUri.getLastPathSegment(),// + " it's empty and it has no daughters.",
-							Toast.LENGTH_LONG).show();
+					
 					getContentResolver().delete(mUri, null, null);
 					mURIDeleted = true;
 					flagDraftTreeAsNeedingToBeReGenerated();//activity finishes when mURI is deleted so no problems
