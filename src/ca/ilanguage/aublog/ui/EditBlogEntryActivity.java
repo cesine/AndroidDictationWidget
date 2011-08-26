@@ -107,6 +107,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public static final String REFRESH_TRANSCRIPTION_INTENT = NonPublicConstants.NONPUBLIC_INTENT_TRANSCRIPTION_RECEIVED;
 	public static final String DICTATION_SENT_INTENT = NonPublicConstants.NONPUBLIC_INTENT_DICTATION_SENT;
 	public static final String DICTATION_STILL_RECORDING_INTENT = NonPublicConstants.NON_PUBLIC_INTENT_DICTATION_STILL_RECORDING;
+	public static final String TRANSCRIPTION_STILL_CONTACTING_INTENT = NonPublicConstants.NON_PUBLIC_INTENT_TRANSCRIPTION_STILL_CONTACTING;
 	
 	private static final int CHANGED_SETTINGS = 0;
 	int selectionStart;
@@ -1335,7 +1336,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * launch async notification service which sends file to transcription server.
          */
 	   	mSendForTranscription=true;
-	   	mAudioResultsFileStatus="recordingflaggedfortranscription";
+	   	mAudioResultsFileStatus="Recording flagged for transcription";
         
         
         /* Code to do a voice recognition via google voice:

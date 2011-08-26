@@ -134,6 +134,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		}
 		IntentFilter intentDictSent = new IntentFilter(MainMenuActivity.KILL_AUBLOG_INTENT);
 		registerReceiver(mKillAublogReceiver, intentDictSent);
+		IntentFilter intentDictRunning = new IntentFilter(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT);
+		registerReceiver(mKillAublogReceiver, intentDictRunning);
+		
 	}
 	
 	public class KillAuBlogReciever extends BroadcastReceiver {
@@ -141,6 +144,15 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	    public void onReceive(Context context, Intent intent) {
 	    	if (intent.getAction().equals(MainMenuActivity.KILL_AUBLOG_INTENT)) {
 	    		mKillAuBlog = true;
+	    	}
+	    	/*
+	    	 * If main menu asks if you're recording (it is trying to kill aublog), reply that yes, you are still working.
+	    	 */
+	    	if (intent.getAction().equals(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT)) {
+	    		Intent i = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
+				i.setData(mUri);
+				i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+				sendBroadcast(i);
 	    	}
 	   	}
 	}
@@ -160,7 +172,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		 * this will execute if MainMenu tells this service that it is the last AuBlog process running.
 		 */
 		if (mKillAuBlog != null){
-				if(mKillAuBlog){
+			if(mKillAuBlog){
 				mAudioManager.setMode(AudioManager.MODE_NORMAL);
 				mAudioManager.setSpeakerphoneOn(true);
 				android.os.Process.killProcess(android.os.Process.myPid());	
@@ -182,6 +194,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 //		if (mNM != null){
 //			mNM.cancelAll();
 //		}
+		showNotification(R.drawable.stat_aublog, "Contacting transcription server.");
+    	
 		/*
 		 * get data from extras bundle, store it in the member variables
 		 */
@@ -202,6 +216,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mNotificationMessage= mAudioFilePath;
 		}else{
 			mNotificationMessage ="No file";
+			mNM.cancel(NOTIFICATION);
+			return;
 		}
 
 		/*
@@ -277,10 +293,12 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
 				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
 	        	mNotificationMessage = firstLine;//+ "\nSelect to import transcription.";
+	        	showNotification(R.drawable.stat_aublog, mNotificationMessage);
+	        	
 			} catch (Exception e) {
 				Log.e(e.getClass().getName(), e.getMessage(), e);
 				//this is showing up for when the audio is not sent, but the client srt is...
-				mNotificationMessage = "...";// null;
+				//mNotificationMessage = "...";// null;
 			}
 			
 			
@@ -315,7 +333,11 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					}
 					outSRT.flush();
 					outSRT.close();
-					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recieved response from Transcription server, saved as _server.srt in the AuBlog folder.";
+					if(mAudioFilePath.endsWith(".mp3")){
+						mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Dictation successfully sent to Transcription server.";
+					}else{
+						mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recieved transcription response from Transcription server, saved as _server.srt in the AuBlog folder.";
+					}
 					mTranscriptionReturned = true;
 					saveMetaDataToDatabase();
 					//mNotificationMessage = "Select to import transcription.";
@@ -323,6 +345,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					mNotificationMessage ="Cannot write results to SDCARD";
+					showNotification(R.drawable.stat_aublog, mNotificationMessage);
+		        	
 				}
 			
 		}else{
@@ -351,6 +375,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					mNotificationMessage ="Cannot write null results to SDCARD";
 				}
 			}//end if to make an empty srt file if the mp3 was not uploaded
+			showNotification(R.drawable.stat_aublog,  mNotificationMessage);
+			
 		}//end if for max file size for upload
 
 		if(mAudioFilePath.endsWith(".srt")){
@@ -363,8 +389,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 		}
-		showNotification(R.drawable.stat_aublog,  mNotificationMessage);
-		
+		mNM.cancel(NOTIFICATION);
 
 	}//end onhandle intent
 	private void saveMetaDataToDatabase(){

@@ -11,20 +11,22 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
+import ca.ilanguage.aublog.ui.MainMenuActivity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.IBinder;
-import android.widget.Toast;
 
 /**
  * A service to record and save a dictation to the SDCard and its filename and status messages to the 
@@ -90,7 +92,8 @@ public class DictationRecorderService extends Service {
     private MediaRecorder mRecorder;
     private AudioManager mAudioManager;
     private Boolean mRecordingNow = false;
-    
+    private RecordingReceiver audioFileUpdateReceiver;
+	
   //uri of the entry being edited.
 	private Uri mUri;
 	private String mDBLastModified="";
@@ -115,6 +118,12 @@ public class DictationRecorderService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		if (audioFileUpdateReceiver == null){
+			audioFileUpdateReceiver = new RecordingReceiver();
+		}
+		IntentFilter intentDictRunning = new IntentFilter(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentDictRunning);
+		
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		// The PendingIntent to launch our activity if the user selects this notification
 		Intent i = new Intent(this, NotifyingController.class);
@@ -144,6 +153,9 @@ public class DictationRecorderService extends Service {
 		Intent i = new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
+		if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 		super.onDestroy();
 		
 	}
@@ -154,18 +166,30 @@ public class DictationRecorderService extends Service {
 	public void onLowMemory() {
 		saveRecording();
 		mNM.cancel(NOTIFICATION);
-		/*
-		 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
-		 * 
-		 * could pass data in the Intent instead of updating database tables
-		 */
+		if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 		Intent i = new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
 		super.onLowMemory();
 	}
 
-
+	public class RecordingReceiver extends BroadcastReceiver {
+	    @Override
+	    public void onReceive(Context context, Intent intent) {
+	    	/*
+	    	 * If main menu asks if you're recording (it is trying to close aublog, reply that yes, you are still recording.
+	    	 */
+	    	if (intent.getAction().equals(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT)) {
+	    		Intent i = new Intent(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT);
+				i.setData(mUri);
+				i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+				sendBroadcast(i);
+	    	}
+	    	
+	   	}
+	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {

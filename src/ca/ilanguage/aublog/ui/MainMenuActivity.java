@@ -103,8 +103,8 @@ public class MainMenuActivity extends Activity {
 	private final String MSG_KEY = "value";
 	public static Feed resultFeed = null;
 	public static final String KILL_AUBLOG_INTENT = NonPublicConstants.NON_PUBLIC_INTENT_KILL_AUBLOG;
+	public static final String IS_DICTATION_STILL_RECORDING_INTENT = NonPublicConstants.NON_PUBLIC_INTENT_IS_DICTATION_STILL_RECORDING;
 	
-
 	int viewStatus = 0;
 
 	private final static int WHATS_NEW_DIALOG = 0;
@@ -205,6 +205,9 @@ public class MainMenuActivity extends Activity {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
 	    	if (intent.getAction().equals(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT)) {
+	    		mRecordingNow = true;
+	    	}
+	    	if (intent.getAction().equals(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT)) {
 	    		mRecordingNow = true;
 	    	}
 	    	if (intent.getAction().equals(EditBlogEntryActivity.DICTATION_SENT_INTENT)) {
@@ -424,23 +427,7 @@ public class MainMenuActivity extends Activity {
 			}
 		}
 	};
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-      super.onSaveInstanceState(savedInstanceState);
-      // Save UI state changes to the savedInstanceState.
-      // This bundle will be passed to onCreate if the process is
-      // killed and restarted.
-      savedInstanceState.putBoolean("recordingNow", mRecordingNow);
-      
-    }
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
-      super.onRestoreInstanceState(savedInstanceState);
-      // Restore UI state from the savedInstanceState.
-      // This bundle has also been passed to onCreate.
-      mRecordingNow = savedInstanceState.getBoolean("recordingNow");
 
-    }
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -512,7 +499,16 @@ public class MainMenuActivity extends Activity {
 		registerReceiver(audioFileUpdateReceiver, intentDictSent);
 		IntentFilter intentDictRunning = new IntentFilter(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentDictRunning);
+		IntentFilter intentTransRunning = new IntentFilter(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentTransRunning);
+		/*
+		 * Ask dictation and transcription service if they are running. 
+		 */
+		Intent i = new Intent(IS_DICTATION_STILL_RECORDING_INTENT);
+		sendBroadcast(i);
+		mRecordingNow=false;
 		
+		mBackButtonCount=0;
 		mButtonFlickerAnimation.setAnimationListener(null);
 
 		if (mStartButton != null) {
