@@ -24,12 +24,13 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.AudioManager;
@@ -52,7 +53,7 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
-import ca.ilanguage.aublog.service.NotifyingController;
+import ca.ilanguage.aublog.service.DictationRecorderService;
 import ca.ilanguage.aublog.util.UIConstants;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
@@ -94,10 +95,15 @@ public class MainMenuActivity extends Activity {
 	private Runnable generateDraftsTree;
 	private ProgressDialog m_ProgressDialog = null; 
 	private AudioManager mAudioManager;
+	private Boolean mRecordingNow;
+	private RecordingReceiver audioFileUpdateReceiver;
+	    
     private int mBackButtonCount=0;
 	
 	private final String MSG_KEY = "value";
 	public static Feed resultFeed = null;
+	public static final String KILL_AUBLOG_INTENT = NonPublicConstants.NON_PUBLIC_INTENT_KILL_AUBLOG;
+	
 
 	int viewStatus = 0;
 
@@ -107,59 +113,104 @@ public class MainMenuActivity extends Activity {
 	protected static final String TAG = "MainMenuActivity";
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		Boolean killAuBlog = false;
-		String release = Build.VERSION.RELEASE;
+		Boolean supersvalue;
+		if (mRecordingNow == null){
+			mRecordingNow = false;
+		}
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			mBackButtonCount++;
+			/*
+			 * On the first touch of the back button, toast the user and return.
+			 */
 			if (mBackButtonCount == 1){
-				Toast.makeText(MainMenuActivity.this, "Press again to exit.", Toast.LENGTH_LONG).show();
-		    	 return false;
-			}else{
+				if(mRecordingNow == true){
+					Toast.makeText(MainMenuActivity.this, "You are recording.\n\nPress again if you want to exit, AuBlog will stop and save your recording.", Toast.LENGTH_LONG).show();
+				}else{
+					Toast.makeText(MainMenuActivity.this, "Press again to exit.", Toast.LENGTH_LONG).show();
+				}
+		    	return false;
+			} else {
 				/*
-				 * When app is shut down, audio should return to normal.
+				 * On the second touch of the back button, exit Aublog but stop
+				 * the recording if its recording, and kill aublog if the user
+				 * has 2.2 android due to Blue tooth bug.
 				 */
-				mAudioManager.setMode(AudioManager.MODE_NORMAL);
-		        mAudioManager.setSpeakerphoneOn(true);
-				// Toast.makeText(MainMenuActivity.this,
-				// "You have Android 2.2, disconnecting the bluetooth after it has been uesd for audio playback will restart your Android. "
-				// +
-				// "\n\nThe only availible workaround is to killing this app's process id right after the app exits.\n "
-				// +
-				// "The bluetooth bug was fixed in Android 2.2.1 and above.",
-				// Toast.LENGTH_LONG).show();
-				// ActivityManager activityManager = (ActivityManager)
-				// getSystemService(ACTIVITY_SERVICE);
-				// activityManager.killBackgroundProcesses("ca.ilanguage.aublog");
-				// this does not show a force close, but does sucessfully allow
-				// the user to disconnect the bluetooth after they close aublog.
-				// if they have android 2.2 and they disconnect the bluetooth
-				// without quitting aublog then the device will reboot.
-				/*
-				 * This is a terrible workaround for issue
-				 * http://code.google.com/p/android/issues/detail?id=9503 of
-				 * using bluetooth audio on Android 2.2 phones. Summary: it
-				 * kills the app instead of finishing normally
-				 */
-				// android.os.Process.killProcess(android.os.Process.myPid());
-
-				// do nothing, bluetooth issue is fixed in 2.2.1 and above
-		        if(release.equals("2.2")){
-		        	killAuBlog = true;
-		        }
-				
-			}
+				String release = Build.VERSION.RELEASE;
+				if (release.equals("2.2")) {
+					/*
+					 * This is a terrible workaround for issue
+					 * http://code.google.com/p/android/issues/detail?id=9503 of
+					 * using bluetooth audio on Android 2.2 phones. Summary: it
+					 * kills the app instead of finishing normally
+					 */
+					killAuBlog = true;
+				}
+				if (mRecordingNow) {
+					/*
+					 * tell the recording service to exit gracefully it will
+					 * save the recording, and launch the transcription service
+					 * which will try to send the mp3 for transcription.
+					 */
+					Intent intent = new Intent(this,
+							DictationRecorderService.class);
+					stopService(intent);
+					if (killAuBlog) {
+						/*
+						 * tell the transcription service to kill aublog when it
+						 * is done.
+						 */
+						Intent i = new Intent(MainMenuActivity.KILL_AUBLOG_INTENT);
+						sendBroadcast(i);
+					} else {
+						// do nothing,
+					}
+				} else {
+					// not recording, so reset the audio modes
+					mAudioManager.setMode(AudioManager.MODE_NORMAL);
+					mAudioManager.setSpeakerphoneOn(true);
+					if (killAuBlog) {
+						//call the super method, then kill aublog. 
+						supersvalue = super.onKeyDown(keyCode, event);
+						android.os.Process.killProcess(android.os.Process.myPid());
+					} else {
+						// do nothing
+					}
+				}
+				//for all cases, call the super method. 
+				supersvalue = super.onKeyDown(keyCode, event);
+			}// end else for exit on second back button
+			return supersvalue;
+		} else {
+			// for all other keyCodes, simply return the super.
+			return super.onKeyDown(keyCode, event);
 		}
-		 
-		Boolean supersvalue;
-		if(mBackButtonCount >1 && killAuBlog){
-			supersvalue = super.onKeyDown(keyCode, event);
-			android.os.Process.killProcess(android.os.Process.myPid());
-		}else{
-			supersvalue = super.onKeyDown(keyCode, event);
-			//do nothing, bluetooth issue is fixed in 2.2.1 and above
-		}
-		
-	
-		return supersvalue;
+	}
+	/**
+	 * Inner class which waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. 
+	 * 
+	 * Notes:
+	 * -Beware of security hasard of running code in this reviecer.
+	 * In this case, ony rechecking the aduio setings and releaseing the media player and reattaching it. 
+	 * -Recievers should be registerd in the manifest, but this is an inner class so that it can access the member functions of EditBlogEntryActivity so it 
+	 * doesnt need to be registered in the manifest.xml.
+	 * 
+	 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
+	 * http://thinkandroid.wordpress.com/2010/02/02/custom-intents-and-broadcasting-with-receivers/
+	 * 
+	 * could pass data in the Intent instead of updating database tables
+	 * 
+	 * @author cesine
+	 */
+	public class RecordingReceiver extends BroadcastReceiver {
+	    @Override
+	    public void onReceive(Context context, Intent intent) {
+	    	if (intent.getAction().equals(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT)) {
+	    		mRecordingNow = true;
+	    	}
+	    	if (intent.getAction().equals(EditBlogEntryActivity.DICTATION_SENT_INTENT)) {
+	    		mRecordingNow = false;
+	    	}
+	   	}
 	}
 	@Override
 	  protected void onDestroy() {
@@ -373,7 +424,23 @@ public class MainMenuActivity extends Activity {
 			}
 		}
 	};
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+      super.onSaveInstanceState(savedInstanceState);
+      // Save UI state changes to the savedInstanceState.
+      // This bundle will be passed to onCreate if the process is
+      // killed and restarted.
+      savedInstanceState.putBoolean("recordingNow", mRecordingNow);
+      
+    }
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+      super.onRestoreInstanceState(savedInstanceState);
+      // Restore UI state from the savedInstanceState.
+      // This bundle has also been passed to onCreate.
+      mRecordingNow = savedInstanceState.getBoolean("recordingNow");
 
+    }
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -389,7 +456,9 @@ public class MainMenuActivity extends Activity {
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
 		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        
+		if(mRecordingNow == null){
+			mRecordingNow = false;
+		}
 		setContentView(R.layout.mainmenu);
 
 		mStartButton = findViewById(R.id.startButton);
@@ -426,6 +495,9 @@ public class MainMenuActivity extends Activity {
 
 	@Override
 	protected void onPause() {
+		if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 		super.onPause();
 
 	}
@@ -433,7 +505,14 @@ public class MainMenuActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
+		if (audioFileUpdateReceiver == null){
+			audioFileUpdateReceiver = new RecordingReceiver();
+		}
+		IntentFilter intentDictSent = new IntentFilter(EditBlogEntryActivity.DICTATION_SENT_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentDictSent);
+		IntentFilter intentDictRunning = new IntentFilter(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentDictRunning);
+		
 		mButtonFlickerAnimation.setAnimationListener(null);
 
 		if (mStartButton != null) {

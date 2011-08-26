@@ -23,16 +23,19 @@ import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
+import ca.ilanguage.aublog.ui.MainMenuActivity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.location.GpsStatus.NmeaListener;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.NetworkInfo.State;
@@ -58,6 +61,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
     private Uri mUri;
     private String mAuBlogInstallId;
     private String mPostContents="";
+    private Boolean mKillAuBlog;
+    private AudioManager mAudioManager;
+	private KillAuBlogReciever mKillAublogReceiver;
     
     private String mDBLastModified="";
 	private Cursor mCursor;
@@ -119,15 +125,47 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	public void onCreate() {
 		super.onCreate();
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
+		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+		if(mKillAuBlog == null){
+			mKillAuBlog = false;
+		}
+		if(mKillAublogReceiver == null){
+			mKillAublogReceiver = new KillAuBlogReciever();
+		}
+		IntentFilter intentDictSent = new IntentFilter(MainMenuActivity.KILL_AUBLOG_INTENT);
+		registerReceiver(mKillAublogReceiver, intentDictSent);
 	}
-
+	
+	public class KillAuBlogReciever extends BroadcastReceiver {
+	    @Override
+	    public void onReceive(Context context, Intent intent) {
+	    	if (intent.getAction().equals(MainMenuActivity.KILL_AUBLOG_INTENT)) {
+	    		mKillAuBlog = true;
+	    	}
+	   	}
+	}
 	@Override
 	public void onDestroy() {
-		// TODO Auto-generated method stub
 		mNM.cancel(NOTIFICATION);
-		
+		if (mKillAublogReceiver != null) {
+			unregisterReceiver(mKillAublogReceiver);
+		}
 		super.onDestroy();
+		/*
+		 * This is a terrible workaround for issue
+		 * http://code.google.com/p/android/issues/detail?id=9503 of
+		 * using bluetooth audio on Android 2.2 phones. Summary: it
+		 * kills the app instead of finishing normally
+		 * 
+		 * this will execute if MainMenu tells this service that it is the last AuBlog process running.
+		 */
+		if (mKillAuBlog != null){
+				if(mKillAuBlog){
+				mAudioManager.setMode(AudioManager.MODE_NORMAL);
+				mAudioManager.setSpeakerphoneOn(true);
+				android.os.Process.killProcess(android.os.Process.myPid());	
+			}
+		}
 	}
 /**
  * {@inheritDoc}
@@ -277,7 +315,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					}
 					outSRT.flush();
 					outSRT.close();
-					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Transcription server response was saved as _server.srt in the AuBlog folder.";
+					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recieved response from Transcription server, saved as _server.srt in the AuBlog folder.";
 					mTranscriptionReturned = true;
 					saveMetaDataToDatabase();
 					//mNotificationMessage = "Select to import transcription.";
@@ -317,6 +355,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 
 		if(mAudioFilePath.endsWith(".srt")){
 			Intent i = new Intent(EditBlogEntryActivity.REFRESH_TRANSCRIPTION_INTENT);
+			i.setData(mUri);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 		}else{
