@@ -124,7 +124,7 @@ public class MainMenuActivity extends Activity {
         mAudioManager.setSpeakerphoneOn(true);
 	    super.onDestroy();
 	    /*
-TODO move the process kill into the back button so that the main menu can be rotated without disapearing.
+TODO  move the process kill into the back button so that the main menu can be rotated without disapearing.
 
 		 * This is a terrible workaround for issue http://code.google.com/p/android/issues/detail?id=9503 of using bluetooth audio on Android 2.2 phones.
 		 * Summary: it kills the app instead of finishing normally 
