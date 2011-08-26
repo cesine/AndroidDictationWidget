@@ -184,6 +184,25 @@ public class MainMenuActivity extends Activity {
 		// for all other keyCodes, simply return the super.
 		return super.onKeyDown(keyCode, event);
 	}
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		super.onSaveInstanceState(savedInstanceState);
+		// Save UI state changes to the savedInstanceState.
+		// This bundle will be passed to onCreate if the process is
+		// killed and restarted.
+		savedInstanceState.putBoolean("recordingNow", mRecordingNow);
+
+	}
+
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		// Restore UI state from the savedInstanceState.
+		// This bundle has also been passed to onCreate.
+		mRecordingNow = savedInstanceState.getBoolean("recordingNow");
+
+	}
 	/**
 	 * Inner class which waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. 
 	 * 
@@ -430,7 +449,13 @@ public class MainMenuActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		if(savedInstanceState != null){
+			mRecordingNow = savedInstanceState.getBoolean("recordingNow");
+		}else{
+			if(mRecordingNow == null){
+				mRecordingNow = false;
+			}
+		}
 		tracker = GoogleAnalyticsTracker.getInstance();
 
 	    // Start the tracker in manual dispatch mode...
@@ -442,9 +467,7 @@ public class MainMenuActivity extends Activity {
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
 		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-		if(mRecordingNow == null){
-			mRecordingNow = false;
-		}
+		
 		setContentView(R.layout.mainmenu);
 
 		mStartButton = findViewById(R.id.startButton);
@@ -505,7 +528,7 @@ public class MainMenuActivity extends Activity {
 		 */
 		Intent i = new Intent(IS_DICTATION_STILL_RECORDING_INTENT);
 		sendBroadcast(i);
-		mRecordingNow=false;
+		//mRecordingNow=false;
 		
 		mBackButtonCount=0;
 		mButtonFlickerAnimation.setAnimationListener(null);

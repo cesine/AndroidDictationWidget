@@ -132,8 +132,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		if(mKillAublogReceiver == null){
 			mKillAublogReceiver = new KillAuBlogReciever();
 		}
-		IntentFilter intentDictSent = new IntentFilter(MainMenuActivity.KILL_AUBLOG_INTENT);
-		registerReceiver(mKillAublogReceiver, intentDictSent);
+		IntentFilter intentkill = new IntentFilter(MainMenuActivity.KILL_AUBLOG_INTENT);
+		registerReceiver(mKillAublogReceiver, intentkill);
 		IntentFilter intentDictRunning = new IntentFilter(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT);
 		registerReceiver(mKillAublogReceiver, intentDictRunning);
 		
@@ -142,6 +142,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	public class KillAuBlogReciever extends BroadcastReceiver {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
+	    	/*if main menu says to kill aublog, pass the message on to the transcription service*/
 	    	if (intent.getAction().equals(MainMenuActivity.KILL_AUBLOG_INTENT)) {
 	    		mKillAuBlog = true;
 	    	}

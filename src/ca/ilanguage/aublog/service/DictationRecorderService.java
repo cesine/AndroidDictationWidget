@@ -93,6 +93,7 @@ public class DictationRecorderService extends Service {
     private AudioManager mAudioManager;
     private Boolean mRecordingNow = false;
     private RecordingReceiver audioFileUpdateReceiver;
+    private Boolean mKillAuBlog;
 	
   //uri of the entry being edited.
 	private Uri mUri;
@@ -123,6 +124,8 @@ public class DictationRecorderService extends Service {
 		}
 		IntentFilter intentDictRunning = new IntentFilter(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentDictRunning);
+		IntentFilter intentkill = new IntentFilter(MainMenuActivity.KILL_AUBLOG_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentkill);
 		
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		// The PendingIntent to launch our activity if the user selects this notification
@@ -151,7 +154,15 @@ public class DictationRecorderService extends Service {
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
 		}
+		
 		super.onDestroy();
+		/*pass on the kill aublog message to the transcription server*/
+		if (mKillAuBlog != null){
+			if(mKillAuBlog){
+				Intent intent = new Intent(MainMenuActivity.KILL_AUBLOG_INTENT);
+				sendBroadcast(intent);
+			}
+		}
 		
 	}
 
@@ -182,6 +193,9 @@ public class DictationRecorderService extends Service {
 				i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 				sendBroadcast(i);
 	    	}
+	    	if (intent.getAction().equals(MainMenuActivity.KILL_AUBLOG_INTENT)) {
+	    		mKillAuBlog = true;
+	    	}
 	    	
 	   	}
 	}
@@ -192,6 +206,7 @@ public class DictationRecorderService extends Service {
 		i.setData(mUri);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
+		
 		startForeground(startId, mNotification);
 		mUri = intent.getData();
 		/*
