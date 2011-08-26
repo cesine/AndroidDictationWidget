@@ -39,6 +39,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -93,7 +94,7 @@ public class MainMenuActivity extends Activity {
 	private Runnable generateDraftsTree;
 	private ProgressDialog m_ProgressDialog = null; 
 	private AudioManager mAudioManager;
-    
+    private int mBackButtonCount=0;
 	
 	private final String MSG_KEY = "value";
 	public static Feed resultFeed = null;
@@ -104,39 +105,69 @@ public class MainMenuActivity extends Activity {
 	private final static int GENERATING_TREE_DIALOG = 1;
 	
 	protected static final String TAG = "MainMenuActivity";
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		Boolean killAuBlog = false;
+		String release = Build.VERSION.RELEASE;
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			mBackButtonCount++;
+			if (mBackButtonCount == 1){
+				Toast.makeText(MainMenuActivity.this, "Press again to exit.", Toast.LENGTH_LONG).show();
+		    	 return false;
+			}else{
+				/*
+				 * When app is shut down, audio should return to normal.
+				 */
+				mAudioManager.setMode(AudioManager.MODE_NORMAL);
+		        mAudioManager.setSpeakerphoneOn(true);
+				// Toast.makeText(MainMenuActivity.this,
+				// "You have Android 2.2, disconnecting the bluetooth after it has been uesd for audio playback will restart your Android. "
+				// +
+				// "\n\nThe only availible workaround is to killing this app's process id right after the app exits.\n "
+				// +
+				// "The bluetooth bug was fixed in Android 2.2.1 and above.",
+				// Toast.LENGTH_LONG).show();
+				// ActivityManager activityManager = (ActivityManager)
+				// getSystemService(ACTIVITY_SERVICE);
+				// activityManager.killBackgroundProcesses("ca.ilanguage.aublog");
+				// this does not show a force close, but does sucessfully allow
+				// the user to disconnect the bluetooth after they close aublog.
+				// if they have android 2.2 and they disconnect the bluetooth
+				// without quitting aublog then the device will reboot.
+				/*
+				 * This is a terrible workaround for issue
+				 * http://code.google.com/p/android/issues/detail?id=9503 of
+				 * using bluetooth audio on Android 2.2 phones. Summary: it
+				 * kills the app instead of finishing normally
+				 */
+				// android.os.Process.killProcess(android.os.Process.myPid());
+
+				// do nothing, bluetooth issue is fixed in 2.2.1 and above
+		        if(release.equals("2.2")){
+		        	killAuBlog = true;
+		        }
+				
+			}
+		}
+		 
+		Boolean supersvalue;
+		if(mBackButtonCount >1 && killAuBlog){
+			supersvalue = super.onKeyDown(keyCode, event);
+			android.os.Process.killProcess(android.os.Process.myPid());
+		}else{
+			supersvalue = super.onKeyDown(keyCode, event);
+			//do nothing, bluetooth issue is fixed in 2.2.1 and above
+		}
+		
 	
+		return supersvalue;
+	}
 	@Override
 	  protected void onDestroy() {
-		String release = Build.VERSION.RELEASE;
-	    if(release.equals("2.2")){
-//	    	 Toast.makeText(MainMenuActivity.this, "You have Android 2.2, disconnecting the bluetooth after it has been uesd for audio playback will restart your Android. " +
-//	    	 		"\n\nThe only availible workaround is to killing this app's process id right after the app exits.\n " +
-//	    	 		"The bluetooth bug was fixed in Android 2.2.1 and above.", Toast.LENGTH_LONG).show();
-	    	 //ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-		     //activityManager.killBackgroundProcesses("ca.ilanguage.aublog");
-	    }
+
 		// Stop the tracker when it is no longer needed.
 	    tracker.stop();
-		/*
-		 * When app is shut down, audio should return to normal.
-		 */
-		mAudioManager.setMode(AudioManager.MODE_NORMAL);
-        mAudioManager.setSpeakerphoneOn(true);
+		
 	    super.onDestroy();
-	    /*
-TODO  move the process kill into the back button so that the main menu can be rotated without disapearing.
-
-		 * This is a terrible workaround for issue http://code.google.com/p/android/issues/detail?id=9503 of using bluetooth audio on Android 2.2 phones.
-		 * Summary: it kills the app instead of finishing normally 
-		 */
-	    if(release.equals("2.2")){
-	    	//this does not show a force close, but does sucessfully allow the user to disconnect the bluetooth after they close aublog. 
-	    	//if they have android 2.2 and they disconnect the bluetooth without quitting aublog then the device will reboot.
-	    	 android.os.Process.killProcess(android.os.Process.myPid());
-	    }else{
-	    	//do nothing, bluetooth issue is fixed in 2.2.1 and above
-	    }
-	   
 	  }
 
 	// Create an anonymous implementation of OnClickListener

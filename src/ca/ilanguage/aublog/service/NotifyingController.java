@@ -79,9 +79,8 @@ public class NotifyingController extends Activity {
 
 	private OnClickListener mStartListener = new OnClickListener() {
         public void onClick(View v) {
-        	Intent intent = new Intent(NotifyingController.this, EditBlogEntryActivity.class);
-        	intent.putExtra("error", "user clicked cancel");
-            stopService(intent);
+        	Intent intent = new Intent(NotifyingController.this, DictationRecorderService.class);
+        	stopService(intent);
         }
     };
 
