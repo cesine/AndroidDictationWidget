@@ -671,6 +671,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	}
         }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
+        	if (!(mPostTitle.equals(strTitle)) ){
+        		flagDraftTreeAsNeedingToBeReGenerated();
+        	}
         	mPostContent=strContent;
         	mPostTitle=strTitle;
         	mPostLabels=strLabels;
@@ -1556,8 +1559,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				}
 			}else{
 				//backbutton acts as save as self to database.
-				mWebView.loadUrl("javascript:savePostToState()");
-		    	saveAsSelfToDB();
+				//as it calls onPause next, and onPause saves to the database.
 			}
 			mFreshEditScreen =true;
 		}
