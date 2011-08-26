@@ -46,6 +46,7 @@ function autoSize() {
 <script type="text/javascript">
 <!--
 $(document).ready(function()	{
+	document.getElementById('playButton').style.visibility='hidden'; // hide play button
 	fillFromAndroidActivity();
 	importTranscription(document.getElementById('markItUp').value);
 	checkRecordingNow();
@@ -87,7 +88,7 @@ $(document).ready(function()	{
 <input type="button"  id="publishButton"  value="Publish" onClick="publishPostToDB()" />
 <input type="button"  id="deleteButton"  value="Delete" onClick="deletePost()" />
 <input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecordingController()" />
-<input type="button"  id="playButton" visibility='hidden' value="Play" onClick="playPauseAudioController()" />
+<input type="button"  id="playButton" value="Play" onClick="playPauseAudioController()" />
 </span>
 <script type="text/javascript">
 	/*/http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
