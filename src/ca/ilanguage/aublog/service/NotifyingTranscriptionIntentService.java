@@ -161,9 +161,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	@Override
 	public void onDestroy() {
 		mNM.cancel(NOTIFICATION);
-		if (mKillAublogReceiver != null) {
-			unregisterReceiver(mKillAublogReceiver);
-		}
+//		if (mKillAublogReceiver != null) {
+//			unregisterReceiver(mKillAublogReceiver);
+//		}//never unregister, then maybe we will get the kill commands?
 		super.onDestroy();
 		/*
 		 * This is a terrible workaround for issue
@@ -211,7 +211,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mAudioFilePath = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH);
 			mAudioResultsFileStatus = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 			mPostContents=intent.getExtras().getString(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS);
-			mKillAuBlog=intent.getExtras().getBoolean(DictationRecorderService.EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU);
+			//mKillAuBlog=intent.getExtras().getBoolean(DictationRecorderService.EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU);
 			if (mPostContents == null){
 				mPostContents="";
 			}

@@ -240,6 +240,13 @@ public class MainMenuActivity extends Activity {
 	    if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
 		}
+	    /*cant get the kill intent to get to the dictation or transcription services in time. this is called after the transcription is started. so this might reach it.*/
+	    if (mKillAuBlog != null){
+			if(mKillAuBlog){
+				Intent intent = new Intent(MainMenuActivity.KILL_AUBLOG_INTENT);
+				sendBroadcast(intent);
+			}
+		}
 	    super.onDestroy();
 	  }
 

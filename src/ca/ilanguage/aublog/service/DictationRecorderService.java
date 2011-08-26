@@ -148,6 +148,8 @@ public class DictationRecorderService extends Service {
 	@Override
 	public void onDestroy() {
 		saveRecording();
+		sendForTranscription();
+		saveMetaDataToDatabase();
 		mNM.cancel(NOTIFICATION);
 		Intent i = new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
@@ -171,13 +173,13 @@ public class DictationRecorderService extends Service {
 	@Override
 	public void onLowMemory() {
 		saveRecording();
+		sendForTranscription();
+		saveMetaDataToDatabase();
 		mNM.cancel(NOTIFICATION);
 		Intent i = new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
-		if (audioFileUpdateReceiver != null) {
-			unregisterReceiver(audioFileUpdateReceiver);
-		}
+		
 		/*pass on the kill aublog message to the transcription server*/
 		if (mKillAuBlog != null){
 			if(mKillAuBlog){
@@ -186,6 +188,9 @@ public class DictationRecorderService extends Service {
 			}
 		}
 		super.onLowMemory();
+		if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 	}
 
 	public class RecordingReceiver extends BroadcastReceiver {
@@ -199,9 +204,21 @@ public class DictationRecorderService extends Service {
 				i.setData(mUri);
 				i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 				sendBroadcast(i);
+				if (mKillAuBlog != null){
+					if(mKillAuBlog){
+						Intent inten = new Intent(MainMenuActivity.KILL_AUBLOG_INTENT);
+						sendBroadcast(inten);
+					}
+				}
 	    	}
 	    	if (intent.getAction().equals(MainMenuActivity.KILL_AUBLOG_INTENT)) {
 	    		mKillAuBlog = true;
+	    		if (mKillAuBlog != null){
+	    			if(mKillAuBlog){
+	    				Intent inten = new Intent(MainMenuActivity.KILL_AUBLOG_INTENT);
+	    				sendBroadcast(inten);
+	    			}
+	    		}
 	    	}
 	    	
 	   	}
@@ -395,8 +412,7 @@ public class DictationRecorderService extends Service {
 			   	appendToContent ="Attached a "+mTimeAudioWasRecorded/100+" second Recording.\n";
 			   	mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+appendToContent;
 	            mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recording flagged for transcription.";
-	            sendForTranscription();
-				saveMetaDataToDatabase();
+	            
 			}else{
 				//this should not run
 				mRecorder.release(); //this is called in the stop save recording
