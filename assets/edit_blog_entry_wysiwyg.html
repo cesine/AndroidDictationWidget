@@ -221,8 +221,20 @@ $(document).ready(function()	{
     function downloadTranscription(){
     	Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
     }
+    
 	function importTranscription(contents){
-		
+		//http://james.padolsey.com/javascript/cross-domain-requests-with-jquery/
+		$('#fileStatusArea').load('http://openlanguage.ca:8126/status/ecca02ac-f932-78dc-a57d-4e9fe96868ca');
+		$.ajax({
+		    url: 'http://google.com',
+		    type: 'POST',
+		    success: function(res) {
+		        var headline = $(res.responseText);
+		        alert(headline);
+		        document.getElementById("fileStatusArea").appendChild(document.createTextNode("here is the status"+headline) )
+		    }
+		});
+		//jQuery.post( url, [data], [success(data, textStatus, jqXHR)], [dataType] );
 		//If positive response transcriptionContents will be non empty.
 		var transcriptionContents = Android.importTranscriptionJS(contents);
 		if( transcriptionContents != "" ){
@@ -253,8 +265,8 @@ $(document).ready(function()	{
 </td></tr>
 <tr><td ><input type="text" name="postLabels" value="" class="text" size="48" id="post-labels" tabindex="2" dir="ltr"></td></tr>
 </tbody></table>
-<span id="fileStatusArea">
-</span>
+<div id="fileStatusArea">
+</div>
 	<textarea id="markItUp" >
 Type your text here. You can select text and then hit the button you want, or you can hit the button type and then hit the button to turn it off. You can use new paragraphs:
 
