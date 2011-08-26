@@ -87,6 +87,7 @@ $(document).ready(function()	{
 <input type="button"  id="publishButton"  value="Publish" onClick="publishPostToDB()" />
 <input type="button"  id="deleteButton"  value="Delete" onClick="deletePost()" />
 <input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecordingController()" />
+<input type="button"  id="playButton" visibility='hidden' value="Play" onClick="playPauseAudioController()" />
 </span>
 <script type="text/javascript">
 	/*/http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
@@ -147,15 +148,18 @@ $(document).ready(function()	{
     }
     function displayPlayButton(){
     	if (hasAudio == true){
-    		//do nothing, the play button is already active
+    		//do nothing, it is already visible
     	}else{
     		hasAudio = true;
-    		var playButtn = document.createElement("input");
+    		document.getElementById('playButton').style.visibility='visible'; // hide play button
+    		/*
+    		var playButtn  = document.createElement("input");
         	playButtn.setAttribute("type","button");
         	playButtn.setAttribute("id","playButton");
         	playButtn.setAttribute("value","Play");
         	playButtn.setAttribute("onClick","playPauseAudioController()");
         	document.getElementById("buttonArea").appendChild(playButtn);
+        	*/
     	}
     }
     /* Additional Interface contents:
@@ -175,7 +179,8 @@ $(document).ready(function()	{
     function saveButton(){
     	readTTSPost();
     	Android.zeroOutParentResultFileJS();
-    	//hide play button
+    	hasAudio=false;
+    	document.getElementById('playButton').style.visibility='hidden'; // hide play button
     	Android.savePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function savePostToDB(){
