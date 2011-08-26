@@ -36,6 +36,7 @@ import android.location.GpsStatus.NmeaListener;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.NetworkInfo.State;
+import android.util.Log;
 
 public class NotifyingTranscriptionIntentService extends IntentService {
 	protected static String TAG = "NotifyingTranscriptionIntentService";
@@ -124,6 +125,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
+		mNM.cancel(NOTIFICATION);
+		
 		super.onDestroy();
 	}
 /**
@@ -237,9 +240,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
 	        	mNotificationMessage = firstLine;//+ "\nSelect to import transcription.";
 			} catch (Exception e) {
-				//Log.e(e.getClass().getName(), e.getMessage(), e);
+				Log.e(e.getClass().getName(), e.getMessage(), e);
 				//this is showing up for when the audio is not sent, but the client srt is...
-				mNotificationMessage = "Dictation audio not sent: no wifi or too long. Check settings.";// null;
+				mNotificationMessage = "...";// null;
 			}
 			
 			

@@ -22,6 +22,7 @@ package ca.ilanguage.aublog.service;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -29,6 +30,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.ui.EditBlogEntryActivity;
 
 
 /**
@@ -44,15 +46,19 @@ Open aublog settings
 Retry xxx audio file (add files to cue)
  */
 public class NotifyingController extends Activity {
+	private Uri mUri;
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mUri = getIntent().getData();
         setContentView(R.layout.notifying_controller);
 
         Button button = (Button) findViewById(R.id.notifyStart);
         button.setOnClickListener(mStartListener);
         button = (Button) findViewById(R.id.notifyStop);
+        button.setVisibility(Button.INVISIBLE);
         button.setOnClickListener(mStopListener);
     }
 
@@ -73,17 +79,18 @@ public class NotifyingController extends Activity {
 
 	private OnClickListener mStartListener = new OnClickListener() {
         public void onClick(View v) {
-        	Intent intent = new Intent(NotifyingController.this, NotifyingTranscriptionService.class);
-        	intent.putExtra(NotifyingTranscriptionService.EXTRA_AUDIOFILE_FULL_PATH, "/sdcard/AuBlog/test.mp3");
-            startService(intent); 
+        	Intent intent = new Intent(NotifyingController.this, EditBlogEntryActivity.class);
+        	intent.putExtra("error", "user clicked cancel");
+            stopService(intent);
         }
     };
 
     private OnClickListener mStopListener = new OnClickListener() {
         public void onClick(View v) {
-        	Intent intent = new Intent(NotifyingController.this, DictationRecorderService.class);
-        	intent.putExtra("error", "user clicked cancel");
-            stopService(intent);
+
+            Intent i = new Intent(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT);
+            i.setData(mUri);
+    		sendBroadcast(i);
         }
     };
 }

@@ -47,7 +47,7 @@ function autoSize() {
 <!--
 $(document).ready(function()	{
 	fillFromAndroidActivity();
-	importTranscription();
+	importTranscription(document.getElementById('markItUp').value);
 	checkRecordingNow();
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
@@ -156,7 +156,6 @@ $(document).ready(function()	{
         	playButtn.setAttribute("onClick","playPauseAudioController()");
         	document.getElementById("buttonArea").appendChild(playButtn);
     	}
-    	
     }
     /* Additional Interface contents:
 		Android.getTimeRecordedJS();
@@ -215,22 +214,16 @@ $(document).ready(function()	{
     function downloadTranscription(){
     	Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
     }
-	function importTranscription(){
+	function importTranscription(contents){
 		
-		//If positive response
-		var transcriptionContents = Android.importTranscriptionJS();
+		//If positive response transcriptionContents will be non empty.
+		var transcriptionContents = Android.importTranscriptionJS(contents);
 		if( transcriptionContents != "" ){
-			document.getElementById("fileStatusArea").appendChild(document.createTextNode(transcriptionContents.split(":::").join("\n")) );
+			document.getElementById('markItUp').value = transcriptionContents;//document.getElementById("fileStatusArea").appendChild(document.createTextNode(transcriptionContents.split(":::").join("\n")) );
 		}else{
-			document.getElementById("fileStatusArea").appendChild(document.createTextNode("") );	
+			//document.getElementById("fileStatusArea").appendChild(document.createTextNode("") );	
 		}
-		/*
-		prompt user do you want to import
-		*/
-		//if yes
-		/*
-		convert srt into text and append to blog.
-		*/
+		
 		/*TODO in future relase do more complicated diff to integrate user's edits with the transcription contents.
 		*/
 	}
