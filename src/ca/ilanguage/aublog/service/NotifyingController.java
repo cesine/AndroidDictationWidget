@@ -58,6 +58,7 @@ public class NotifyingController extends Activity {
         Button button = (Button) findViewById(R.id.notifyStart);
         button.setOnClickListener(mStartListener);
         button = (Button) findViewById(R.id.notifyStop);
+        button.setVisibility(Button.INVISIBLE);
         button.setOnClickListener(mStopListener);
     }
 

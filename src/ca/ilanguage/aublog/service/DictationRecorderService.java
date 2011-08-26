@@ -117,10 +117,10 @@ public class DictationRecorderService extends Service {
 		super.onCreate();
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		// The PendingIntent to launch our activity if the user selects this notification
-		Intent i =new Intent(this, NotifyingController.class);
+		Intent i = new Intent(this, NotifyingController.class);
 		i.setData(mUri);
-		i.putExtra(EditBlogEntryActivity.EXTRA_FROM_NOTIFICATION_RECORDING_STILL_RUNNING, "Stop Recording");
-        mContentIntent = PendingIntent.getActivity(this, 0, i, 0);
+		mContentIntent = PendingIntent.getActivity(this, 0, i, 0);
+		
 		mNotification = new Notification(mAuBlogIconId, "AuBlog Dictation in progress", System.currentTimeMillis());
 		mNotification.setLatestEventInfo(this, "AuBlog Dictation", "Recording...", mContentIntent);
 		mNotification.flags  |= Notification.FLAG_AUTO_CANCEL;

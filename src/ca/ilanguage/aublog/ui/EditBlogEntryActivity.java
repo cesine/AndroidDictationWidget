@@ -11,12 +11,16 @@ import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.google.gdata.client.youtube.YouTubeQuery.SafeSearch;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnClickListener;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -116,6 +120,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	String mAudioResultsFile;
 	String mAudioResultsFileStatus;
 	String mTranscription;
+	String mTranscriptionAndContents;
 	Boolean mFreshEditScreen;
 	private Boolean mDeleted;
 	private Boolean mURIDeleted =false;;
@@ -533,15 +538,17 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	}
         	
         }
-        public String importTranscriptionJS(){
-        	if(mTranscription == null){
-        		return mAudioResultsFileStatus;
-        	}else{
-        		return mAudioResultsFileStatus+"\n\n"+mTranscription;
-        	}
+        public String importTranscriptionJS(String strContents){
+        	return askUserIfImport(strContents);
+//        	if(mTranscription == null){
+//        		return mAudioResultsFileStatus;
+//        	}else{
+//        		return mAudioResultsFileStatus+"\n\n"+mTranscription;
+//        	}
         }
         public void zeroOutParentResultFileJS(){
         	mAudioResultsFile="";
+        	mAudioResultsFileStatus="";
         }
         public Boolean findOutIfFreshDataJS(){
         	return mFreshEditScreen;
@@ -1072,7 +1079,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 				mTranscription = "TODO this is what came back from the server.";
-				mWebView.loadUrl("javascript:importTranscription()");
+				mWebView.loadUrl("javascript:importTranscription(document.getElementById('markItUp').value)");
 				/* tell javascript to fill in the transcription stuff */
 			}
 	        String tmep;
@@ -1292,10 +1299,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		Intent intent = new Intent(this, DictationRecorderService.class);
 		stopService(intent);
 	   	//cannot savely recheck audio settings here, the service is still using the audio. instead do it in the prepare player function. recheckAublogSettings();
-	   	
-	   	
-	   	mTimeAudioWasRecorded=mEndTime-mStartTime;
-	   	
+	   	if(mStartTime != null){
+	   		mTimeAudioWasRecorded=mEndTime-mStartTime;
+	   	}else{
+	   		mTimeAudioWasRecorded=(long)999; //use 999 as code name for unknown
+	   	}
 	   	//Javascript changes the blog content to add the length of the recording 
 	   	//Javascript simpulates a click on the save button, so most likely it will be saved as a daughter. 
 	   	
@@ -1534,7 +1542,45 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         }
         
     }*/
-
+	public String askUserIfImport(final String currentPostContents){
+		mTranscriptionAndContents= "";
+		if (mTranscription != null){
+			if(mTranscription.length() <1){
+				return "";
+			}else{
+					
+				OnClickListener yes = new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						mTranscriptionAndContents = mTranscription+currentPostContents;
+					}
+				};
+				OnClickListener no = new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						mTranscriptionAndContents= "";				
+					}
+				};
+				/*
+				prompt user do you want to import
+				*/
+				//if yes
+				/*
+				convert srt into text and append to blog.
+				*/
+				Dialog dialog = new AlertDialog.Builder(this)
+				.setTitle("Import Transcription")
+				.setPositiveButton("Import", yes)
+				.setNegativeButton("Don't Import", no)
+				.setMessage("Here is the what your entry will look like.\n\n"+mTranscription+currentPostContents).create();
+				dialog.show();
+				
+				return mTranscriptionAndContents;
+		
+			}
+		}
+		return "";
+	}
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Hold on to this
@@ -1542,7 +1588,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
 		// Inflate the currently selected menu XML resource.
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.drafts_tree_menu, menu);
+		inflater.inflate(R.menu.edit_blog_entry_menu, menu);
 
 
 		return true;
@@ -1552,6 +1598,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		switch (item.getItemId()) {
 		// For "Title only": Examples of matching an ID with one assigned in
 		//                   the XML
+		case R.id.transcription_status:
+			Dialog dialog = new AlertDialog.Builder(this)
+				.setTitle("Status")
+				.setPositiveButton("Ok", null)
+				.setMessage("Here is the current status of your dictation and its transcription.\n\n"+mAudioResultsFileStatus.replaceAll(":::", "\n  ")).create();
+			dialog.show();
+			return true;
 		case R.id.open_settings:
 			tracker.trackPageView("/settingsScreen");
 			tracker.trackEvent(
