@@ -398,7 +398,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 			mReadBlog = prefs.getBoolean(PreferenceConstants.PREFERENCE_SOUND_ENABLED, true);
 	    }
-        mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
+	    
+        mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_HH.mm", new java.util.Date());
 	    mDateString = mDateString.replaceAll("/","-").replaceAll(" ","-");
      
         
@@ -577,8 +578,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * @param postTitle The current title of the blog post, it will show up in the audio file's name
          * @return an internal status message
          */
-        public String startToRecordJS(){
-        	return beginRecording();
+        public String startToRecordJS(String title){
+        	return beginRecording(title);
         }
         /**
          * A wrapper which stops the Dictation recorder service. It doesn't set up the media player immediately as the recording service takes some time to finalize and write the .mp3 to the sdcard. 
@@ -645,7 +646,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         }
         public void saveDaughterForRecordingJS(String strTitle, String strContent, String strLabels){
         	/*
-        	 * If the current information has either some text, or a file, then create a daughter.
+        	 * If the current information has either some text, or a file, then create a daughter. 
+        	 * Save the users edits in the parent, then create the daughter.
         	 */
         	if ( ( (mPostTitle+mPostContent+mPostLabels).length() > 1  )
     				|| mAudioResultsFile.length() > 5  ) {
@@ -658,9 +660,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	}else{
         		/*
         		 * if it is not the case that the text is longer than one, nor it is also not the case that the result file is longer than 5, 
-        		 * then just save as self to the databse.
+        		 * then just save as self to the database.
         		 */
-            	saveAsDaughterToDB(strTitle, strContent, strLabels);
+        		mPostContent=strContent;
+            	mPostTitle=strTitle;
+            	mPostLabels=strLabels;
+            	
+        		saveAsSelfToDB();
         	}
         }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
@@ -1200,7 +1206,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * 
 	 * @return an internal status message
 	 */
-	public String beginRecording(){
+	public String beginRecording(String strTitle){
 		//recheckAublogSettings();//check if bluetooth is ready, use it if it is
 		mAudioResultsFileStatus = "recordingstarted";
 		tracker.trackEvent(
@@ -1210,7 +1216,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            34);       // Value
 
 		mStartTime=System.currentTimeMillis();
-		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_hh.mm", new java.util.Date());
+		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_HH.mm", new java.util.Date());
 		mDateString = mDateString.replaceAll("/","-");
 		mAudioResultsFile = mAuBlogDirectory+"audio/";
 		new File(mAudioResultsFile).mkdirs();
@@ -1231,7 +1237,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
        Since we want to replace things that are not the above,
        set negation ([^ and ]) is used.
      */  
-		String safePostTitleForFileName =  mPostTitle.replaceAll("[^\\w\\.\\-\\_]", "_");
+		String safePostTitleForFileName =  strTitle.replaceAll("[^\\w\\.\\-\\_]", "_");
 		if(safePostTitleForFileName.length() >= 50){
 			safePostTitleForFileName = safePostTitleForFileName.substring(0,49)+"...";
 		}
