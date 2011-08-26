@@ -145,11 +145,6 @@ public class DictationRecorderService extends Service {
 	public void onDestroy() {
 		saveRecording();
 		mNM.cancel(NOTIFICATION);
-		/*
-		 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
-		 * 
-		 * could pass data in the Intent instead of updating database tables
-		 */
 		Intent i = new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
@@ -166,12 +161,12 @@ public class DictationRecorderService extends Service {
 	public void onLowMemory() {
 		saveRecording();
 		mNM.cancel(NOTIFICATION);
-		if (audioFileUpdateReceiver != null) {
-			unregisterReceiver(audioFileUpdateReceiver);
-		}
 		Intent i = new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
+		if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 		super.onLowMemory();
 	}
 
@@ -179,7 +174,7 @@ public class DictationRecorderService extends Service {
 	    @Override
 	    public void onReceive(Context context, Intent intent) {
 	    	/*
-	    	 * If main menu asks if you're recording (it is trying to close aublog, reply that yes, you are still recording.
+	    	 * If main menu asks if you're recording (it is trying to close aublog), reply that yes, you are still recording.
 	    	 */
 	    	if (intent.getAction().equals(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT)) {
 	    		Intent i = new Intent(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT);
@@ -193,6 +188,10 @@ public class DictationRecorderService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		Intent i = new Intent(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT);
+		i.setData(mUri);
+		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+		sendBroadcast(i);
 		startForeground(startId, mNotification);
 		mUri = intent.getData();
 		/*

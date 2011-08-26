@@ -874,9 +874,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    	mWebView.loadUrl("javascript:savePostToState()");
 	    	saveAsSelfToDB();
 		}
-		if (audioFileUpdateReceiver != null) {
-			unregisterReceiver(audioFileUpdateReceiver);
-		}
+		
+		
+		
 		super.onPause();
 	}
 	/**
@@ -905,6 +905,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		//mTts.shutdown();
 		// Log.i(TAG, "Method 'onDestroy()' launched");
 		tracker.stop();
+		if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 		mFreshEditScreen=false;
 		if(!mURIDeleted){
 			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);

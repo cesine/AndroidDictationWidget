@@ -194,6 +194,11 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 //		if (mNM != null){
 //			mNM.cancelAll();
 //		}
+		Intent inten = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
+		inten.setData(mUri);
+		inten.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+		sendBroadcast(inten);
+		
 		showNotification(R.drawable.stat_aublog, "Contacting transcription server.");
     	
 		/*

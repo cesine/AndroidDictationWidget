@@ -122,7 +122,7 @@ public class MainMenuActivity extends Activity {
 			/*
 			 * On the first touch of the back button, toast the user and return.
 			 */
-			if (mBackButtonCount == 1){
+			if (mBackButtonCount < 2){
 				if(mRecordingNow == true){
 					Toast.makeText(MainMenuActivity.this, "You are recording.\n\nPress again if you want to exit, AuBlog will stop and save your recording.", Toast.LENGTH_LONG).show();
 				}else{
@@ -180,10 +180,9 @@ public class MainMenuActivity extends Activity {
 				supersvalue = super.onKeyDown(keyCode, event);
 			}// end else for exit on second back button
 			return supersvalue;
-		} else {
-			// for all other keyCodes, simply return the super.
-			return super.onKeyDown(keyCode, event);
-		}
+		} 
+		// for all other keyCodes, simply return the super.
+		return super.onKeyDown(keyCode, event);
 	}
 	/**
 	 * Inner class which waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. 
@@ -217,10 +216,10 @@ public class MainMenuActivity extends Activity {
 	}
 	@Override
 	  protected void onDestroy() {
-
-		// Stop the tracker when it is no longer needed.
-	    tracker.stop();
-		
+	    tracker.stop();// Stop the tracker when it is no longer needed.
+	    if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 	    super.onDestroy();
 	  }
 
@@ -482,9 +481,9 @@ public class MainMenuActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		if (audioFileUpdateReceiver != null) {
-			unregisterReceiver(audioFileUpdateReceiver);
-		}
+		  
+		
+		
 		super.onPause();
 
 	}
