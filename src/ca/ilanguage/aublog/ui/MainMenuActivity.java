@@ -97,6 +97,7 @@ public class MainMenuActivity extends Activity {
 	private AudioManager mAudioManager;
 	private Boolean mRecordingNow;
 	private RecordingReceiver audioFileUpdateReceiver;
+	private Boolean mKillAuBlog;
 	    
     private int mBackButtonCount=0;
 	
@@ -112,7 +113,7 @@ public class MainMenuActivity extends Activity {
 	
 	protected static final String TAG = "MainMenuActivity";
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		Boolean killAuBlog = false;
+		
 		Boolean supersvalue;
 		if (mRecordingNow == null){
 			mRecordingNow = false;
@@ -143,7 +144,7 @@ public class MainMenuActivity extends Activity {
 					 * using bluetooth audio on Android 2.2 phones. Summary: it
 					 * kills the app instead of finishing normally
 					 */
-					killAuBlog = true;
+					mKillAuBlog = true;
 				}
 				if (mRecordingNow) {
 					/*
@@ -154,7 +155,7 @@ public class MainMenuActivity extends Activity {
 					Intent intent = new Intent(this,
 							DictationRecorderService.class);
 					stopService(intent);
-					if (killAuBlog) {
+					if (mKillAuBlog) {
 						/*
 						 * tell the transcription service to kill aublog when it
 						 * is done.
@@ -168,7 +169,7 @@ public class MainMenuActivity extends Activity {
 					// not recording, so reset the audio modes
 					mAudioManager.setMode(AudioManager.MODE_NORMAL);
 					mAudioManager.setSpeakerphoneOn(true);
-					if (killAuBlog) {
+					if (mKillAuBlog) {
 						//call the super method, then kill aublog. 
 						supersvalue = super.onKeyDown(keyCode, event);
 						android.os.Process.killProcess(android.os.Process.myPid());
@@ -529,7 +530,7 @@ public class MainMenuActivity extends Activity {
 		Intent i = new Intent(IS_DICTATION_STILL_RECORDING_INTENT);
 		sendBroadcast(i);
 		//mRecordingNow=false;
-		
+		mKillAuBlog = false;
 		mBackButtonCount=0;
 		mButtonFlickerAnimation.setAnimationListener(null);
 

@@ -152,9 +152,7 @@ public class DictationRecorderService extends Service {
 		Intent i = new Intent(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
-		if (audioFileUpdateReceiver != null) {
-			unregisterReceiver(audioFileUpdateReceiver);
-		}
+		
 		/*pass on the kill aublog message to the transcription server*/
 		if (mKillAuBlog != null){
 			if(mKillAuBlog){
@@ -163,6 +161,9 @@ public class DictationRecorderService extends Service {
 			}
 		}
 		super.onDestroy();
+		if (audioFileUpdateReceiver != null) {
+			unregisterReceiver(audioFileUpdateReceiver);
+		}
 	}
 
 
