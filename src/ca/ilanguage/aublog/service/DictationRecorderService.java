@@ -443,7 +443,7 @@ public class DictationRecorderService extends Service {
         intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
         /*pass on the kill aublog message to the transcription server*/
         intent.putExtra(EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
-        intent.putExtra(EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU, mKillAuBlog);
+        //intent.putExtra(EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU, mKillAuBlog);
         startService(intent); 
         
 		

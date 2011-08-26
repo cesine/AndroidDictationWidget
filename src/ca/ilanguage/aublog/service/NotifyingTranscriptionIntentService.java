@@ -161,9 +161,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	@Override
 	public void onDestroy() {
 		mNM.cancel(NOTIFICATION);
-//		if (mKillAublogReceiver != null) {
-//			unregisterReceiver(mKillAublogReceiver);
-//		}//never unregister, then maybe we will get the kill commands?
+		if (mKillAublogReceiver != null) {
+			unregisterReceiver(mKillAublogReceiver);
+		}//never unregister, then maybe we will get the kill commands?
 		super.onDestroy();
 		/*
 		 * This is a terrible workaround for issue
