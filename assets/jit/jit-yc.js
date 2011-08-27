@@ -5177,7 +5177,7 @@
 			{
 				st : null,
 				colors : [ "#416D9C", "#70A35E", "#EBB056", "#C74243",
-						"#83548B", "#909291", "#557EAA" ],
+						"#83548B", "#909291", "#557EAA", "#557EAA", "#557EAA", "#557EAA", "#557EAA", "#557EAA", "#557EAA" ],
 				selected : {},
 				busy : false,
 				initialize : function(y) {
