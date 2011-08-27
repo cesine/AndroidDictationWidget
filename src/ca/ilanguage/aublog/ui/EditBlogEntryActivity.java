@@ -949,7 +949,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 
 	@Override
 	protected void onDestroy() {
-		//mTts.shutdown();
+		// Don't forget to shutdown tts
+        if (mTts != null) {
+            mTts.stop();
+            mTts.shutdown();
+        }
 		// Log.i(TAG, "Method 'onDestroy()' launched");
 		tracker.stop();
 		if (audioFileUpdateReceiver != null) {
