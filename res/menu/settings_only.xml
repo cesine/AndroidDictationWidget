@@ -18,6 +18,7 @@
 
     <item android:id="@+id/open_settings"
         android:title="Settings" />
-
+	<item android:id="@+id/issue_tracker"
+        android:title="Bugs" />
 
 </menu>

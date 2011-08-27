@@ -384,6 +384,15 @@ public class ViewDraftTreeActivity extends Activity {
 			Intent i = new Intent(getBaseContext(),	SetPreferencesActivity.class);
 			startActivity(i);
 			return true;
+		case R.id.issue_tracker:
+			tracker.trackEvent(
+		            "Clicks",  // Category
+		            "Button",  // Action
+		            "clicked bugs in the edit blog entry menu: "+mAuBlogInstallId, // Label
+		            24);       // Value
+			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://code.google.com/p/aublog/issues/entry"));
+			startActivity(browserIntent);
+			return true;
 		case R.id.new_entry:
 			tracker.trackPageView("/editBlogEntryScreen");
 			tracker.trackEvent(

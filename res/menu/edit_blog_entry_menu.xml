@@ -22,5 +22,6 @@
         android:title="New Entry" />
  	<item android:id="@+id/transcription_status"
         android:title="Status" />
-
+	<item android:id="@+id/issue_tracker"
+        android:title="Bugs" />
 </menu>
