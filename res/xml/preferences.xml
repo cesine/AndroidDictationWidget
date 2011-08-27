@@ -34,7 +34,7 @@
                 android:summaryOn="@string/preference_enable_bluetooth_audio_summary"
                 android:summaryOff="@string/preference_enable_bluetooth_audio_summary"
                 android:defaultValue="true"
-                android:persistent="true"
+                android:persistent="false"
                 />
          <CheckBoxPreference
        			android:key="useEarPhonesAudio"
