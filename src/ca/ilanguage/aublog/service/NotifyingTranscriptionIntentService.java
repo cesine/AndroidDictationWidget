@@ -64,7 +64,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
     private Boolean mKillAuBlog;
     private AudioManager mAudioManager;
 	private KillAuBlogReciever mKillAublogReceiver;
-    
+    private Boolean mAskUserImport;
     private String mDBLastModified="";
 	private Cursor mCursor;
 	private  String[] PROJECTION = new String[] {
@@ -211,7 +211,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mAudioFilePath = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH);
 			mAudioResultsFileStatus = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 			mPostContents=intent.getExtras().getString(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS);
-			//mKillAuBlog=intent.getExtras().getBoolean(DictationRecorderService.EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU);
+			mAskUserImport=intent.getExtras().getBoolean(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
 			if (mPostContents == null){
 				mPostContents="";
 			}
@@ -392,6 +392,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			Intent i = new Intent(EditBlogEntryActivity.REFRESH_TRANSCRIPTION_INTENT);
 			i.setData(mUri);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+			i.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
 			sendBroadcast(i);
 		}else{
 			Intent i = new Intent(EditBlogEntryActivity.DICTATION_SENT_INTENT);

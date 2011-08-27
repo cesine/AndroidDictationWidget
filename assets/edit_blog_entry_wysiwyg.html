@@ -48,7 +48,7 @@ function autoSize() {
 $(document).ready(function()	{
 	document.getElementById('playButton').style.visibility='hidden'; // hide play button
 	fillFromAndroidActivity();
-	importTranscription(document.getElementById('markItUp').value);
+	queryServerIfTranscriptionIsReady();
 	checkRecordingNow();
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
@@ -221,22 +221,42 @@ $(document).ready(function()	{
     function downloadTranscription(){
     	Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
     }
-    
-	function importTranscription(contents){
-		//http://james.padolsey.com/javascript/cross-domain-requests-with-jquery/
-		$('#fileStatusArea').load(Android.getTranscriptionRequestURLJS());
+    function queryServerIfTranscriptionIsReady(){
+    	//http://james.padolsey.com/javascript/cross-domain-requests-with-jquery/
 		//jQuery.post( url, [data], [success(data, textStatus, jqXHR)], [dataType] );
-		//If positive response transcriptionContents will be non empty.
-		var transcriptionContents = Android.importTranscriptionJS(contents);
-		if( transcriptionContents != "" ){
-			document.getElementById('markItUp').value = transcriptionContents;//document.getElementById("fileStatusArea").appendChild(document.createTextNode(transcriptionContents.split(":::").join("\n")) );
-		}else{
-			//document.getElementById("fileStatusArea").appendChild(document.createTextNode("") );	
-		}
+		$('#fileStatusArea').load(Android.getTranscriptionRequestURLJS());
+		var response = document.getElementById('fileStatusArea').value;
 		
-		/*TODO in future relase do more complicated diff to integrate user's edits with the transcription contents.
+		/*Dictation ->Transcription lifecycle
+		null --> dictation recieved --> transcription nothing fresh -->
+									     \					      ^	
+					                     --> transcription fresh /
 		*/
-	}
+		
+		if (response["status"] == null && Android.hasAudioFileJS()){
+			//there is no audio file on the server, try to send it (again) maybe the user will be on wifi
+			Android.sendDictationToServerJS(document.getElementById('markItUp').value);
+		}
+		/*
+		this will send a client update each time the user loads the edit blog entry, until the server status changes (the next status should be nothing fresh.
+		*/
+		if (response["status"] == "dictation received"){
+			Android.sendClientUpdateJS(document.getElementById('markItUp').value);
+		}
+		/*
+		If the server has a fresh transcription for the user, try to download it (and import it into the contents)
+		*/
+		if (response["status"] == "transcription fresh"]){
+			Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
+		}
+		/*
+		If the server hasnt changed anything, dont do anything
+		*/
+		if (response["status"] == "transcription nothing fresh"]){
+			//do nothing
+		}
+    }
+
 	
 	function regexReplace(){
 		/*TODO allow user to do regex replacements in blog contents, log to frequent rules to automate if they want

@@ -3,6 +3,7 @@ package ca.ilanguage.aublog.ui;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Locale;
@@ -102,6 +103,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public static final String EXTRA_CURRENT_CONTENTS ="currentContents";
 	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
 	public static final String EXTRA_FROM_NOTIFICATION_RECORDING_STILL_RUNNING ="recordingStillRunning";
+	public static final String EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG = "askUserIfWantToImportTranscriptionIntoBlogEntry";
 	//private Boolean mReturnedTranscription; //check on reload?
 	public static final String REFRESH_AUDIOFILE_INTENT = NonPublicConstants.NONPUBLIC_INTENT_AUDIOFILE_RECORDED_AND_SAVED;
 	public static final String REFRESH_TRANSCRIPTION_INTENT = NonPublicConstants.NONPUBLIC_INTENT_TRANSCRIPTION_RECEIVED;
@@ -523,9 +525,27 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * 
          * 
          * */
-        
+        /**
+         * Javascript wrapper to startTranscription service with an mp3
+         * @return an internal status message
+         */
+        public String sendDictationToServerJS(String strContents){
+        	return sendDictationToServer(strContents);
+        }
+        /**
+         * Javascript wrapper to startTranscription service with an srt. 
+         * differes from downloadTranscription in that the changes from the server shouldnt be presented to the user for import. 
+         * 
+         * @param strContents the current contents of the blog entry
+         * @return an internal status message
+         */
+        public String sendClientUpdateJS(String strContents){
+        	Boolean askUserToImport = false;
+        	return downloadTranscription(strContents, askUserToImport);
+        }
         public String downloadTranscriptionFromServerJS(String strContents){
-        	return downloadTranscription(strContents);
+        	Boolean askUserToImport = true;
+        	return downloadTranscription(strContents, askUserToImport);
         	
         }
         public int getValueRecordingNowJS(){
@@ -540,15 +560,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	}
         	
         }
-        public String importTranscriptionJS(String strContents){
-        	askUserIfImport(strContents);
-        	return mTranscriptionAndContents;
-//        	if(mTranscription == null){
-//        		return mAudioResultsFileStatus;
-//        	}else{
-//        		return mAudioResultsFileStatus+"\n\n"+mTranscription;
-//        	}
-        }
+
         public void zeroOutParentResultFileJS(){
         	mAudioResultsFile="";
         	mAudioResultsFileStatus="";
@@ -915,7 +927,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            "Pause",  // Action
 	            "event was paused: "+mAuBlogInstallId, // Label
 	            38);       // Value
-    	
+    	//TODO branch and put back button logic here, and just set a counter for back button to make this code run. 
 		if(mURIDeleted == true){
 			Toast.makeText(
 					EditBlogEntryActivity.this,
@@ -1113,7 +1125,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				/* find out the status */
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				mWebView.loadUrl("javascript:downloadTranscription()");
+				
 			}
 			if (intent.getAction().equals(DICTATION_STILL_RECORDING_INTENT)) {
 				/* if the uri is the uri we are editing, then set its recording to true so the user can click stop 
@@ -1134,11 +1146,16 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				/* open the srt and extract the text */
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
+				Boolean askUser = intent.getExtras().getBoolean(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
+				if(askUser != null){
+					if(askUser){
+						//call function to call dialog and change the blog contents in the dialog if its positive.
+					}
+				}
 				if(intent.getData() == mUri){
 					mTranscription = "TODO this is what came back from the server.";
-					mWebView.loadUrl("javascript:importTranscription(document.getElementById('markItUp').value)");
-					
-					/* tell javascript to fill in the transcription stuff */
+					//mWebView.loadUrl("javascript:importTranscription(document.getElementById('markItUp').value)");
+					//call android method to import srt into the post contents, then do a fetch contents.
 				}else{
 					Toast.makeText(EditBlogEntryActivity.this, "Transcription for post "+intent.getData().getLastPathSegment()+" received.", Toast.LENGTH_LONG).show();
 					//TODO perhaps give user the option of importing the transcription here, since this is most likely a daughter of the transcription sent since roughly 1-2 minutes have passed.
@@ -1540,7 +1557,22 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false);
     	editor.commit();
 	}
-	private String downloadTranscription(String strContents){
+	/**
+	 * Calls the transcription service to download a transcription from the server. It may be called iether on the case that the client ahs new data, or that the server has new data. 
+	 * The boolean is used to control if the edit activity shoudl ask the user if they want to import the servers response (for the case when the server's transcription was flagged as fresh.)
+	 * 
+	 * @param strContents
+	 * @param askUserToImportTranscriptionIntoBlog True: edit will prompt user "do you want to import" once the transcription service has broadcast that it is done. False: edit will not prompt the user to import the new transcription. (use in case that the client side is fresh)
+	 * @return
+	 */
+	private String downloadTranscription(String strContents, Boolean askUserToImportTranscriptionIntoBlog){
+		if (mCursor != null) {
+			// Requery in case something changed 
+			mCursor.requery();
+            // Make sure we are at the one and only row in the cursor.
+            mCursor.moveToFirst();
+            mAudioResultsFileStatus=mCursor.getString(11);
+        }
 		mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Requested transcription result at "+System.currentTimeMillis();
 		Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
 		intent.setData(mUri);
@@ -1548,9 +1580,46 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile.replace(".mp3","_client.srt"));
         intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
         intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+        intent.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, askUserToImportTranscriptionIntoBlog);
         startService(intent); 
-		return "Waiting for service to complete.";
+		return "Waiting for service to send and receive transcriptions.";
 		
+	}
+	private String sendDictationToServer(String strContents){
+        if (mCursor != null) {
+			// Requery in case something changed 
+			mCursor.requery();
+            // Make sure we are at the one and only row in the cursor.
+            mCursor.moveToFirst();
+            mAudioResultsFileStatus=mCursor.getString(11);
+        }
+		mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Sent to transcription service at "+System.currentTimeMillis()+" (after a delay).";
+		/*create an empty subtitles file */
+		File outSRTFile =  new File(mAudioResultsFile.replace(".mp3","_client.srt"));
+		FileOutputStream outSRT;
+		try {
+			outSRT = new FileOutputStream(outSRTFile);
+			outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
+			outSRT.write(mAudioResultsFileStatus.getBytes());
+			outSRT.write("\n\n".getBytes());
+			
+			outSRT.write("0:00:01.000,0:00:01.000\n".getBytes());
+			outSRT.write(strContents.getBytes());
+			outSRT.write("\n\n".getBytes());
+			outSRT.flush();
+			outSRT.close();
+			outSRT.flush();
+			outSRT.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+		}
+		Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
+		intent.setData(mUri);
+        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
+        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
+        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS,mAudioResultsFileStatus);
+        startService(intent); 
+   		return "attempting to send dictation to server.";
 	}
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {

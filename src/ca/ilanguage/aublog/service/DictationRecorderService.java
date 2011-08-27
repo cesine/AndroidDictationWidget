@@ -443,7 +443,10 @@ public class DictationRecorderService extends Service {
         intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
         /*pass on the kill aublog message to the transcription server*/
         intent.putExtra(EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
-        //intent.putExtra(EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU, mKillAuBlog);
+        //always promt user if they want to import the transcription on the first round of transcription sent to the server. 
+        //even though the transcription will be minimal, new users will realize that they will be prompted when further results are ready.
+        //can put a settings like 5 times, and the set it to false because the user has learned how to use the aublog. 
+        intent.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, true);
         startService(intent); 
         
 		
