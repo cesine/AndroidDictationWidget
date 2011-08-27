@@ -45,11 +45,16 @@ function autoSize() {
 <body>
 <script type="text/javascript">
 <!--
+//var requestTranscriptionStatus = setInterval(importTranscription(document.getElementById('markItUp').value),60000);
+
+//var saveFrequentlyToState =  setInterval(savePostToState(), 2000);
 $(document).ready(function()	{
 	document.getElementById('playButton').style.visibility='hidden'; // hide play button
 	fillFromAndroidActivity();
-	importTranscription(document.getElementById('markItUp').value);
 	checkRecordingNow();
+	savePostToState();
+	importTranscription(document.getElementById('markItUp').value);
+	
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
 	$('#markItUp').markItUp(mySettings);
@@ -188,6 +193,8 @@ $(document).ready(function()	{
     	Android.savePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function savePostToState(){
+    	//loop itself
+    	setInterval(savePostToState(), 2000);
     	Android.saveStateJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
     function publishPostToDB(){
@@ -223,6 +230,8 @@ $(document).ready(function()	{
     }
     
 	function importTranscription(contents){
+		//loop it self.
+		setInterval(importTranscription(document.getElementById('markItUp').value),60000);
 		//http://james.padolsey.com/javascript/cross-domain-requests-with-jquery/
 		$('#fileStatusArea').load('http://openlanguage.ca:8126/status/ecca02ac-f932-78dc-a57d-4e9fe96868ca');
 		$.ajax({
