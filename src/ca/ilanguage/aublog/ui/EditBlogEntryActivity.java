@@ -670,6 +670,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		saveAsSelfToDB();
         	}
         }
+        public String getTranscriptionRequestURLJS(){
+        	String urlString = NonPublicConstants.NONPUBLIC_TRANSCRIPTION_REQUEST_URL+NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_API_KEY+mAudioResultsFile.replace(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+"audio/","");
+        	return urlString;
+        }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
         	Boolean flag = false;
         	if (!(mPostTitle.equals(strTitle)) ){

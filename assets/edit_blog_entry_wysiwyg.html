@@ -224,16 +224,7 @@ $(document).ready(function()	{
     
 	function importTranscription(contents){
 		//http://james.padolsey.com/javascript/cross-domain-requests-with-jquery/
-		$('#fileStatusArea').load('http://openlanguage.ca:8126/status/ecca02ac-f932-78dc-a57d-4e9fe96868ca');
-		$.ajax({
-		    url: 'http://google.com',
-		    type: 'POST',
-		    success: function(res) {
-		        var headline = $(res.responseText);
-		        alert(headline);
-		        document.getElementById("fileStatusArea").appendChild(document.createTextNode("here is the status"+headline) )
-		    }
-		});
+		$('#fileStatusArea').load(Android.getTranscriptionRequestURLJS());
 		//jQuery.post( url, [data], [success(data, textStatus, jqXHR)], [dataType] );
 		//If positive response transcriptionContents will be non empty.
 		var transcriptionContents = Android.importTranscriptionJS(contents);
