@@ -204,7 +204,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		
 		mNotification = new Notification(mAuBlogIconId, "AuBlog Transcription in progress", System.currentTimeMillis());
 		mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Checking for Wifi connection...", mContentIntent);
-		mNotification.flags |= Notification.FLAG_AUTO_CANCEL;
+		//mNotification.flags |= Notification.FLAG_AUTO_CANCEL;
 		//startForeground(startId, mNotification);
 		
 		Intent inten = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
@@ -404,7 +404,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 		}
-		mNM.cancel(NOTIFICATION);
+		//mNM.cancel(NOTIFICATION);
 		
 	}//end onhandle intent
 	private void saveMetaDataToDatabase(){
