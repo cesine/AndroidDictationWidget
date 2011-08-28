@@ -1125,7 +1125,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				/* find out the status */
 //				mAudioResultsFileStatus = intent.getExtras().getString(
 //						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
+				mWebView.loadUrl("javascript: setTimeout(queryServerIfTranscriptionIsReady(),60000");
 			}
 			if (intent.getAction().equals(DICTATION_STILL_RECORDING_INTENT)) {
 				/* if the uri is the uri we are editing, then set its recording to true so the user can click stop 
