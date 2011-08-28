@@ -206,6 +206,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Checking for Wifi connection...", mContentIntent);
 		//mNotification.flags |= Notification.FLAG_AUTO_CANCEL;
 		//startForeground(startId, mNotification);
+		mNM.notify(NOTIFICATION, mNotification);
 		
 		Intent inten = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
 		inten.setData(mUri);
