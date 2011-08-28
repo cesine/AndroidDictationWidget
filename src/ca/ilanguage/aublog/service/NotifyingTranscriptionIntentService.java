@@ -269,6 +269,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			 * Upload file
 			 */
 			mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Connecting to transcription server...", mContentIntent);
+			mNM.notify(NOTIFICATION, mNotification);
 			
 			try {
 				HttpClient httpClient = new DefaultHttpClient();
@@ -315,6 +316,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
 	        	mNotificationMessage = firstLine;//+ "\nSelect to import transcription.";
 	        	mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Server response: "+mNotificationMessage, mContentIntent);
+	        	mNM.notify(NOTIFICATION, mNotification);
 	    		
 			} catch (Exception e) {
 				Log.e(e.getClass().getName(), e.getMessage(), e);
@@ -363,17 +365,22 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					saveMetaDataToDatabase();
 					mNotificationMessage = "Transcription response saved as _server.srt";
 					mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+					mNM.notify(NOTIFICATION, mNotification);
+					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					mNotificationMessage ="Cannot write results to SDCARD";
 					mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+					mNM.notify(NOTIFICATION, mNotification);
+					
 				}
 			
 		}else{
 			//no wifi, and the file is larger than the users settings for upload over mobile network.
 			mNotificationMessage = "Dication was not sent for transcription: no wifi or too long. Check Aublog settings.";
 			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+			mNM.notify(NOTIFICATION, mNotification);
 			
 			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Dictation audio wasn't sent for transcription, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 			saveMetaDataToDatabase();
@@ -413,13 +420,14 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				mNotificationMessage = "Transcription results sent and received.";
 			}
 			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-			
+			mNM.notify(NOTIFICATION, mNotification);
 		}else{
 			Intent i = new Intent(EditBlogEntryActivity.DICTATION_SENT_INTENT);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 			mNotificationMessage = "Dication sent for transcription.";
 			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+			mNM.notify(NOTIFICATION, mNotification);
 		}
 		//mNM.cancel(NOTIFICATION);
 		
@@ -462,6 +470,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		        	// Tell the user we saved recording meta info to the database.
 		            //Toast.makeText(this, "Audiofile info saved to DB.", Toast.LENGTH_SHORT).show();
 		            //mNotification.setLatestEventInfo(this, "AuBlog Dictation", "Saved to DB", mContentIntent);
+		        	//mNM.notify(NOTIFICATION, mNotification);
 		    		
 		        	
 			} catch (IllegalArgumentException e) {
