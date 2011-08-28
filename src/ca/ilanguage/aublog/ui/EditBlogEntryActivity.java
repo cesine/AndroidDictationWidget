@@ -125,6 +125,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	String mTranscription;
 	String mTranscriptionAndContents;
 	Boolean mFreshEditScreen;
+	Boolean mBackButtonHasBeenPressed;
 	private Boolean mDeleted;
 	private Boolean mURIDeleted =false;;
 	String mLongestEverContent;
@@ -339,7 +340,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	mFreshEditScreen=true;
         }else{
         	/*
-    		 * make sure non of the variables are still null. they should have been filled in by the cursor or by the onrestorestate
+    		 * make sure non of the variables are still null. they should have been filled in by the cursor or by the onrestorestate TODO the restore state is called much later, should it be done manually here?
+    		 * 
     		 */
     		
         	//mWebView.restoreState(savedInstanceState);
@@ -686,6 +688,53 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	String urlString = NonPublicConstants.NONPUBLIC_TRANSCRIPTION_REQUEST_URL+NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_API_KEY+mAudioResultsFile.replace(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+"audio/","");
         	return urlString;
         }
+        public void savePostAsSelfToDBJS(String strTitle, String strContent, String strLabels){
+        	Boolean flag = false;
+        	if (!(mPostTitle.equals(strTitle)) ){
+        		flag=true;
+        	}
+        	mPostContent=strContent;
+        	mPostTitle=strTitle;
+        	mPostLabels=strLabels;
+        	if (mLongestEverContent.length() < (strTitle+strContent+strLabels).length() ){
+    			mLongestEverContent=strContent+strContent+strLabels;
+    		}
+        	if(flag){
+        		flagDraftTreeAsNeedingToBeReGenerated();
+        	}
+        	mFreshEditScreen = false;
+    		
+//    		if (mDeleted == true){
+//    			return ;
+//    		} //alow users to edit deleted nodes. TODO if the node is deleted, change javascript buton onclick to undelete.
+        	try{
+        		ContentValues values = new ContentValues();
+            	values.put(AuBlogHistory.ENTRY_TITLE, strTitle);
+            	values.put(AuBlogHistory.ENTRY_CONTENT, strContent);
+            	values.put(AuBlogHistory.ENTRY_LABELS, strLabels);
+            	values.put(AuBlogHistory.TIME_EDITED, Long.valueOf(System.currentTimeMillis()));
+            	values.put(AuBlogHistory.AUDIO_FILE, mAudioResultsFile);
+            	//values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
+            	getContentResolver().update(mUri, values,null, null);
+        		Log.d(TAG, "Post saved to database.");
+        	} catch (SQLException e) {
+        		// Log.e(TAG,"SQLException (createPost(title, content))");
+        		tracker.trackEvent(
+        	            "Database",  // Category
+        	            "Bug",  // Action
+        	            "Database connection problem "+e+" : "+mAuBlogInstallId, // Label
+        	            3201);       // Value
+//        		Toast.makeText(EditBlogEntryActivity.this, "Database connection problem "+e, Toast.LENGTH_LONG).show();
+        	} catch (Exception e) {
+        		// Log.e(TAG, "Exception: " + e.getMessage());
+        		tracker.trackEvent(
+        	            "Database",  // Category
+        	            "Bug",  // Action
+        	            "exception "+e+" : "+mAuBlogInstallId, // Label
+        	            3202);       // Value
+//        		Toast.makeText(EditBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
+        	}
+        }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
         	Boolean flag = false;
         	if (!(mPostTitle.equals(strTitle)) ){
@@ -884,22 +933,22 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * (although, this can be changed by just calling saveAsDaugher here)
 	 * 
 	 * Rotate screen: save as self to database 
-	 * Back button: save as self to database
+	 * Back button: save as self to database (if it is empty, and it hasn't been changed, discard it)
 	 * 
-	 * // http://developer.android.com/guide/topics/media/index.html
-	 * As you may know, when the user changes the screen orientation (or changes
-	 * the device configuration in another way), the system handles that by
-	 * restarting the activity (by default), so you might quickly consume all of
-	 * the system resources as the user rotates the device back and forth
-	 * between portrait and landscape, because at each orientation change, you
-	 * create a new MediaPlayer that you never release.
+	 * // http://developer.android.com/guide/topics/media/index.html As you may
+	 * know, when the user changes the screen orientation (or changes the device
+	 * configuration in another way), the system handles that by restarting the
+	 * activity (by default), so you might quickly consume all of the system
+	 * resources as the user rotates the device back and forth between portrait
+	 * and landscape, because at each orientation change, you create a new
+	 * MediaPlayer that you never release.
 	 * 
 	 * DONE: playing and pausing is kept in the EditBlog activity, if the user
-	 * rotates the screen or leaves it will probably not stop playing (the media player 
-	 * is released in the onDestroy rather than the onPause. It will 
-	 * stop playing when the user quits the edit blog activity. This is preferred. If
-	 * the user wants to listen to their audio in the background they can use
-	 * the normal Music player by opening the settings, and going to the audio
+	 * rotates the screen it will stop playing (the media player is released in
+	 * the onDestroy) rather than the onPause. It would be preferrable if it
+	 * stops playing only when the user quits the edit blog activity. If the
+	 * user wants to listen to their audio in the background they can use the
+	 * normal Music player by opening the settings, and going to the audio
 	 * folder.
 	 * 
 	 * DONE: refactored record as a service (foregrounded so that it will be
@@ -912,34 +961,68 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * running in the same process id, so technically the service's ondestroy
 	 * will be killed of aublog is killed.
 	 * 
-	 * Consequences: NEGATIVE: to find out if the audio file is valid, or how
+	 * Consequences:
+	 * NEGATIVE: to find out if the audio file is valid, or how
 	 * long it is, this EditBlogEntry now has to go to the database and the
-	 * Sdcard, it cant know on its own. POSITIVE: the user can rotate the screen
+	 * Sdcard, it cant know on its own. 
+	 * POSITIVE: the user can rotate the screen
 	 * while dictating, which is very natural since they will pick up and put
 	 * down the phone, walk around, maybe biking etc especially if the user is
 	 * using a bluetooth.
 	 */
 	@Override
 	protected void onPause() {
-		mFreshEditScreen=false;
+		//created a new function in the javascript interface to save directly to the database to avoid the rotate bug. 
+		mWebView.loadUrl("javascript:savePostAsSelfToDB()");
+ 		mFreshEditScreen=false;
 		tracker.trackEvent(
 	            "Event",  // Category
 	            "Pause",  // Action
 	            "event was paused: "+mAuBlogInstallId, // Label
 	            38);       // Value
-    	//TODO branch and put back button logic here, and just set a counter for back button to make this code run. 
-		if(mURIDeleted == true){
-			Toast.makeText(
-					EditBlogEntryActivity.this,
-					"Discarding entry " + mUri.getLastPathSegment(),// + " it's empty and it has no daughters.",
-					Toast.LENGTH_LONG).show();
-		}else{
-	    	mWebView.loadUrl("javascript:savePostToState()");
-	    	saveAsSelfToDB();
-		}
-		
-		
-		
+		// put back button logic here, and just set a boolean for back button to make this code run.
+		if(mBackButtonHasBeenPressed){
+			//should be set by the savestate call.
+//			if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
+//	    		//if the longestevercontenttitle etc is shorter than the concatination of the current title and content, save the current as the longested ever. 
+//				mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
+//			}
+			if ( (mPostTitle+mPostContent+mPostLabels).length() <= 1 && mAudioResultsFile.length() < 5) {
+				// delete the entry the blog entry  if the user
+				// never added anything and there is no attached audio file. this should prevent having empty entrys
+				// in the database, but stillkeep entries that are zeroed out and had
+				// content before, or more imprtantly, had daughters.
+				/*
+				 * find all nodes with this node as its parent, if it has no
+				 * daughters, just delete it.
+				 */
+				Cursor cursor = managedQuery(AuBlogHistory.CONTENT_URI,
+						PROJECTION, AuBlogHistory.PARENT_ENTRY + "=" + mUri.getLastPathSegment(),
+						null, null);
+				if (cursor.getCount() < 1) {
+					getContentResolver().delete(mUri, null, null);
+					mURIDeleted = true;
+					flagDraftTreeAsNeedingToBeReGenerated();//activity finishes when mURI is deleted so no problems
+					Toast.makeText(
+							EditBlogEntryActivity.this,
+							"Discarding entry " + mUri.getLastPathSegment(),// + " it's empty and it has no daughters.",
+							Toast.LENGTH_LONG).show();
+				} else {
+					//Toast.makeText(EditBlogEntryActivity.this,"Not Deleting " + mUri.getLastPathSegment()+ " it has" + cursor.getCount()+ " daughters.", Toast.LENGTH_LONG).show();
+				}
+			}else{
+				//do nothing: backbutton acts as save as self to database.
+				//as it calls onPause next, and onPause saves to the database.
+			}
+		}//end if to process backbutton
+//		if(mURIDeleted == true){
+//			Toast.makeText(
+//					EditBlogEntryActivity.this,
+//					"Discarding entry " + mUri.getLastPathSegment(),// + " it's empty and it has no daughters.",
+//					Toast.LENGTH_LONG).show();
+//		}else{
+//	    	saveAsSelfToDB();
+//		}
 		super.onPause();
 	}
 	/**
@@ -958,7 +1041,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		registerReceiver(audioFileUpdateReceiver, intentDictRunning);
 		IntentFilter intentFilterTrans = new IntentFilter(REFRESH_TRANSCRIPTION_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentFilterTrans);
-		
+		mBackButtonHasBeenPressed = false;
 		super.onResume();
 	}
 
@@ -1629,37 +1712,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			mWebView.loadUrl("javascript:savePostToState()");
-			if (mLongestEverContent.length() < (mPostTitle+mPostContent+mPostLabels).length() ){
-	    		//if the longestevercontenttitle etc is shorter than the concatination of the current title and content, save the current as the longested ever. 
-				mLongestEverContent=mPostTitle+mPostContent+mPostLabels;
-			}
-	    	
-			if ( mLongestEverContent.length() <= 1 && mAudioResultsFile.length() < 5) {
-				// delete the entry the blog entry  if the user
-				// never added anything and there is no attached audio file. this should prevent having empty entrys
-				// in the database, but stillkeep entries that are zeroed out and had
-				// content before, or more imprtantly, had daughters.
-				/*
-				 * find all nodes with this node as its parent, if it has no
-				 * daughters, just delete it.
-				 */
-				Cursor cursor = managedQuery(AuBlogHistory.CONTENT_URI,
-						PROJECTION, AuBlogHistory.PARENT_ENTRY + "=" + mUri.getLastPathSegment(),
-						null, null);
-				if (cursor.getCount() < 1) {
-					
-					getContentResolver().delete(mUri, null, null);
-					mURIDeleted = true;
-					flagDraftTreeAsNeedingToBeReGenerated();//activity finishes when mURI is deleted so no problems
-				} else {
-					//Toast.makeText(EditBlogEntryActivity.this,"Not Deleting " + mUri.getLastPathSegment()+ " it has" + cursor.getCount()+ " daughters.", Toast.LENGTH_LONG).show();
-				}
-			}else{
-				//backbutton acts as save as self to database.
-				//as it calls onPause next, and onPause saves to the database.
-			}
-			mFreshEditScreen =true;
+			mBackButtonHasBeenPressed = true;
+			
 		}
 //		if (keyCode == KeyEvent.KEYCODE_MENU) {
 //			int tmp1 = 0, tmp2 = 0;

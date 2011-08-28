@@ -194,6 +194,9 @@ $(document).ready(function()	{
     function savePostToDB(){
     	Android.savePostJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
+    function savePostAsSelfToDB(){
+    	Android.savePostAsSelfToDBJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
+    }
     function savePostToState(){
     	Android.saveStateJS(document.getElementById('f-title').value,document.getElementById('markItUp').value,document.getElementById('post-labels').value);
     }
