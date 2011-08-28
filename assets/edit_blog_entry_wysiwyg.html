@@ -237,7 +237,7 @@ $(document).ready(function()	{
 		    // e.g. $(data).find('#icc10n')
 			var response = JSON.parse(data);
 			
-			if (response["status"] == null && Android.hasAudioFileJS()){
+			if (response["status"] == null && "true" === Android.hasAudioFileJS()){
 				//there is no audio file on the server, try to send it (again) maybe the user will be on wifi
 				Android.sendDictationToServerJS(document.getElementById('markItUp').value);
 			}
