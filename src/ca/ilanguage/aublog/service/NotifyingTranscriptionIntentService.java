@@ -268,6 +268,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			/*
 			 * Upload file
 			 */
+			mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Connecting to transcription server...", mContentIntent);
+			
 			try {
 				HttpClient httpClient = new DefaultHttpClient();
 				HttpContext localContext = new BasicHttpContext();
@@ -312,7 +314,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
 				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
 	        	mNotificationMessage = firstLine;//+ "\nSelect to import transcription.";
-	        	
+	        	mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Server response: "+mNotificationMessage, mContentIntent);
+	    		
 			} catch (Exception e) {
 				Log.e(e.getClass().getName(), e.getMessage(), e);
 				//this is showing up for when the audio is not sent, but the client srt is...
@@ -358,16 +361,20 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					}
 					mTranscriptionReturned = true;
 					saveMetaDataToDatabase();
-					//mNotificationMessage = "Select to import transcription.";
+					mNotificationMessage = "Transcription response saved as _server.srt";
+					mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					mNotificationMessage ="Cannot write results to SDCARD";
+					mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
 				}
 			
 		}else{
 			//no wifi, and the file is larger than the users settings for upload over mobile network.
-			mNotificationMessage = "Dication was not sent for transcription: no wifi or too long. Check settings.";
+			mNotificationMessage = "Dication was not sent for transcription: no wifi or too long. Check Aublog settings.";
+			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+			
 			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Dictation audio wasn't sent for transcription, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 			saveMetaDataToDatabase();
 			if(mAudioFilePath.endsWith(".mp3")){
@@ -400,10 +407,19 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			i.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
 			sendBroadcast(i);
+			if (mAskUserImport){
+				mNotificationMessage = "Transcription merged with server results.";
+			}else{
+				mNotificationMessage = "Transcription results sent and received.";
+			}
+			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+			
 		}else{
 			Intent i = new Intent(EditBlogEntryActivity.DICTATION_SENT_INTENT);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
+			mNotificationMessage = "Dication sent for transcription.";
+			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
 		}
 		//mNM.cancel(NOTIFICATION);
 		
