@@ -43,13 +43,16 @@ import android.util.Log;
 
 public class NotifyingTranscriptionIntentService extends IntentService {
 	protected static String TAG = "NotifyingTranscriptionIntentService";
-	  
+
+	private NotificationManager mNM;
+	private Notification mNotification;
+	private int NOTIFICATION = 7030;
+	private PendingIntent mContentIntent;
+	private int mAuBlogIconId = R.drawable.stat_aublog;  
     public NotifyingTranscriptionIntentService() {
 		super(TAG);
 	}
-    private int NOTIFICATION = 7030;
     
-	private NotificationManager mNM;
 	private Boolean mTranscriptionReturned =false;
     private int mMaxFileUploadOverMobileNetworkSize = 0;
     private int mMaxUploadFileSize = 15000000;  // Set maximum upload size to 1.5MB roughly 15 minutes of audio, 
@@ -133,7 +136,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		
 		super.onCreate();
 		
-		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		if(mKillAuBlog == null){
 			mKillAuBlog = false;
@@ -160,7 +162,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	}
 	@Override
 	public void onDestroy() {
-		mNM.cancel(NOTIFICATION);
 		if (mKillAublogReceiver != null) {
 			unregisterReceiver(mKillAublogReceiver);
 		}//never unregister, then maybe we will get the kill commands?
@@ -193,16 +194,25 @@ public class NotifyingTranscriptionIntentService extends IntentService {
  */
 	@Override
 	protected void onHandleIntent(Intent intent) {
-//		if (mNM != null){
-//			mNM.cancelAll();
-//		}
+		if (mNM == null){
+			mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		}
+		// The PendingIntent to launch our activity if the user selects this notification
+		Intent notifyingIntent = new Intent(this, NotifyingController.class);
+		notifyingIntent.setData(mUri);
+		mContentIntent = PendingIntent.getActivity(this, 0, notifyingIntent, 0);
+		
+		mNotification = new Notification(mAuBlogIconId, "AuBlog Transcription in progress", System.currentTimeMillis());
+		mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Checking for Wifi connection...", mContentIntent);
+		mNotification.flags |= Notification.FLAG_AUTO_CANCEL;
+		//startForeground(startId, mNotification);
+		
 		Intent inten = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
 		inten.setData(mUri);
 		inten.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(inten);
 		
-		showNotification(R.drawable.stat_aublog, "Contacting transcription server.");
-    	
+		
 		/*
 		 * get data from extras bundle, store it in the member variables
 		 */
@@ -224,7 +234,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mNotificationMessage= mAudioFilePath;
 		}else{
 			mNotificationMessage ="No file";
-			mNM.cancel(NOTIFICATION);
 			return;
 		}
 
@@ -302,7 +311,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
 				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
 	        	mNotificationMessage = firstLine;//+ "\nSelect to import transcription.";
-	        	showNotification(R.drawable.stat_aublog, mNotificationMessage);
 	        	
 			} catch (Exception e) {
 				Log.e(e.getClass().getName(), e.getMessage(), e);
@@ -354,8 +362,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					mNotificationMessage ="Cannot write results to SDCARD";
-					showNotification(R.drawable.stat_aublog, mNotificationMessage);
-		        	
 				}
 			
 		}else{
@@ -384,7 +390,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					mNotificationMessage ="Cannot write null results to SDCARD";
 				}
 			}//end if to make an empty srt file if the mp3 was not uploaded
-			showNotification(R.drawable.stat_aublog,  mNotificationMessage);
 			
 		}//end if for max file size for upload
 
@@ -400,7 +405,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			sendBroadcast(i);
 		}
 		mNM.cancel(NOTIFICATION);
-
+		
 	}//end onhandle intent
 	private void saveMetaDataToDatabase(){
 		/*
@@ -454,36 +459,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		}//end if where cursor has content.
 		
 	}
-	  
-    private void showNotification(int iconId, String message) {
-        // In this sample, we'll use the same text for the ticker and the expanded notification
-        //CharSequence text = message;
-
-        // Set the icon, scrolling text and timestamp.
-        // Note that in this example, we pass null for tickerText.  We update the icon enough that
-        // it is distracting to show the ticker text every time it changes.  We strongly suggest
-        // that you do this as well.  (Think of of the "New hardware found" or "Network connection
-        // changed" messages that always pop up)
-        Notification notification = new Notification(iconId, message, System.currentTimeMillis());
-
-        // The PendingIntent to launch our activity if the user selects this notification
-        //tried sending it to Edit activity but couldnt get extras to be extracted in either onResume or onStart, so cant 
-        //pull in new transcription if user relaunches edit activiyt by clicking on the notification.
-        Intent intent = new Intent(this, NotifyingController.class);
-        intent.setData(mUri);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                intent, 0);
-
-        // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, "AuBlog Transcription Service",
-                       message, contentIntent);
-        //notification will disapear when user clicks and launches the pending intent
-        notification.flags  |= Notification.FLAG_AUTO_CANCEL;
-        // Send the notification.
-        // We use a layout id because it is a unique number.  We use it later to cancel.
-        mNM.notify(AUBLOG_NOTIFICATIONS, notification);
-    }
-    public String splitOnSilence(){
+	
+	public String splitOnSilence(){
     	mTimeCodes = new ArrayList<String>();
     	mTimeCodes.add("0:00:02.350,0:00:06.690");
     	mTimeCodes.add("0:00:07.980,0:00:12.780");

@@ -70,7 +70,6 @@ public class DictationRecorderService extends Service {
 	private Notification mNotification;
 	private int NOTIFICATION = 7029;
 	private PendingIntent mContentIntent;
-
 	private int mAuBlogIconId = R.drawable.stat_aublog;
 	
 	private String mAudioResultsFile ="";
