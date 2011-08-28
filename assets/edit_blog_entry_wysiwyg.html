@@ -76,7 +76,12 @@ $(document).ready(function()	{
 		}
  		return false;
 	});
-
+	//http://stackoverflow.com/questions/168963/stop-jquery-load-response-from-being-cached
+	//http://api.jquery.com/jQuery.ajax
+	$.ajaxSetup ({
+	    // Disable caching of AJAX responses
+	    cache: false
+	});
 	queryServerIfTranscriptionIsReady();
 	
 });
@@ -232,10 +237,27 @@ $(document).ready(function()	{
 		    // e.g. $(data).find('#icc10n')
 			var response = JSON.parse(data);
 			
+			if (response["status"] == null && "true" === Android.hasAudioFileJS()){
+				//there is no audio file on the server, try to send it (again) maybe the user will be on wifi
+				Android.sendDictationToServerJS(document.getElementById('markItUp').value);
+			}
+			/*
+			this will send a client update each time the user loads the edit blog entry, until the server status changes (the next status should be nothing fresh.
+			*/
 			if (response["status"] == "dictation received"){
 				Android.sendClientUpdateJS(document.getElementById('markItUp').value);
-			}else{
+			}
+			/*
+			If the server has a fresh transcription for the user, try to download it (and import it into the contents)
+			*/
+			if (response["status"] == "transcription fresh"){
 				Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
+			}
+			/*
+			If the server hasnt changed anything, dont do anything
+			*/
+			if (response["status"] == "transcription nothing fresh"){
+				//do nothing
 			}
 		});
     }
