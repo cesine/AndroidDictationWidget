@@ -76,7 +76,12 @@ $(document).ready(function()	{
 		}
  		return false;
 	});
-
+	//http://stackoverflow.com/questions/168963/stop-jquery-load-response-from-being-cached
+	//http://api.jquery.com/jQuery.ajax
+	$.ajaxSetup ({
+	    // Disable caching of AJAX responses
+	    cache: false
+	});
 	queryServerIfTranscriptionIsReady();
 	
 });
