@@ -1125,7 +1125,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				/* find out the status */
 //				mAudioResultsFileStatus = intent.getExtras().getString(
 //						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				mWebView.loadUrl("javascript: setTimeout(queryServerIfTranscriptionIsReady(),60000");
+				//mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
+				//mWebView.loadUrl("javascript: setTimeout(queryServerIfTranscriptionIsReady(),60000"); doesnt seem to work. instead, just wait until user reloads webview. the cache is dissabled so it should ask for a new query. 
 			}
 			if (intent.getAction().equals(DICTATION_STILL_RECORDING_INTENT)) {
 				/* if the uri is the uri we are editing, then set its recording to true so the user can click stop 

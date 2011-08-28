@@ -314,8 +314,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				reader.close();
 				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
 				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
-	        	mNotificationMessage = firstLine;//+ "\nSelect to import transcription.";
-	        	mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Server response: "+mNotificationMessage, mContentIntent);
+	        	mNotificationMessage = firstLine;//First line from server is presented to user as final notification. 
+	        	mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
 	        	mNM.notify(NOTIFICATION, mNotification);
 	    		
 			} catch (Exception e) {
@@ -364,8 +364,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					mTranscriptionReturned = true;
 					saveMetaDataToDatabase();
 					mNotificationMessage = "Transcription response saved as _server.srt";
-					mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-					mNM.notify(NOTIFICATION, mNotification);
+//					mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+//					mNM.notify(NOTIFICATION, mNotification);
 					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -419,15 +419,15 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			}else{
 				mNotificationMessage = "Transcription results sent and received.";
 			}
-			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-			mNM.notify(NOTIFICATION, mNotification);
+//			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+//			mNM.notify(NOTIFICATION, mNotification);
 		}else{
 			Intent i = new Intent(EditBlogEntryActivity.DICTATION_SENT_INTENT);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 			mNotificationMessage = "Dication sent for transcription.";
-			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-			mNM.notify(NOTIFICATION, mNotification);
+//			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+//			mNM.notify(NOTIFICATION, mNotification);
 		}
 		//mNM.cancel(NOTIFICATION);
 		
