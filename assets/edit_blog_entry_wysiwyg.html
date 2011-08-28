@@ -225,9 +225,19 @@ $(document).ready(function()	{
     }
     var queryServerIfTranscriptionIsReady = function(){
     	//http://james.padolsey.com/javascript/cross-domain-requests-with-jquery/
+    	//http://stackoverflow.com/questions/3973933/jquery-load-callback-function
 		//jQuery.post( url, [data], [success(data, textStatus, jqXHR)], [dataType] );
-		$('#fileStatusArea').load(Android.getTranscriptionRequestURLJS(),processTranscriptionServerResponse);
-		
+		$('#fileStatusArea').load(Android.getTranscriptionRequestURLJS(),function(data){
+		    // use the data param
+		    // e.g. $(data).find('#icc10n')
+			var response = JSON.parse(data);
+			
+			if (response["status"] == "dictation received"){
+				Android.sendClientUpdateJS(document.getElementById('markItUp').value);
+			}else{
+				Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
+			}
+		});
     }
 	/*Dictation ->Transcription lifecycle
 	null --> dictation recieved --> transcription nothing fresh -->
