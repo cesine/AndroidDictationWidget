@@ -1125,7 +1125,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				/* find out the status */
 //				mAudioResultsFileStatus = intent.getExtras().getString(
 //						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				mWebView.loadUrl("javascript:processTranscriptionServerResponse()");
+				mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
 			}
 			if (intent.getAction().equals(DICTATION_STILL_RECORDING_INTENT)) {
 				/* if the uri is the uri we are editing, then set its recording to true so the user can click stop 
@@ -1150,6 +1150,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				if(askUser != null){
 					if(askUser){
 						//call function to call dialog and change the blog contents in the dialog if its positive.
+						Toast.makeText(EditBlogEntryActivity.this, "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.", Toast.LENGTH_LONG).show();
+						
+					}else{
+						Toast.makeText(EditBlogEntryActivity.this, "Transcription for post "+intent.getData().getLastPathSegment()+" sent and recieved.", Toast.LENGTH_LONG).show();
+						
 					}
 				}
 				if(intent.getData() == mUri){
