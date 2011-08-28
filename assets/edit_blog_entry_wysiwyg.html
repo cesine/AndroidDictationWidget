@@ -47,9 +47,8 @@ function autoSize() {
 <!--
 $(document).ready(function()	{
 	document.getElementById('playButton').style.visibility='hidden'; // hide play button
-	fillFromAndroidActivity();
-	queryServerIfTranscriptionIsReady();
 	checkRecordingNow();
+	fillFromAndroidActivity();
 	// Add markItUp! to your textarea in one line
 	// $('textarea').markItUp( { Settings }, { OptionalExtraSettings } );
 	$('#markItUp').markItUp(mySettings);
@@ -77,6 +76,33 @@ $(document).ready(function()	{
 		}
  		return false;
 	});
+	//after loading the page try this.
+	function  processTranscriptionServerResponse(){
+		if (response["status"] == null && Android.hasAudioFileJS()){
+			//there is no audio file on the server, try to send it (again) maybe the user will be on wifi
+			Android.sendDictationToServerJS(document.getElementById('markItUp').value);
+		}
+		/*
+		this will send a client update each time the user loads the edit blog entry, until the server status changes (the next status should be nothing fresh.
+		*/
+		if (response["status"] == "dictation received"){
+			Android.sendClientUpdateJS(document.getElementById('markItUp').value);
+		}
+		/*
+		If the server has a fresh transcription for the user, try to download it (and import it into the contents)
+		*/
+		if (response["status"] == "transcription fresh"){
+			Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
+		}
+		/*
+		If the server hasnt changed anything, dont do anything
+		*/
+		if (response["status"] == "transcription nothing fresh"){
+			//do nothing
+		}
+    }
+	queryServerIfTranscriptionIsReady(processTranscriptionServerResponse);
+	
 });
 -->
 </script>
@@ -91,12 +117,12 @@ $(document).ready(function()	{
 <input type="button"  id="playButton" value="Play" onClick="playPauseAudioController()" />
 </span>
 <script type="text/javascript">
-	/*/http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
+	//http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
 	console.error('1');
 	console.info('2');
 	console.log('3');
 	console.warn('4');
-	*/
+	
 	var hasAudio = false;
 	
     function startStopRecordingController() {
@@ -221,41 +247,24 @@ $(document).ready(function()	{
     function downloadTranscription(){
     	Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
     }
-    function queryServerIfTranscriptionIsReady(){
+    function queryServerIfTranscriptionIsReady( callback ){
     	//http://james.padolsey.com/javascript/cross-domain-requests-with-jquery/
 		//jQuery.post( url, [data], [success(data, textStatus, jqXHR)], [dataType] );
 		$('#fileStatusArea').load(Android.getTranscriptionRequestURLJS());
 		var response = document.getElementById('fileStatusArea').value;
 		
-		/*Dictation ->Transcription lifecycle
-		null --> dictation recieved --> transcription nothing fresh -->
-									     \					      ^	
-					                     --> transcription fresh /
-		*/
-		
-		if (response["status"] == null && Android.hasAudioFileJS()){
-			//there is no audio file on the server, try to send it (again) maybe the user will be on wifi
-			Android.sendDictationToServerJS(document.getElementById('markItUp').value);
+		if (callback && typeof(callback) === "function") {
+		    // execute the callback, passing parameters as necessary
+		    callback(response);
 		}
-		/*
-		this will send a client update each time the user loads the edit blog entry, until the server status changes (the next status should be nothing fresh.
-		*/
-		if (response["status"] == "dictation received"){
-			Android.sendClientUpdateJS(document.getElementById('markItUp').value);
-		}
-		/*
-		If the server has a fresh transcription for the user, try to download it (and import it into the contents)
-		*/
-		if (response["status"] == "transcription fresh"]){
-			Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value);
-		}
-		/*
-		If the server hasnt changed anything, dont do anything
-		*/
-		if (response["status"] == "transcription nothing fresh"]){
-			//do nothing
-		}
+
     }
+	/*Dictation ->Transcription lifecycle
+	null --> dictation recieved --> transcription nothing fresh -->
+								     \					      ^	
+				                     --> transcription fresh /
+	*/
+    
 
 	
 	function regexReplace(){
