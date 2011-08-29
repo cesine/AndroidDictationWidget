@@ -414,6 +414,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         webSettings.setSavePassword(false);
         webSettings.setSaveFormData(true);
         webSettings.setJavaScriptEnabled(true);
+        webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         
         /**
          * Get the uri which was sent to the CreateBlogActivity, put the data into the fields.
@@ -689,10 +690,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	return urlString;
         }
         public void savePostAsSelfToDBJS(String strTitle, String strContent, String strLabels){
-        	Boolean flag = false;
-        	if (!(mPostTitle.equals(strTitle)) ){
-        		flag=true;
-        	}
         	mPostContent=strContent;
         	mPostTitle=strTitle;
         	mPostLabels=strLabels;
@@ -730,9 +727,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	            3202);       // Value
 //        		Toast.makeText(EditBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
         	}
-        	if(flag){
-        		flagDraftTreeAsNeedingToBeReGenerated();
-        	}
+        	
+        	flagDraftTreeAsNeedingToBeReGenerated();
+        	
         }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
 //        	Boolean flag = false;
