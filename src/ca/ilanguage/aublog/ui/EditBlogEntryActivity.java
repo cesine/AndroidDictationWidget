@@ -1822,13 +1822,20 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    {
 	    	 //throw away file info by detecting the timecodes and discarding 2 lines after. 
             if (line.contains("0:00:00.000,0:00:00.000")){
-            	String throwAwayFileInfo = reader.readLine();
-            	throwAwayFileInfo = reader.readLine();
+            	line = reader.readLine();
+            	line = reader.readLine();
+            	line = reader.readLine();
             	//add checking if throwaway is null, will while return?
             }
             if (line.contains("0:00:00.010,0:00:00.010")){
-            	String throwAwayFileInfo = reader.readLine();
-            	throwAwayFileInfo = reader.readLine();
+            	line = reader.readLine();
+            	line = reader.readLine();
+            	line = reader.readLine();
+            }
+            if (line.contains("0:00:00.020,0:00:00.020")){
+            	line = reader.readLine();
+            	line = reader.readLine();
+            	line = reader.readLine();
             }
 	        results += line+ " ";
 	    }
