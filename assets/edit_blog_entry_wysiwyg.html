@@ -263,7 +263,7 @@ $(document).ready(function()	{
 			If the server hasnt changed anything, dont do anything
 			*/
 			if (response["status"] == "transcription nothing fresh"){
-				//do nothing
+				Android.askUserIfImportJS(document.getElementById('markItUp').value);
 			}
 		});
     }
