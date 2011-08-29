@@ -345,7 +345,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					outSRT.write(mAudioResultsFileStatus.getBytes());
 					outSRT.write("\n\n".getBytes());
 					
-					outSRT.write("0:00:01.000,0:00:01.000\n".getBytes());
+					outSRT.write("0:00:00.010,0:00:00.010\n".getBytes());
 					outSRT.write(mPostContents.getBytes());
 					outSRT.write("\n\n".getBytes());
 					/*
