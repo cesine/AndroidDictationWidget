@@ -376,16 +376,16 @@ public class MainMenuActivity extends Activity {
 		            "Use",  // Action
 		            "creating new drafts tree: "+mAuBlogInstallId, // Label
 		            112);  
-			new GenerateTreeTask().execute();
-			
-			
-			
-			/*
-			 * Mean while set the flag that the draft tree is fresh
-			 */
-			SharedPreferences.Editor editor = prefs.edit();
-	    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,true);
-	    	editor.commit();
+//			new GenerateTreeTask().execute();
+//			
+//			
+//			
+//			/*
+//			 * Mean while set the flag that the draft tree is fresh
+//			 */
+//			SharedPreferences.Editor editor = prefs.edit();
+//	    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,true);
+//	    	editor.commit();
 			
 			
 
@@ -541,11 +541,19 @@ public class MainMenuActivity extends Activity {
 		mBackButtonCount=0;
 		mButtonFlickerAnimation.setAnimationListener(null);
 
+		new GenerateTreeTask().execute();
+		/*
+		 * Mean while set the flag that the draft tree is fresh
+		 */
+		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+		SharedPreferences.Editor editor = prefs.edit();
+    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,true);
+    	editor.commit();
+		
 		if (mStartButton != null) {
 
 			
 			// Change "start" to "continue" if its in a resume.
-			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 			
 
 			((ImageView) mStartButton).setImageDrawable(getResources()
