@@ -276,6 +276,7 @@ $(document).ready(function()	{
 	//after loading the page try this.
 	var  processTranscriptionServerResponse = function(){
 		var response = JSON.parse(document.getElementById('fileStatusArea').value);
+		document.getElementById('fileStatusArea').value = "";
 		
 		if (response["status"] == "dictation received"){
 			Android.sendClientUpdateJS(document.getElementById('markItUp').value);

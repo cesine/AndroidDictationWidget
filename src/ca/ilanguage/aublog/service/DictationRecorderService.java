@@ -165,6 +165,12 @@ public class DictationRecorderService extends Service {
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
 		}
+//		if (mUseBluetooth){
+//			mAudioManager.setBluetoothScoOn(false);
+//		}
+//		mAudioManager.setMode(AudioManager.MODE_NORMAL);
+//		mAudioManager.setSpeakerphoneOn(true);
+		
 	}
 
 
@@ -190,6 +196,8 @@ public class DictationRecorderService extends Service {
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
 		}
+//		mAudioManager.setMode(AudioManager.MODE_NORMAL);
+//		mAudioManager.setSpeakerphoneOn(true);
 	}
 
 	public class RecordingReceiver extends BroadcastReceiver {
@@ -266,16 +274,16 @@ public class DictationRecorderService extends Service {
 			* However, the app will not have control of hte bluetooth connection when teh phone call comes back. The user must exit the Edit Blog activity.
 			* 
 	    	 */
-	    	mAudioManager.startBluetoothSco();
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	mAudioManager.setBluetoothScoOn(true);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+//	    	mAudioManager.startBluetoothSco();
+//	    	mAudioManager.setSpeakerphoneOn(false);
+//	    	mAudioManager.setBluetoothScoOn(true);
+//	    	mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 	    	mAudioSource= "maybe bluetooth";
 
 		}
 		if(mUsePhoneEarPiece){
-	    	mAudioManager.setSpeakerphoneOn(false);
-	    	mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+//	    	mAudioManager.setSpeakerphoneOn(false);
+//	    	mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 	    	mAudioSource= "internal mic";
 		}
 		if(mAudioManager.isWiredHeadsetOn()){

@@ -168,6 +168,10 @@ public class MainMenuActivity extends Activity {
 					}
 				} else {
 					// not recording, so reset the audio modes
+					if (mAudioManager.isBluetoothScoOn() ){
+						mAudioManager.setBluetoothScoOn(false);
+						mAudioManager.stopBluetoothSco();
+					}
 					mAudioManager.setMode(AudioManager.MODE_NORMAL);
 					mAudioManager.setSpeakerphoneOn(true);
 					if (mKillAuBlog) {

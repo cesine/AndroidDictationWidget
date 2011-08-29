@@ -177,6 +177,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		 */
 		if (mKillAuBlog != null){
 			if(mKillAuBlog){
+				if (mAudioManager.isBluetoothScoOn() ){
+					mAudioManager.setBluetoothScoOn(false);
+					mAudioManager.stopBluetoothSco();
+				}
 				mAudioManager.setMode(AudioManager.MODE_NORMAL);
 				mAudioManager.setSpeakerphoneOn(true);
 				android.os.Process.killProcess(android.os.Process.myPid());	
