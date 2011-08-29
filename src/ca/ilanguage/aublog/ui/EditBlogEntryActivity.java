@@ -633,7 +633,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * @return
          */
         public String hasAudioFileJS(){
-        	return hasAudioFileAttached().toString();
+        	if (hasAudioFileAttached()){
+        		if(! mRecordingNow){
+        			return "true";
+        		}else{
+        			return "false"; //if its still recording dont consider it as a valid audio file (ie dont show the play button or try to upload it!)
+        		}
+        	}else{
+        		return "false";
+        	}
         }
         public String fetchPostContentJS(){
         	if (mPostContent == null){
