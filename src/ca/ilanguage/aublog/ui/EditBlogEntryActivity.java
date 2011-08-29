@@ -311,8 +311,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			/*
 			 * If user wants to play audio through the phone's in-call speaker,
 			 */
-			mAudioManager.setSpeakerphoneOn(false);
-			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+				
+			if (getWindow().getWindowManager().getDefaultDisplay().getHeight() < 1000){
+				//phones
+				mAudioManager.setSpeakerphoneOn(false);
+				setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+			}else{
+				//tablets
+			}
 			mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 			//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
 			}

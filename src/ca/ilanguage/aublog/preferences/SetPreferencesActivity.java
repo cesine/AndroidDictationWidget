@@ -103,6 +103,14 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 		 */
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
+		if (getWindow().getWindowManager().getDefaultDisplay().getHeight() > 1000){
+			//consider it a tablet and turn off the earpiece options.
+			Preference inphonespeaker = getPreferenceManager().findPreference(PreferenceConstants.PREFERENCE_USE_PHONE_EARPIECE_AUDIO);
+			inphonespeaker.setEnabled(false);
+			inphonespeaker.setSelectable(false);
+			inphonespeaker.setSummary("Your device was detected as a tablet, there appears to be no in call speaker.");
+			
+		}
         
         Preference exportTree = findPreference(PreferenceConstants.PREFERENCE_EMAIL_DRAFTS_TREE);
         exportTree.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
