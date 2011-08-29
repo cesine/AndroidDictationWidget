@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -376,6 +377,13 @@ public class MainMenuActivity extends Activity {
 		            "Use",  // Action
 		            "creating new drafts tree: "+mAuBlogInstallId, // Label
 		            112);  
+			/*
+			 * Getting force closes if user rotates while generating drafts tree. since this might happen often because the main menu is nice in portrait, but the drafts tree is nice in landscape, should handle this
+			 * http://stackoverflow.com/questions/1111980/how-to-handle-screen-orientation-change-when-progress-dialog-and-background-threa
+			 * Solution: refactor generating drafts tree into an intentservice (with start sticky for the broadcasts that it is started or done). 
+			 * A less demanding solution: try the orientation config changes, although have tried to do everythign in the android way for all activities. maybe it is better to just try it. 
+			 * android:configChanges="orientation|keyboardHidden"
+			 */
 			new GenerateTreeTask().execute();
 			
 			
@@ -454,6 +462,64 @@ public class MainMenuActivity extends Activity {
 		}
 	};
 
+	/*
+	 * This redraws only the view, leaving the rest of the activity running. In
+	 * discussions of webview and loosing javascript state it was rumored to not
+	 * be best practices. But because rotating the screen while generating the
+	 * drafts tree crashes Aublog I decided to try this, as it is claimed to be
+	 * the proper solution in the case of showing a dialog...
+	 * 
+	 * Some of the reasoning behind why it is bad practices to handle onconfig
+	 * changes yourself:"Avoiding memory leaks" where they talk about a kind of
+	 * memory leak commonly occuring when trying to keep data across context
+	 * destruct/construct sequences (of which Activity is a sub-set).
+	 * 
+	 * TODO other alternatives in future refactoring AuBlog is to extend the
+	 * Application class, rather than all having Activities. put some of the
+	 * logic which is present through otu the activities into a central
+	 * application (which runs in the background).
+	 * http://stackoverflow.com/questions
+	 * /456211/activity-restart-on-rotation-android (non-Javadoc)
+	 * 
+	 * @see
+	 * android.app.Activity#onConfigurationChanged(android.content.res.Configuration
+	 * )
+	 */
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+	  super.onConfigurationChanged(newConfig);
+	  setContentView(R.layout.mainmenu);
+	  
+
+		mStartButton = findViewById(R.id.startButton);
+		mOptionsButton = findViewById(R.id.optionButton);
+		mBackground = findViewById(R.id.mainMenuBackground);
+
+		if (mOptionsButton != null) {
+			mOptionsButton.setOnClickListener(sOptionButtonListener);
+		}
+
+		mExtrasButton = findViewById(R.id.extrasButton);
+		mExtrasButton.setOnClickListener(sExtrasButtonListener);
+
+		mDraftsButton = findViewById(R.id.draftsButton);
+		mDraftsButton.setOnClickListener(sDraftsButtonListener);
+
+		mButtonFlickerAnimation = AnimationUtils.loadAnimation(this,
+				R.anim.button_flicker);
+		mFadeOutAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+		mAlternateFadeOutAnimation = AnimationUtils.loadAnimation(this,
+				R.anim.fade_out);
+		mFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+
+		mTicker = findViewById(R.id.ticker);
+		if (mTicker != null) {
+			mTicker.setFocusable(true);
+			mTicker.requestFocus();
+			mTicker.setSelected(true);
+		}
+
+	}
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
