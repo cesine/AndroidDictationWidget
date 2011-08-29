@@ -699,11 +699,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	if (mLongestEverContent.length() < (strTitle+strContent+strLabels).length() ){
     			mLongestEverContent=strContent+strContent+strLabels;
     		}
-        	if(flag){
-        		flagDraftTreeAsNeedingToBeReGenerated();
-        	}
         	mFreshEditScreen = false;
-    		
 //    		if (mDeleted == true){
 //    			return ;
 //    		} //alow users to edit deleted nodes. TODO if the node is deleted, change javascript buton onclick to undelete.
@@ -733,6 +729,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	            "exception "+e+" : "+mAuBlogInstallId, // Label
         	            3202);       // Value
 //        		Toast.makeText(EditBlogEntryActivity.this, "exception "+e, Toast.LENGTH_LONG).show();
+        	}
+        	if(flag){
+        		flagDraftTreeAsNeedingToBeReGenerated();
         	}
         }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
@@ -836,7 +835,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     public void onSaveInstanceState(Bundle savedInstanceState) {
     	//CAREFUL: you need to call super.onSaveInstanceState(savedInstanceState) before adding your values to the Bundle, or they will get wiped out on that call 
     	//http://stackoverflow.com/questions/151777/how-do-i-save-an-android-applications-state
-    	mWebView.loadUrl("javascript:savePostToState()");
+    	//mWebView.loadUrl("javascript:savePostToState()");//todo, replace with savetodatabase? and remove it from pause?
     	super.onSaveInstanceState(savedInstanceState);
       // Save UI state changes to the savedInstanceState.
       // This bundle will be passed to onCreate if the process is
@@ -973,7 +972,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	@Override
 	protected void onPause() {
 		//created a new function in the javascript interface to save directly to the database to avoid the rotate bug. 
-		mWebView.loadUrl("javascript:savePostAsSelfToDB()");
+		mWebView.loadUrl("javascript:savePostAsSelfToDB()");//this is saving to the database but the main menu is generating the tree before its saved. 
  		mFreshEditScreen=false;
 		tracker.trackEvent(
 	            "Event",  // Category
