@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.google.gdata.client.youtube.YouTubeQuery.SafeSearch;
@@ -739,6 +741,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	flagDraftTreeAsNeedingToBeReGenerated();
         	
         }
+        public void askUserIfImportJS(String strContents){
+        	askUserIfImport(strContents);
+        }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
 //        	Boolean flag = false;
 //        	if (!(mPostTitle.equals(strTitle)) ){
@@ -1176,102 +1181,113 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            361);       // Value
 		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);	
 	}
+
 	/**
-	 * Inner class which waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. 
+	 * Inner class which waits to recieve an intent that the audio file has been
+	 * updated, This intent generally will come from the dictationRecorder,
+	 * unless someone else's app broadcasts it.
 	 * 
-	 * Notes:
-	 * -Beware of security hasard of running code in this reviecer.
-	 * In this case, ony rechecking the aduio setings and releaseing the media player and reattaching it. 
-	 * -Recievers should be registerd in the manifest, but this is an inner class so that it can access the member functions of EditBlogEntryActivity so it 
-	 * doesnt need to be registered in the manifest.xml.
+	 * Notes: -Beware of security hasard of running code in this reviecer. In
+	 * this case, ony rechecking the aduio setings and releaseing the media
+	 * player and reattaching it. -Recievers should be registerd in the
+	 * manifest, but this is an inner class so that it can access the member
+	 * functions of EditBlogEntryActivity so it doesnt need to be registered in
+	 * the manifest.xml.
 	 * 
-	 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
-	 * http://thinkandroid.wordpress.com/2010/02/02/custom-intents-and-broadcasting-with-receivers/
+	 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-
+	 * communicate-with-activity
+	 * http://thinkandroid.wordpress.com/2010/02/02/custom
+	 * -intents-and-broadcasting-with-receivers/
 	 * 
 	 * could pass data in the Intent instead of updating database tables
 	 * 
 	 * @author cesine
 	 */
 	public class AudioFileUpdateReceiver extends BroadcastReceiver {
-	    @Override
-	    public void onReceive(Context context, Intent intent) {
-	    	//refresh audiofile REFRESH_AUDIOFILE_INTENT is too soon to check because the transcription service 
-	    	//will be in the middle of sending the .mp3 when we want to listen to it. instead, wait until the transcription service replys
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// refresh audiofile REFRESH_AUDIOFILE_INTENT is too soon to check
+			// because the transcription service
+			// will be in the middle of sending the .mp3 when we want to listen
+			// to it. instead, wait until the upload service replys
 			if (intent.getAction().equals(DICTATION_SENT_INTENT)) {
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-
-				// Do stuff - maybe update my view based on the changed DB
-				// contents
 				recheckAublogSettings();// if audio settings have changed use
 										// the new ones.
 				preparePlayerAttachedAudioFile();
 				// request transcription from the server, normally put this in a
 				// timer in javascript
-			}
-			if (intent.getAction().equals(DICTATION_SENT_INTENT)) {
-				/* find out the status */
-//				mAudioResultsFileStatus = intent.getExtras().getString(
-//						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				//mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
-				//mWebView.loadUrl("javascript: setTimeout(queryServerIfTranscriptionIsReady(),60000"); doesnt seem to work. instead, just wait until user reloads webview. the cache is dissabled so it should ask for a new query. 
-			}
-			if (intent.getAction().equals(DICTATION_STILL_RECORDING_INTENT)) {
-				/* if the uri is the uri we are editing, then set its recording to true so the user can click stop 
-				 * case 1: we are editing and click home, then open notification and click on it. it takes us to the notifying controller, we click stop, it takes us back to the 
-				 * same edit activty that was open (probelm without this is that user can potentially have two versions of edit editing the same muri, where the old one overwrites changes to the new one.
+				mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
+			} else if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
+				/*
+				 * If its the transcription for this post, process it.
+				 */
+				if (intent.getData() == mUri) {
+					mAudioResultsFileStatus = intent.getExtras().getString(
+							DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
+					
+					Boolean askUser = intent
+							.getExtras()
+							.getBoolean(
+									EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
+					if (askUser != null) {
+						if (askUser) {
+							// call function to call dialog and change the blog
+							// contents in the dialog if its positive.
+							// Toast.makeText(EditBlogEntryActivity.this,
+							// "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.",
+							// Toast.LENGTH_LONG).show();
+							//removeStickyBroadcast(intent);
+							mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
+							// mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
+						} else {
+							// Toast.makeText(EditBlogEntryActivity.this,
+							// "Transcription for post "+intent.getData().getLastPathSegment()+" sent and recieved.",
+							// Toast.LENGTH_LONG).show();
+						}
+					}
+				}// else the transcription result doesnt match this blog post.
+				else {
+					// Toast.makeText(EditBlogEntryActivity.this,"Transcription for post "
+					// + intent.getData().getLastPathSegment() + " received.",
+					// Toast.LENGTH_LONG).show();
+					// TODO perhaps give user the option of importing the
+					// transcription here, since this is most likely a daughter
+					// of the transcription sent since roughly 1-2 minutes have
+					// passed.
+				}
+			} else if (intent.getAction().equals(
+					DICTATION_STILL_RECORDING_INTENT)) {
+				/*
+				 * if the uri is the uri we are editing, then set its recording
+				 * to true so the user can click stop case 1: we are editing and
+				 * click home, then open notification and click on it. it takes
+				 * us to the notifying controller, we click stop, it takes us
+				 * back to the same edit activty that was open (probelm without
+				 * this is that user can potentially have two versions of edit
+				 * editing the same muri, where the old one overwrites changes
+				 * to the new one.
 				 * 
-				 * case 2: we have left the edit activity, so it no longer has an instance state taht says its recording. if we click on the notification it will(open a new edit?) load the edit from the database
-				 * and then call this section whereby the stop button is displayed?
+				 * case 2: we have left the edit activity, so it no longer has
+				 * an instance state taht says its recording. if we click on the
+				 * notification it will(open a new edit?) load the edit from the
+				 * database and then call this section whereby the stop button
+				 * is displayed?
 				 * 
-				 * case 3: we are in the middle of editing another uri, click home, click on the notification, click on stop and it brings us here, but this is the wrong uri, so nothing happens. and the only way to stop the uri is to have a stop button and an open button. */
+				 * case 3: we are in the middle of editing another uri, click
+				 * home, click on the notification, click on stop and it brings
+				 * us here, but this is the wrong uri, so nothing happens. and
+				 * the only way to stop the uri is to have a stop button and an
+				 * open button.
+				 */
 				Uri uri = intent.getData();
-				if (mUri == uri){
+				if (mUri == uri) {
 					mRecordingNow = true;
 					mWebView.loadUrl("javascript:checkRecordingNow()");
 				}
-			}
-			if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
-				/* open the srt and extract the text */
-				mAudioResultsFileStatus = intent.getExtras().getString(
-						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				Boolean askUser = intent.getExtras().getBoolean(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
-				if(askUser != null){
-					if(askUser){
-						//call function to call dialog and change the blog contents in the dialog if its positive.
-						Toast.makeText(EditBlogEntryActivity.this, "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.", Toast.LENGTH_LONG).show();
-						
-					}else{
-						Toast.makeText(EditBlogEntryActivity.this, "Transcription for post "+intent.getData().getLastPathSegment()+" sent and recieved.", Toast.LENGTH_LONG).show();
-						
-					}
-				}
-				if(intent.getData() == mUri){
-					mTranscription = "TODO this is what came back from the server.";
-					//mWebView.loadUrl("javascript:importTranscription(document.getElementById('markItUp').value)");
-					//call android method to import srt into the post contents, then do a fetch contents.
-				}else{
-					Toast.makeText(EditBlogEntryActivity.this, "Transcription for post "+intent.getData().getLastPathSegment()+" received.", Toast.LENGTH_LONG).show();
-					//TODO perhaps give user the option of importing the transcription here, since this is most likely a daughter of the transcription sent since roughly 1-2 minutes have passed.
-				}
-			}
-	        String tmep;
-	        tmep = "wait to see if error is here";
-			/*
-			 * error after this line, dont need a reciever registered in the manifest if its an inner class.
-			 * 
-			 * java.lang.ClassNotFoundException: ca.ilanguage.aublog.ui.EditBlogEntryActivity.AudioFileUpdateReceiver 
-			 * in loader dalvik.system.PathClassLoader[/mnt/asec/ca.ilanguage.aublog-1/pkg.apk]
-			 * 
-			 *  ReceiverData{intent=Intent {
-			 * act=ca.ilanguage
-			 * .aublog.intent.action.BROADCAST_DICTATIONSERVICE_FINISHED
-			 * cmp=ca.ilanguage
-			 * .aublog/.ui.EditBlogEntryActivity.AudioFileUpdateReceiver }
-			 * packageName=ca.ilanguage.aublog resultCode=-1 resultData=null
-			 * resultExtras=null}
-			 */
-	    }
+			} // end ifs to check intent
+		}//end on receive
 	}
 	/**
 	 * If the media player is instantiated, release it and make it null
@@ -1605,7 +1621,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 //	            intent.putExtra(NotifyingTranscriptionService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionService.SPLIT_ON_SILENCE);
 //	            intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUri.toString());
 //	            startService(intent); 
-    			Toast.makeText(EditBlogEntryActivity.this, "Check your notification area for transcription status. ", Toast.LENGTH_LONG).show();
+    			//Toast.makeText(EditBlogEntryActivity.this, "Check your notification area for transcription status. ", Toast.LENGTH_LONG).show();
 
 	            mSendForTranscription = false;
 	            mAudioResultsFileStatus="recordingsenttotranscriptionservice";
@@ -1651,12 +1667,21 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false);
     	editor.commit();
 	}
+
 	/**
-	 * Calls the transcription service to download a transcription from the server. It may be called iether on the case that the client ahs new data, or that the server has new data. 
-	 * The boolean is used to control if the edit activity shoudl ask the user if they want to import the servers response (for the case when the server's transcription was flagged as fresh.)
+	 * Calls the transcription service to download a transcription from the
+	 * server. It may be called iether on the case that the client ahs new data,
+	 * or that the server has new data. The boolean is used to control if the
+	 * edit activity shoudl ask the user if they want to import the servers
+	 * response (for the case when the server's transcription was flagged as
+	 * fresh.)
 	 * 
 	 * @param strContents
-	 * @param askUserToImportTranscriptionIntoBlog True: edit will prompt user "do you want to import" once the transcription service has broadcast that it is done. False: edit will not prompt the user to import the new transcription. (use in case that the client side is fresh)
+	 * @param askUserToImportTranscriptionIntoBlog
+	 *            True: edit will prompt user "do you want to import" once the
+	 *            transcription service has broadcast that it is done. False:
+	 *            edit will not prompt the user to import the new transcription.
+	 *            (use in case that the client side is fresh)
 	 * @return
 	 */
 	private String downloadTranscription(String strContents, Boolean askUserToImportTranscriptionIntoBlog){
@@ -1745,7 +1770,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         
     }*/
 	public String askUserIfImport(final String currentPostContents){
-		mTranscriptionAndContents= "";
+		mTranscription ="";
+		try {
+			mTranscription = readSRTFileAsTranscriptionString(mAudioResultsFile.replace(".mp3", "_server.srt"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			mTranscription ="Error reading file from SDCard";
+		}
+		
 		if (mTranscription != null){
 			if(mTranscription.length() <1){
 				return "";
@@ -1754,13 +1787,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				OnClickListener yes = new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						mTranscriptionAndContents = mTranscription+currentPostContents;
+						mPostContent = currentPostContents+mTranscription;
+						mWebView.loadUrl("javascript:fillPostContentFromAndroidActivity()");
 					}
 				};
 				OnClickListener no = new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						mTranscriptionAndContents= "";				
+						//do nothing.				
 					}
 				};
 				/*
@@ -1774,12 +1808,44 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				.setTitle("Import Transcription")
 				.setPositiveButton("Import", yes)
 				.setNegativeButton("Don't Import", no)
-				.setMessage("Here is the what your entry will look like.\n\n"+mTranscription+currentPostContents).create();
+				.setMessage("Here is the what your entry will look like.\n\n"+currentPostContents+mTranscription).create();
 				dialog.show();
 			}
 		}
 		return "";
 	}
+	public static String readSRTFileAsTranscriptionString(String filePath) throws java.io.IOException
+	{
+	    BufferedReader reader = new BufferedReader(new FileReader(filePath));
+	    String line;
+	    String results="";
+	    Pattern pattern = Pattern.compile("^\\d:\\d\\d:\\d\\d.\\d\\d\\d,\\d:\\d\\d:\\d\\d.\\d\\d\\d");
+		Matcher matcher;
+	    while((line = reader.readLine()) != null)
+	    {
+	    	//throw away file info by detecting the timecodes and discarding 2 lines after. 
+            if (line.contains("0:00:00.000,0:00:00.000")){
+            	line = reader.readLine();
+            	while (! line.contains("0:00:00.020,0:00:00.020")){
+            		line = reader.readLine();
+            	}
+            	line = reader.readLine();
+            	line = reader.readLine();
+            	line = reader.readLine();
+            }
+            //throw away additional time codes
+            matcher = pattern.matcher(line);
+    		if (matcher.find()){
+    			//its a time code do nothing.
+    		}else{
+    			results += line+ " ";
+    		}
+	    }
+	    reader.close();
+	    return results;
+	}
+         
+        
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Hold on to this
