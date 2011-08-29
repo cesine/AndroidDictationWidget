@@ -739,6 +739,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	flagDraftTreeAsNeedingToBeReGenerated();
         	
         }
+        public void askUserIfImportJS(String strContents){
+        	askUserIfImport(strContents);
+        }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
 //        	Boolean flag = false;
 //        	if (!(mPostTitle.equals(strTitle)) ){
@@ -1240,16 +1243,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					if(askUser){
 						//call function to call dialog and change the blog contents in the dialog if its positive.
 						Toast.makeText(EditBlogEntryActivity.this, "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.", Toast.LENGTH_LONG).show();
-						
 					}else{
 						Toast.makeText(EditBlogEntryActivity.this, "Transcription for post "+intent.getData().getLastPathSegment()+" sent and recieved.", Toast.LENGTH_LONG).show();
-						
 					}
 				}
 				if(intent.getData() == mUri){
 					mTranscription = "TODO this is what came back from the server.";
-					//mWebView.loadUrl("javascript:importTranscription(document.getElementById('markItUp').value)");
-					//call android method to import srt into the post contents, then do a fetch contents.
+					mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
 				}else{
 					Toast.makeText(EditBlogEntryActivity.this, "Transcription for post "+intent.getData().getLastPathSegment()+" received.", Toast.LENGTH_LONG).show();
 					//TODO perhaps give user the option of importing the transcription here, since this is most likely a daughter of the transcription sent since roughly 1-2 minutes have passed.
@@ -1651,12 +1651,21 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false);
     	editor.commit();
 	}
+
 	/**
-	 * Calls the transcription service to download a transcription from the server. It may be called iether on the case that the client ahs new data, or that the server has new data. 
-	 * The boolean is used to control if the edit activity shoudl ask the user if they want to import the servers response (for the case when the server's transcription was flagged as fresh.)
+	 * Calls the transcription service to download a transcription from the
+	 * server. It may be called iether on the case that the client ahs new data,
+	 * or that the server has new data. The boolean is used to control if the
+	 * edit activity shoudl ask the user if they want to import the servers
+	 * response (for the case when the server's transcription was flagged as
+	 * fresh.)
 	 * 
 	 * @param strContents
-	 * @param askUserToImportTranscriptionIntoBlog True: edit will prompt user "do you want to import" once the transcription service has broadcast that it is done. False: edit will not prompt the user to import the new transcription. (use in case that the client side is fresh)
+	 * @param askUserToImportTranscriptionIntoBlog
+	 *            True: edit will prompt user "do you want to import" once the
+	 *            transcription service has broadcast that it is done. False:
+	 *            edit will not prompt the user to import the new transcription.
+	 *            (use in case that the client side is fresh)
 	 * @return
 	 */
 	private String downloadTranscription(String strContents, Boolean askUserToImportTranscriptionIntoBlog){
@@ -1745,7 +1754,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         
     }*/
 	public String askUserIfImport(final String currentPostContents){
-		mTranscriptionAndContents= "";
+		mTranscription ="";
+		try {
+			mTranscription = readSRTFileAsTranscriptionString(mAudioResultsFile.replace(".mp3", "_server.srt"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			mTranscription ="Error reading file from SDCard";
+		}
+		
 		if (mTranscription != null){
 			if(mTranscription.length() <1){
 				return "";
@@ -1754,13 +1771,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				OnClickListener yes = new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						mTranscriptionAndContents = mTranscription+currentPostContents;
+						mPostContent = currentPostContents+mTranscription;
+						mWebView.loadUrl("javascript:Android.fetchPostContentJS()");
 					}
 				};
 				OnClickListener no = new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						mTranscriptionAndContents= "";				
+						//do nothing.				
 					}
 				};
 				/*
@@ -1774,12 +1792,37 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				.setTitle("Import Transcription")
 				.setPositiveButton("Import", yes)
 				.setNegativeButton("Don't Import", no)
-				.setMessage("Here is the what your entry will look like.\n\n"+mTranscription+currentPostContents).create();
+				.setMessage("Here is the what your entry will look like.\n\n"+currentPostContents+mTranscription).create();
 				dialog.show();
 			}
 		}
 		return "";
 	}
+	public static String readSRTFileAsTranscriptionString(String filePath) throws java.io.IOException
+	{
+	    BufferedReader reader = new BufferedReader(new FileReader(filePath));
+	    String line;
+	    String results="";
+	    line = reader.readLine();
+	    while((line = reader.readLine()) != null)
+	    {/*
+	    	 //throw away file info by detecting the timecodes and discarding 2 lines after. 
+            if (line.contains("0:00:00.000,0:00:00.000")){
+            	String throwAwayFileInfo = reader.readLine();
+            	throwAwayFileInfo = reader.readLine();
+            	//add checking if throwaway is null, will while return?
+            }
+            if (line.contains("0:00:00.010,0:00:00.010")){
+            	String throwAwayFileInfo = reader.readLine();
+            	throwAwayFileInfo = reader.readLine();
+            }*/
+	        results += line+ " ";
+	    }
+	    reader.close();
+	    return results;
+	}
+         
+        
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Hold on to this
