@@ -278,7 +278,7 @@ public class ViewDraftTreeActivity extends Activity {
 					   		mMediaPlayer = new MediaPlayer();
 					        //mMediaPlayer.setLooping(true);
 							mMediaPlayer.setDataSource(audioResultsFile);
-							mMediaPlayer.prepareAsync();
+							mMediaPlayer.prepare();
 							mMediaPlayer.start();
 						} catch (IllegalArgumentException e) {
 							Toast.makeText(ViewDraftTreeActivity.this, "Problem with opening the audio file "+e, Toast.LENGTH_LONG).show();
