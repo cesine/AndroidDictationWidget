@@ -278,7 +278,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mAudioManager.setBluetoothScoOn(true);
 
 			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-			mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+			mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 			mAudioSource = "maybe bluetooth";
 			}//end iff to change bluetooth settings
 			/*
@@ -313,7 +313,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 */
 			mAudioManager.setSpeakerphoneOn(false);
 			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-			mAudioManager.setMode(AudioManager.MODE_IN_CALL);//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
+			mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
 			}
 			if (!mAudioManager.isBluetoothScoOn()){
 				mAudioSource = "internal microphone";
