@@ -140,6 +140,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		if(mKillAuBlog == null){
 			mKillAuBlog = false;
 		}
+		mTimeCodes = new ArrayList<String>();
 	}
 	
 	public class KillAuBlogReciever extends BroadcastReceiver {
@@ -194,26 +195,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
  */
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		if (mNM == null){
-			mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		}
-		// The PendingIntent to launch our activity if the user selects this notification
-		Intent notifyingIntent = new Intent(this, NotifyingController.class);
-		notifyingIntent.setData(mUri);
-		mContentIntent = PendingIntent.getActivity(this, 0, notifyingIntent, 0);
-		
-		mNotification = new Notification(mAuBlogIconId, "AuBlog Transcription in progress", System.currentTimeMillis());
-		mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Checking for Wifi connection...", mContentIntent);
-		//mNotification.flags |= Notification.FLAG_AUTO_CANCEL;
-		//startForeground(startId, mNotification);
-		mNM.notify(NOTIFICATION, mNotification);
-		
-		Intent inten = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
-		inten.setData(mUri);
-		inten.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
-		sendBroadcast(inten);
-		
-		
+
 		/*
 		 * get data from extras bundle, store it in the member variables
 		 */
@@ -237,6 +219,36 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mNotificationMessage ="No file";
 			return;
 		}
+		
+		File outSRTFile;
+		if(mAudioFilePath.endsWith(".mp3")){
+			outSRTFile =  new File(mAudioFilePath.replace(".mp3","_client.srt"));
+		}else{
+			outSRTFile =  new File(mAudioFilePath.replace("_client.srt","_server.srt"));
+		}
+		
+		if (mNM == null){
+			mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		}
+		// The PendingIntent to launch our activity if the user selects this notification
+		// View the results file
+		Intent notifyingIntent = new Intent();
+		notifyingIntent.setAction(android.content.Intent.ACTION_VIEW);
+		notifyingIntent.setDataAndType(Uri.fromFile(outSRTFile), "text/*");
+		mContentIntent = PendingIntent.getActivity(this, 0, notifyingIntent, 0);
+		
+		mNotification = new Notification(mAuBlogIconId, "AuBlog Transcription in progress", System.currentTimeMillis());
+		mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Checking for Wifi connection...", mContentIntent);
+		mNotification.flags |= Notification.FLAG_AUTO_CANCEL;
+		//startForeground(startId, mNotification);
+		mNM.notify(NOTIFICATION, mNotification);
+		
+		Intent inten = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
+		inten.setData(mUri);
+		inten.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+		sendBroadcast(inten);
+		
+		
 
 		/*
 		 * Check if wifi is active, or if this file can be uploaded as per the users
@@ -301,7 +313,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 								response.getEntity().getContent(), "UTF-8"));
 
 				String firstLine = reader.readLine();
-				reader.readLine();//mFileNameOnServer = reader.readLine().replaceAll(":filename","");
+				mNotification.setLatestEventInfo(this, "AuBlog Transcription", firstLine, mContentIntent);
+	        	mNM.notify(NOTIFICATION, mNotification);
+	        	
+	        	reader.readLine();//mFileNameOnServer = reader.readLine().replaceAll(":filename","");
 				mFileNameOnServer = reader.readLine().replaceAll(":path","");
 				/*
 				 * Read response into timecodes
@@ -309,32 +324,20 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				String line ="";
 				while((line = reader.readLine()) != null){
 					mTimeCodes.add(line);
-					
 				}
 				reader.close();
 				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
-				//showNotification(R.drawable.stat_stat_aublog,  mFileNameOnServer);
-	        	mNotificationMessage = firstLine;//First line from server is presented to user as final notification. 
-	        	mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-	        	mNM.notify(NOTIFICATION, mNotification);
-	    		
 			} catch (Exception e) {
 				Log.e(e.getClass().getName(), e.getMessage(), e);
 				//this is showing up for when the audio is not sent, but the client srt is...
 				//mNotificationMessage = "...";// null;
 			}
 			
-			
 			/*
 			 * Append fake time codes for testing purposes
 			 */
 			splitOnSilence();
-			File outSRTFile;
-			if(mAudioFilePath.endsWith(".mp3")){
-				outSRTFile =  new File(mAudioFilePath.replace(".mp3","_client.srt"));
-			}else{
-				outSRTFile =  new File(mAudioFilePath.replace("_client.srt","_server.srt"));
-			}
+			
 				FileOutputStream outSRT;
 				try {
 					outSRT = new FileOutputStream(outSRTFile);
@@ -487,7 +490,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	}
 	
 	public String splitOnSilence(){
-    	mTimeCodes = new ArrayList<String>();
     	mTimeCodes.add("0:00:02.350,0:00:06.690");
     	mTimeCodes.add("0:00:07.980,0:00:12.780");
     	mTimeCodes.add("0:00:14.529,0:00:17.970");
