@@ -175,6 +175,7 @@ $(document).ready(function()	{
 	    Android.showToastJS(toast);
 	    Android.getAudioResultsFileStatusJS(); TODO?
 	    Android.downloadTranscriptionFromServerJS();
+	    Android.askUserIfImportJS(document.getElementById('markItUp').value); //will open the _server.srt and ask the user if they want to import it, it will put it in the markitup.
 	*/
     
     
@@ -263,7 +264,7 @@ $(document).ready(function()	{
 			If the server hasnt changed anything, dont do anything
 			*/
 			if (response["status"] == "transcription nothing fresh"){
-				Android.askUserIfImportJS(document.getElementById('markItUp').value);
+				//
 			}
 		});
     }
