@@ -388,11 +388,12 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Dictation audio wasn't sent for transcription, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 			saveMetaDataToDatabase();
 			if(mAudioFilePath.endsWith(".mp3")){
+				//if unable to send the mp3, create a client srt anyway.
 				//overwrite the srt file witht he most recent status message, saying why the file wasn't sent for transcription.
-				File outSRTFile =  new File(mAudioFilePath.replace(".mp3","_client.srt"));
+				File outSRTFileClient =  new File(mAudioFilePath.replace(".mp3","_client.srt"));
 				FileOutputStream outSRT;
 				try {
-					outSRT = new FileOutputStream(outSRTFile);
+					outSRT = new FileOutputStream(outSRTFileClient);
 					outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
 					outSRT.write(mAudioResultsFileStatus.getBytes());
 					outSRT.write("\n\n".getBytes());
