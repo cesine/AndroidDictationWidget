@@ -843,11 +843,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	
     	mFreshEditScreen = false; 
     	//mWebView.saveState(savedInstanceState);//http://stackoverflow.com/questions/4726637/android-how-to-savestate-of-a-webview-with-an-addjavascriptinterface-attached
-
-	      savedInstanceState.putString("title", mPostTitle);
-	      savedInstanceState.putString("content", mPostContent);
-	      savedInstanceState.putString("labels", mPostLabels);
-	      savedInstanceState.putString("longestcontentever", mLongestEverContent);
 	      savedInstanceState.putString("audiofile",mAudioResultsFile);
 	      savedInstanceState.putBoolean("fresheditscreen",mFreshEditScreen);
 	      savedInstanceState.putString("audiofilestatus",mAudioResultsFileStatus);
@@ -855,6 +850,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	      savedInstanceState.putBoolean("recordingNow", mRecordingNow);
 	      savedInstanceState.putString("parentid", mPostParent);
 	      savedInstanceState.putString("id",mPostId);
+	      
+	      savedInstanceState.putString("title", mPostTitle);
+	      savedInstanceState.putString("content", mPostContent);
+	      savedInstanceState.putString("labels", mPostLabels);
+	      savedInstanceState.putString("longestcontentever", mLongestEverContent);
+
 //	      savedInstanceState.putString("uri", mUri.getPath());
  
       
