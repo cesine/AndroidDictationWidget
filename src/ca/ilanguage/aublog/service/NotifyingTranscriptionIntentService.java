@@ -354,8 +354,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					 */
 					for(int i = 0; i < mTimeCodes.size(); i++){
 						outSRT.write(mTimeCodes.get(i).getBytes());
-						outSRT.write("\n--Unknown--".getBytes());
-						outSRT.write("\n\n".getBytes());
+						outSRT.write("\n".getBytes());
+//						outSRT.write("\n--Unknown--".getBytes());
+//						outSRT.write("\n\n".getBytes());
 					}
 					outSRT.flush();
 					outSRT.close();
@@ -491,10 +492,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	}
 	
 	public String splitOnSilence(){
-    	mTimeCodes.add("0:00:02.350,0:00:06.690");
-    	mTimeCodes.add("0:00:07.980,0:00:12.780");
-    	mTimeCodes.add("0:00:14.529,0:00:17.970");
-    	mTimeCodes.add("0:00:17.970,0:00:20.599");
+//    	mTimeCodes.add("0:00:02.350,0:00:06.690");
+//    	mTimeCodes.add("0:00:07.980,0:00:12.780");
+//    	mTimeCodes.add("0:00:14.529,0:00:17.970");
+//    	mTimeCodes.add("0:00:17.970,0:00:20.599");
     	return "right now, these are fake timecodes";
     }
 }
