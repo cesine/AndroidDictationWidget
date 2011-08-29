@@ -735,19 +735,19 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	}
         }
         public void saveStateJS(String strTitle, String strContent, String strLabels){
-        	Boolean flag = false;
-        	if (!(mPostTitle.equals(strTitle)) ){
-        		flag=true;
-        	}
+//        	Boolean flag = false;
+//        	if (!(mPostTitle.equals(strTitle)) ){
+//        		flag=true;
+//        	}
         	mPostContent=strContent;
         	mPostTitle=strTitle;
         	mPostLabels=strLabels;
         	if (mLongestEverContent.length() < (strTitle+strContent+strLabels).length() ){
     			mLongestEverContent=strContent+strContent+strLabels;
     		}
-        	if(flag){
-        		flagDraftTreeAsNeedingToBeReGenerated();
-        	}
+//        	if(flag){
+//        		flagDraftTreeAsNeedingToBeReGenerated();
+//        	}
         	tracker.trackEvent(
     	            "AuBlogLifeCycleEvent",  // Category
     	            "saveSTate",  // Action
@@ -835,7 +835,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     public void onSaveInstanceState(Bundle savedInstanceState) {
     	//CAREFUL: you need to call super.onSaveInstanceState(savedInstanceState) before adding your values to the Bundle, or they will get wiped out on that call 
     	//http://stackoverflow.com/questions/151777/how-do-i-save-an-android-applications-state
-    	//mWebView.loadUrl("javascript:savePostToState()");//todo, replace with savetodatabase? and remove it from pause?
+    	mWebView.loadUrl("javascript:savePostToState()");//todo, replace with savetodatabase? and remove it from pause?
     	super.onSaveInstanceState(savedInstanceState);
       // Save UI state changes to the savedInstanceState.
       // This bundle will be passed to onCreate if the process is
