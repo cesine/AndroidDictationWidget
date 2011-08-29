@@ -326,7 +326,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					mTimeCodes.add(line);
 				}
 				reader.close();
-				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
+				//mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
 			} catch (Exception e) {
 				Log.e(e.getClass().getName(), e.getMessage(), e);
 				//this is showing up for when the audio is not sent, but the client srt is...
