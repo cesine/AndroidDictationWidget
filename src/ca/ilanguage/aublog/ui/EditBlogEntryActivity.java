@@ -313,7 +313,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 */
 			mAudioManager.setSpeakerphoneOn(false);
 			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-			mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
+			mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+			//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
 			}
 			if (!mAudioManager.isBluetoothScoOn()){
 				mAudioSource = "internal microphone";
@@ -1741,9 +1742,30 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
    		return "attempting to send dictation to server.";
 	}
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			mBackButtonHasBeenPressed = true;
 			
+		}
+		switch (keyCode) {
+		case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+			// something for fast forward
+			return true;
+		case KeyEvent.KEYCODE_MEDIA_NEXT:
+			// something for next
+			return true;
+		case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+			// something for play/pause
+			return true;
+		case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+			// something for previous
+			return true;
+		case KeyEvent.KEYCODE_MEDIA_REWIND:
+			// something for rewind
+			return true;
+		case KeyEvent.KEYCODE_MEDIA_STOP:
+			// something for stop
+			return true;
 		}
 //		if (keyCode == KeyEvent.KEYCODE_MENU) {
 //			int tmp1 = 0, tmp2 = 0;
