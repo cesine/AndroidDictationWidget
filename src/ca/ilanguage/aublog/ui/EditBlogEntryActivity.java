@@ -1817,22 +1817,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    BufferedReader reader = new BufferedReader(new FileReader(filePath));
 	    String line;
 	    String results="";
-	    line = reader.readLine();
+	    
 	    while((line = reader.readLine()) != null)
 	    {
 	    	 //throw away file info by detecting the timecodes and discarding 2 lines after. 
             if (line.contains("0:00:00.000,0:00:00.000")){
             	line = reader.readLine();
-            	line = reader.readLine();
-            	line = reader.readLine();
-            	//add checking if throwaway is null, will while return?
-            }
-            if (line.contains("0:00:00.010,0:00:00.010")){
-            	line = reader.readLine();
-            	line = reader.readLine();
-            	line = reader.readLine();
-            }
-            if (line.contains("0:00:00.020,0:00:00.020")){
+            	while (! line.contains("0:00:00.020,0:00:00.020")){
+            		line = reader.readLine();
+            	}
             	line = reader.readLine();
             	line = reader.readLine();
             	line = reader.readLine();
