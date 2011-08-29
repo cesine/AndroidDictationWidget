@@ -1218,12 +1218,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				// timer in javascript
 				mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
 			} else if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
-				mAudioResultsFileStatus = intent.getExtras().getString(
-						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 				/*
 				 * If its the transcription for this post, process it.
 				 */
 				if (intent.getData() == mUri) {
+					mAudioResultsFileStatus = intent.getExtras().getString(
+							DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
+					
 					Boolean askUser = intent
 							.getExtras()
 							.getBoolean(
@@ -1235,7 +1236,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 							// Toast.makeText(EditBlogEntryActivity.this,
 							// "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.",
 							// Toast.LENGTH_LONG).show();
-							removeStickyBroadcast(intent);
+							//removeStickyBroadcast(intent);
 							mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
 							// mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
 						} else {
