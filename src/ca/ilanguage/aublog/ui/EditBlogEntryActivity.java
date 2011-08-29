@@ -1406,6 +1406,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		intent.setData(mUri);
 		intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
 		intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
+		String s="Debug-infos:";
+		s += "OS Version: " + System.getProperty("os.version") + "(" + android.os.Build.VERSION.INCREMENTAL + ")";
+		s += "\t OS API Level: " + android.os.Build.VERSION.SDK;
+		s += "\t Device: " + android.os.Build.DEVICE;
+		s += "\t Model (and Product): " + android.os.Build.MODEL + " ("+ android.os.Build.PRODUCT + ")";
+		s += "\t Window width: " + getWindow().getWindowManager().getDefaultDisplay().getWidth();
+		s += "\t Window height: " + getWindow().getWindowManager().getDefaultDisplay().getHeight();
+		s += "\t Keyboard: " + getResources().getConfiguration().keyboard;
+		intent.putExtra(DictationRecorderService.EXTRA_DEVICE_INFO, s);
 		startService(intent); 
 		mRecordingNow = true;
 

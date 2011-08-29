@@ -77,6 +77,7 @@ public class DictationRecorderService extends Service {
 	public static final String EXTRA_AUDIOFILE_FULL_PATH = "audioFilePath";
 	public static final String EXTRA_AUDIOFILE_STATUS = "audioFileStatus";
 	public static final String EXTRA_DELEGATE_KILL_AUBLOG_TO_YOU ="killAublog";
+	public static final String EXTRA_DEVICE_INFO = "deviceInfo";
 	
 
 	private Long mStartTime;
@@ -87,6 +88,7 @@ public class DictationRecorderService extends Service {
     private Boolean mUsePhoneEarPiece;
     private String mDateString ="";
     private String mAuBlogInstallId;
+    private String mDeviceInfo="";
     
     private String mAuBlogDirectory = PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY;//"/sdcard/AuBlog/";
     private MediaRecorder mRecorder;
@@ -246,6 +248,7 @@ public class DictationRecorderService extends Service {
 		try {
 			mAudioResultsFile = intent.getExtras().getString(EXTRA_AUDIOFILE_FULL_PATH);
 			mAudioResultsFileStatus = intent.getExtras().getString(EXTRA_AUDIOFILE_STATUS);
+			mDeviceInfo = intent.getExtras().getString(EXTRA_DEVICE_INFO);
 			//Discard status which was sent.
 			mAudioResultsFileStatus = "Recording service running";
 		} catch (Exception e) {
@@ -305,7 +308,8 @@ public class DictationRecorderService extends Service {
 		 */
 		mRecordingNow = true;
 		mStartTime=System.currentTimeMillis();
-		mAudioResultsFileStatus = mAudioResultsFileStatus+":::"+"Recording started."+":::Audio source: "+mAudioSource+":::Start time: "+mStartTime;
+		
+		mAudioResultsFileStatus = mAudioResultsFileStatus+":::"+"Recording started."+":::Audio source: "+mAudioSource+":::Device info: "+mDeviceInfo+":::Start time: "+mStartTime;
 		
 		saveMetaDataToDatabase();
 		mRecorder = new MediaRecorder();
