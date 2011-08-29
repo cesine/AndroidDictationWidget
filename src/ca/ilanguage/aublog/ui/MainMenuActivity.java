@@ -233,6 +233,9 @@ public class MainMenuActivity extends Activity {
 	    	if (intent.getAction().equals(EditBlogEntryActivity.DICTATION_SENT_INTENT)) {
 	    		mRecordingNow = false;
 	    	}
+	    	if (intent.getAction().equals(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT)) {
+	    		mRecordingNow = false;
+	    	}
 	   	}
 	}
 	@Override
@@ -591,6 +594,9 @@ public class MainMenuActivity extends Activity {
 		if (audioFileUpdateReceiver == null){
 			audioFileUpdateReceiver = new RecordingReceiver();
 		}
+		
+		IntentFilter intentDictStopped = new IntentFilter(EditBlogEntryActivity.REFRESH_AUDIOFILE_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentDictStopped);
 		IntentFilter intentDictSent = new IntentFilter(EditBlogEntryActivity.DICTATION_SENT_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentDictSent);
 		IntentFilter intentDictRunning = new IntentFilter(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT);
