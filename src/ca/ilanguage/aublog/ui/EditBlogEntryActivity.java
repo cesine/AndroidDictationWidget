@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.google.gdata.client.youtube.YouTubeQuery.SafeSearch;
@@ -1817,10 +1819,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    BufferedReader reader = new BufferedReader(new FileReader(filePath));
 	    String line;
 	    String results="";
-	    
+	    Pattern pattern = Pattern.compile("^\\d:\\d\\d:\\d\\d.\\d\\d\\d,\\d:\\d\\d:\\d\\d.\\d\\d\\d");
+		Matcher matcher;
 	    while((line = reader.readLine()) != null)
 	    {
-	    	 //throw away file info by detecting the timecodes and discarding 2 lines after. 
+	    	//throw away file info by detecting the timecodes and discarding 2 lines after. 
             if (line.contains("0:00:00.000,0:00:00.000")){
             	line = reader.readLine();
             	while (! line.contains("0:00:00.020,0:00:00.020")){
@@ -1830,7 +1833,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             	line = reader.readLine();
             	line = reader.readLine();
             }
-	        results += line+ " ";
+            //throw away additional time codes
+            matcher = pattern.matcher(line);
+    		if (matcher.find()){
+    			//its a time code do nothing.
+    		}else{
+    			results += line+ " ";
+    		}
 	    }
 	    reader.close();
 	    return results;
