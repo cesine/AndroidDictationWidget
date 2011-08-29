@@ -213,6 +213,9 @@ $(document).ready(function()	{
     		document.getElementById('recordButton').value="New Dictation";
     	}
     }
+    function fillPostContentFromAndroidActivity(){
+    	document.getElementById('markItUp').value=Android.fetchPostContentJS();
+    }
     function checkRecordingNow(){
     	if (Android.getValueRecordingNowJS() == 1){
     		document.getElementById('recordButton').value="Stop Dictation";

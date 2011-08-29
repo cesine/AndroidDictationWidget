@@ -1179,99 +1179,112 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	            361);       // Value
 		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);	
 	}
+
 	/**
-	 * Inner class which waits to recieve an intent that the audio file has been updated, This intent generally will come from the dictationRecorder, unless someone else's app broadcasts it. 
+	 * Inner class which waits to recieve an intent that the audio file has been
+	 * updated, This intent generally will come from the dictationRecorder,
+	 * unless someone else's app broadcasts it.
 	 * 
-	 * Notes:
-	 * -Beware of security hasard of running code in this reviecer.
-	 * In this case, ony rechecking the aduio setings and releaseing the media player and reattaching it. 
-	 * -Recievers should be registerd in the manifest, but this is an inner class so that it can access the member functions of EditBlogEntryActivity so it 
-	 * doesnt need to be registered in the manifest.xml.
+	 * Notes: -Beware of security hasard of running code in this reviecer. In
+	 * this case, ony rechecking the aduio setings and releaseing the media
+	 * player and reattaching it. -Recievers should be registerd in the
+	 * manifest, but this is an inner class so that it can access the member
+	 * functions of EditBlogEntryActivity so it doesnt need to be registered in
+	 * the manifest.xml.
 	 * 
-	 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-communicate-with-activity
-	 * http://thinkandroid.wordpress.com/2010/02/02/custom-intents-and-broadcasting-with-receivers/
+	 * http://stackoverflow.com/questions/2463175/how-to-have-android-service-
+	 * communicate-with-activity
+	 * http://thinkandroid.wordpress.com/2010/02/02/custom
+	 * -intents-and-broadcasting-with-receivers/
 	 * 
 	 * could pass data in the Intent instead of updating database tables
 	 * 
 	 * @author cesine
 	 */
 	public class AudioFileUpdateReceiver extends BroadcastReceiver {
-	    @Override
-	    public void onReceive(Context context, Intent intent) {
-	    	//refresh audiofile REFRESH_AUDIOFILE_INTENT is too soon to check because the transcription service 
-	    	//will be in the middle of sending the .mp3 when we want to listen to it. instead, wait until the transcription service replys
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// refresh audiofile REFRESH_AUDIOFILE_INTENT is too soon to check
+			// because the transcription service
+			// will be in the middle of sending the .mp3 when we want to listen
+			// to it. instead, wait until the upload service replys
 			if (intent.getAction().equals(DICTATION_SENT_INTENT)) {
 				mAudioResultsFileStatus = intent.getExtras().getString(
 						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-
-				// Do stuff - maybe update my view based on the changed DB
-				// contents
 				recheckAublogSettings();// if audio settings have changed use
 										// the new ones.
 				preparePlayerAttachedAudioFile();
 				// request transcription from the server, normally put this in a
 				// timer in javascript
-			}
-			if (intent.getAction().equals(DICTATION_SENT_INTENT)) {
-				/* find out the status */
-//				mAudioResultsFileStatus = intent.getExtras().getString(
-//						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				//mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
-				//mWebView.loadUrl("javascript: setTimeout(queryServerIfTranscriptionIsReady(),60000"); doesnt seem to work. instead, just wait until user reloads webview. the cache is dissabled so it should ask for a new query. 
-			}
-			if (intent.getAction().equals(DICTATION_STILL_RECORDING_INTENT)) {
-				/* if the uri is the uri we are editing, then set its recording to true so the user can click stop 
-				 * case 1: we are editing and click home, then open notification and click on it. it takes us to the notifying controller, we click stop, it takes us back to the 
-				 * same edit activty that was open (probelm without this is that user can potentially have two versions of edit editing the same muri, where the old one overwrites changes to the new one.
+				mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
+			} else if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
+				mAudioResultsFileStatus = intent.getExtras().getString(
+						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
+				/*
+				 * If its the transcription for this post, process it.
+				 */
+				if (intent.getData() == mUri) {
+					Boolean askUser = intent
+							.getExtras()
+							.getBoolean(
+									EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
+					if (askUser != null) {
+						if (askUser) {
+							// call function to call dialog and change the blog
+							// contents in the dialog if its positive.
+							// Toast.makeText(EditBlogEntryActivity.this,
+							// "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.",
+							// Toast.LENGTH_LONG).show();
+							removeStickyBroadcast(intent);
+							mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
+							// mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
+						} else {
+							// Toast.makeText(EditBlogEntryActivity.this,
+							// "Transcription for post "+intent.getData().getLastPathSegment()+" sent and recieved.",
+							// Toast.LENGTH_LONG).show();
+						}
+					}
+				}// else the transcription result doesnt match this blog post.
+				else {
+					// Toast.makeText(EditBlogEntryActivity.this,"Transcription for post "
+					// + intent.getData().getLastPathSegment() + " received.",
+					// Toast.LENGTH_LONG).show();
+					// TODO perhaps give user the option of importing the
+					// transcription here, since this is most likely a daughter
+					// of the transcription sent since roughly 1-2 minutes have
+					// passed.
+				}
+			} else if (intent.getAction().equals(
+					DICTATION_STILL_RECORDING_INTENT)) {
+				/*
+				 * if the uri is the uri we are editing, then set its recording
+				 * to true so the user can click stop case 1: we are editing and
+				 * click home, then open notification and click on it. it takes
+				 * us to the notifying controller, we click stop, it takes us
+				 * back to the same edit activty that was open (probelm without
+				 * this is that user can potentially have two versions of edit
+				 * editing the same muri, where the old one overwrites changes
+				 * to the new one.
 				 * 
-				 * case 2: we have left the edit activity, so it no longer has an instance state taht says its recording. if we click on the notification it will(open a new edit?) load the edit from the database
-				 * and then call this section whereby the stop button is displayed?
+				 * case 2: we have left the edit activity, so it no longer has
+				 * an instance state taht says its recording. if we click on the
+				 * notification it will(open a new edit?) load the edit from the
+				 * database and then call this section whereby the stop button
+				 * is displayed?
 				 * 
-				 * case 3: we are in the middle of editing another uri, click home, click on the notification, click on stop and it brings us here, but this is the wrong uri, so nothing happens. and the only way to stop the uri is to have a stop button and an open button. */
+				 * case 3: we are in the middle of editing another uri, click
+				 * home, click on the notification, click on stop and it brings
+				 * us here, but this is the wrong uri, so nothing happens. and
+				 * the only way to stop the uri is to have a stop button and an
+				 * open button.
+				 */
 				Uri uri = intent.getData();
-				if (mUri == uri){
+				if (mUri == uri) {
 					mRecordingNow = true;
 					mWebView.loadUrl("javascript:checkRecordingNow()");
 				}
-			}
-			if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
-				/* open the srt and extract the text */
-				mAudioResultsFileStatus = intent.getExtras().getString(
-						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				Boolean askUser = intent.getExtras().getBoolean(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
-				if(askUser != null){
-					if(askUser){
-						//call function to call dialog and change the blog contents in the dialog if its positive.
-						Toast.makeText(EditBlogEntryActivity.this, "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.", Toast.LENGTH_LONG).show();
-					}else{
-						Toast.makeText(EditBlogEntryActivity.this, "Transcription for post "+intent.getData().getLastPathSegment()+" sent and recieved.", Toast.LENGTH_LONG).show();
-					}
-				}
-				if(intent.getData() == mUri){
-					mTranscription = "TODO this is what came back from the server.";
-					mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
-				}else{
-					Toast.makeText(EditBlogEntryActivity.this, "Transcription for post "+intent.getData().getLastPathSegment()+" received.", Toast.LENGTH_LONG).show();
-					//TODO perhaps give user the option of importing the transcription here, since this is most likely a daughter of the transcription sent since roughly 1-2 minutes have passed.
-				}
-			}
-	        String tmep;
-	        tmep = "wait to see if error is here";
-			/*
-			 * error after this line, dont need a reciever registered in the manifest if its an inner class.
-			 * 
-			 * java.lang.ClassNotFoundException: ca.ilanguage.aublog.ui.EditBlogEntryActivity.AudioFileUpdateReceiver 
-			 * in loader dalvik.system.PathClassLoader[/mnt/asec/ca.ilanguage.aublog-1/pkg.apk]
-			 * 
-			 *  ReceiverData{intent=Intent {
-			 * act=ca.ilanguage
-			 * .aublog.intent.action.BROADCAST_DICTATIONSERVICE_FINISHED
-			 * cmp=ca.ilanguage
-			 * .aublog/.ui.EditBlogEntryActivity.AudioFileUpdateReceiver }
-			 * packageName=ca.ilanguage.aublog resultCode=-1 resultData=null
-			 * resultExtras=null}
-			 */
-	    }
+			} // end ifs to check intent
+		}//end on receive
 	}
 	/**
 	 * If the media player is instantiated, release it and make it null
@@ -1605,7 +1618,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 //	            intent.putExtra(NotifyingTranscriptionService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionService.SPLIT_ON_SILENCE);
 //	            intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_CORRESPONDING_DRAFT_URI_STRING, mUri.toString());
 //	            startService(intent); 
-    			Toast.makeText(EditBlogEntryActivity.this, "Check your notification area for transcription status. ", Toast.LENGTH_LONG).show();
+    			//Toast.makeText(EditBlogEntryActivity.this, "Check your notification area for transcription status. ", Toast.LENGTH_LONG).show();
 
 	            mSendForTranscription = false;
 	            mAudioResultsFileStatus="recordingsenttotranscriptionservice";
@@ -1772,7 +1785,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						mPostContent = currentPostContents+mTranscription;
-						mWebView.loadUrl("javascript:Android.fetchPostContentJS()");
+						mWebView.loadUrl("javascript:fillPostContentFromAndroidActivity()");
 					}
 				};
 				OnClickListener no = new OnClickListener() {
