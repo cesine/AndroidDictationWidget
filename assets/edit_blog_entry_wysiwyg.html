@@ -245,7 +245,7 @@ $(document).ready(function()	{
 		    // use the data param
 		    // e.g. $(data).find('#icc10n')
 			var response = JSON.parse(data);
-			
+			//document.getElementById('fileStatusArea').value  = "";
 			if (response["status"] == null && "true" === Android.hasAudioFileJS()){
 				//there is no audio file on the server, try to send it (again) maybe the user will be on wifi
 				Android.sendDictationToServerJS(document.getElementById('markItUp').value);
@@ -268,7 +268,9 @@ $(document).ready(function()	{
 			if (response["status"] == "transcription nothing fresh"){
 				//
 			}
+			$('#fileStatusArea').hide();
 		});
+		
     }
 	/*Dictation ->Transcription lifecycle
 	null --> dictation recieved --> transcription nothing fresh -->
@@ -278,7 +280,7 @@ $(document).ready(function()	{
 	//after loading the page try this.
 	var  processTranscriptionServerResponse = function(){
 		var response = JSON.parse(document.getElementById('fileStatusArea').value);
-		document.getElementById('fileStatusArea').value = "";
+		//document.getElementById('fileStatusArea').value = "";
 		
 		if (response["status"] == "dictation received"){
 			Android.sendClientUpdateJS(document.getElementById('markItUp').value);
