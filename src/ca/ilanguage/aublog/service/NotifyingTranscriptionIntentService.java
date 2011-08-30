@@ -47,6 +47,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	private NotificationManager mNM;
 	private Notification mNotification;
 	private int NOTIFICATION = 7030;
+	private Boolean mShowNotification = true;
 	private PendingIntent mContentIntent;
 	private int mAuBlogIconId = R.drawable.stat_aublog;  
     public NotifyingTranscriptionIntentService() {
@@ -219,6 +220,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		}
 		if (mAudioFilePath.length() > 0) {
 			mNotificationMessage= mAudioFilePath;
+		}else if (mAudioFilePath.contains("exported_drafts")){
+			mShowNotification = false;
 		}else{
 			mNotificationMessage ="No file";
 			return;
@@ -245,7 +248,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Checking for Wifi connection...", mContentIntent);
 		mNotification.flags |= Notification.FLAG_AUTO_CANCEL;
 		//startForeground(startId, mNotification);
-		mNM.notify(NOTIFICATION, mNotification);
+		if (mShowNotification){
+			mNM.notify(NOTIFICATION, mNotification);
+		}
 		
 		Intent inten = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
 		inten.setData(mUri);
@@ -285,8 +290,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			 * Upload file
 			 */
 			mNotification.setLatestEventInfo(this, "AuBlog Transcription", "Connecting to transcription server...", mContentIntent);
-			mNM.notify(NOTIFICATION, mNotification);
-			
+			if (mShowNotification){
+				mNM.notify(NOTIFICATION, mNotification);
+			}
 			try {
 				HttpClient httpClient = new DefaultHttpClient();
 				HttpContext localContext = new BasicHttpContext();
@@ -318,8 +324,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 
 				String firstLine = reader.readLine();
 				mNotification.setLatestEventInfo(this, "AuBlog Transcription", firstLine, mContentIntent);
-	        	mNM.notify(NOTIFICATION, mNotification);
-	        	
+				if (mShowNotification){
+					mNM.notify(NOTIFICATION, mNotification);
+				}
 	        	reader.readLine();//mFileNameOnServer = reader.readLine().replaceAll(":filename","");
 				mFileNameOnServer = reader.readLine().replaceAll(":path","");
 				/*
@@ -373,14 +380,18 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					saveMetaDataToDatabase();
 					mNotificationMessage = "Transcription response saved as _server.srt";
 //					mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+//					if (mShowNotification){
 //					mNM.notify(NOTIFICATION, mNotification);
+//				}
 					
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					//e.printStackTrace();
 					mNotificationMessage ="Cannot write results to SDCARD";
 					mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-					mNM.notify(NOTIFICATION, mNotification);
+					if (mShowNotification){
+						mNM.notify(NOTIFICATION, mNotification);
+					}
 					
 				}
 			
@@ -388,8 +399,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			//no wifi, and the file is larger than the users settings for upload over mobile network.
 			mNotificationMessage = "Dication was not sent for transcription: no wifi or too long. Check Aublog settings.";
 			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-			mNM.notify(NOTIFICATION, mNotification);
-			
+			if (mShowNotification){
+				mNM.notify(NOTIFICATION, mNotification);
+			}
 			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Dictation audio wasn't sent for transcription, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 			saveMetaDataToDatabase();
 			if(mAudioFilePath.endsWith(".mp3")){
@@ -429,14 +441,19 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				mNotificationMessage = "Transcription results sent and received.";
 			}
 //			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-//			mNM.notify(NOTIFICATION, mNotification);
+			/*if (mShowNotification){
+				mNM.notify(NOTIFICATION, mNotification);
+			}*/			
+
 		}else{
 			Intent i = new Intent(EditBlogEntryActivity.DICTATION_SENT_INTENT);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 			mNotificationMessage = "Dication sent for transcription.";
 //			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-//			mNM.notify(NOTIFICATION, mNotification);
+			/*if (mShowNotification){
+			mNM.notify(NOTIFICATION, mNotification);
+			}*/	
 		}
 		//mNM.cancel(NOTIFICATION);
 		

@@ -55,6 +55,7 @@ import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
 import ca.ilanguage.aublog.service.DictationRecorderService;
+import ca.ilanguage.aublog.service.NotifyingTranscriptionIntentService;
 import ca.ilanguage.aublog.util.UIConstants;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
@@ -648,6 +649,19 @@ public class MainMenuActivity extends Activity {
 					PreferenceConstants.PREFERENCE_LAST_VERSION, 0);
 
 			if (Math.abs(lastVersion) < Math.abs(AuBlog.VERSION)) {
+				///data/data/ca.ilanguage.aublog/databases/aubloghistory.db
+				String backupFile = "/sdcard/AuBlog/aublog_exported_drafts_json_format.js";
+								
+				Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
+				intent.setData(AuBlogHistory.CONTENT_URI.buildUpon().appendPath("1").build());
+		        intent.putExtra(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS,"This is a back up of your data.");
+				intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, backupFile);
+		        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
+		        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, "Status backing up previous data.");
+		        intent.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, false);
+		        startService(intent); 
+				
+				
 				// This is a new install or an upgrade.
 				SharedPreferences.Editor editor = prefs.edit();
 				
