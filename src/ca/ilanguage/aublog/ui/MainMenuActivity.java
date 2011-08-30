@@ -649,17 +649,7 @@ public class MainMenuActivity extends Activity {
 					PreferenceConstants.PREFERENCE_LAST_VERSION, 0);
 
 			if (Math.abs(lastVersion) < Math.abs(AuBlog.VERSION)) {
-				///data/data/ca.ilanguage.aublog/databases/aubloghistory.db
-				String backupFile = "/sdcard/AuBlog/aublog_exported_drafts_json_format.js";
-								
-				Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
-				intent.setData(AuBlogHistory.CONTENT_URI.buildUpon().appendPath("1").build());
-		        intent.putExtra(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS,"This is a back up of your data.");
-				intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, backupFile);
-		        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
-		        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, "Status backing up previous data.");
-		        intent.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, false);
-		        startService(intent); 
+				
 				
 				
 				// This is a new install or an upgrade.
@@ -684,7 +674,30 @@ public class MainMenuActivity extends Activity {
 					String newInstallID = currentTimeStamp.toString()+randomNumberToAvoidSameSecondInstallsClash.toString();
 					editor.putString(PreferenceConstants.AUBLOG_INSTALL_ID, newInstallID);
 				}
-				
+				///data/data/ca.ilanguage.aublog/databases/aubloghistory.db
+				String backupFile = "/sdcard/AuBlog/aublog_exported_drafts_json_format.js";
+				String backupFileName = backupFile.replace(".js","backup"+mAuBlogInstallId+".js");
+				// File (or directory) with old name
+				File file = new File(backupFile);
+
+				// File (or directory) with new name
+				File file2 = new File(backupFileName);
+
+				// Rename file (or directory)
+				boolean success = file.renameTo(file2);
+				if (!success) {
+				    // File was not successfully renamed
+				}
+			
+				Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
+				intent.setData(AuBlogHistory.CONTENT_URI.buildUpon().appendPath("1").build());
+		        intent.putExtra(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS,"This is a back up of your data from install ."+mAuBlogInstallId);
+				intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, backupFile);
+		        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
+		        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, "Status backing up previous data. at "+System.currentTimeMillis());
+		        intent.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, false);
+		        startService(intent); 
+		        
 				/* This code checks for device compatibility
 				 *
 				 *
