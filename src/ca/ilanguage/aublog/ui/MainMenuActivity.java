@@ -668,12 +668,15 @@ public class MainMenuActivity extends Activity {
 				 *  so that users can connect them to their aublog accounts at a later date. 
 				 */
 				final String installID = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+				String newInstallID;
 				if (installID.length()< 5){
 					Long currentTimeStamp = System.currentTimeMillis();
 					Long randomNumberToAvoidSameSecondInstallsClash = (Math.round(Math.random()*10000));
-					String newInstallID = currentTimeStamp.toString()+randomNumberToAvoidSameSecondInstallsClash.toString();
+					newInstallID = currentTimeStamp.toString()+randomNumberToAvoidSameSecondInstallsClash.toString();
 					editor.putString(PreferenceConstants.AUBLOG_INSTALL_ID, newInstallID);
+					mAuBlogInstallId = newInstallID;
 				}
+				
 				///data/data/ca.ilanguage.aublog/databases/aubloghistory.db
 				String backupFile = "/sdcard/AuBlog/aublog_exported_drafts_json_format.js";
 				String backupFileName = backupFile.replace(".js","backup"+mAuBlogInstallId+".js");
@@ -686,7 +689,19 @@ public class MainMenuActivity extends Activity {
 				// Rename file (or directory)
 				boolean success = file.renameTo(file2);
 				if (!success) {
-				    // File was not successfully renamed
+					tracker.trackEvent(
+				            "Clicks",  // Category
+				            "Button",  // Action
+				            "new user: "+mAuBlogInstallId, // Label
+				            18);       // Value
+
+				}else{
+					tracker.trackEvent(
+				            "Clicks",  // Category
+				            "Button",  // Action
+				            "user upgraded database: "+mAuBlogInstallId, // Label
+				            18);       // Value
+
 				}
 			
 				Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
@@ -697,6 +712,7 @@ public class MainMenuActivity extends Activity {
 		        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, "Status backing up previous data. at "+System.currentTimeMillis());
 		        intent.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, false);
 		        startService(intent); 
+		        
 		        
 				/* This code checks for device compatibility
 				 *
