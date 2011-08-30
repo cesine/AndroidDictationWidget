@@ -477,20 +477,24 @@ public class AuBlogHistoryProvider extends ContentProvider {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			/*
 			 * export user database
-			 * 
+			 * http://stackoverflow.com/questions/805363/how-do-i-rename-a-column-in-a-sqlite-database-table
 			 * The SQLite ALTER TABLE documentation can be found here. If you
 			 * add new columns you can use ALTER TABLE to insert them into a
 			 * live table. If you rename or remove columns you can use ALTER
 			 * TABLE to rename the old table, then create the new table and then
 			 * populate the new table with the contents of the old table.
 			 */
-        	String copyTableToBackup = "ALTER TABLE "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+" RENAME TO "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME + "backup1";
+        	String copyTableToBackup = "ALTER TABLE "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+" RENAME TO "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME + "backup1;";
         	db.execSQL(copyTableToBackup);
         	
         	Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-        			+ newVersion + ", which will destroy all old data");
+        			+ newVersion + ", will try to copy all old data");
         	db.execSQL("DROP TABLE IF EXISTS "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
         	onCreate(db);
+        	
+        	//delete data
+        	String clearSampleData = "DELETE * FROM "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+";";
+        	db.execSQL(clearSampleData);
         	
         	String performUpgrade = "BEGIN TRANSACTION; " +
         			"INSERT INTO "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME
