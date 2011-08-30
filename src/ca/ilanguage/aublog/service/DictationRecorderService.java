@@ -318,7 +318,7 @@ public class DictationRecorderService extends Service {
 			mRecordingNow = true;
 	    	mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 		    mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-		    mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+		    mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
 		    mRecorder.setOutputFile(mAudioResultsFile);
 		    mRecorder.prepare();
 		    mStartTime=System.currentTimeMillis();
