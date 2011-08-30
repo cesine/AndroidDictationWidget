@@ -113,7 +113,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public static final String DICTATION_STILL_RECORDING_INTENT = NonPublicConstants.NON_PUBLIC_INTENT_DICTATION_STILL_RECORDING;
 	public static final String TRANSCRIPTION_STILL_CONTACTING_INTENT = NonPublicConstants.NON_PUBLIC_INTENT_TRANSCRIPTION_STILL_CONTACTING;
 	
-	private static final int CHANGED_SETTINGS = 0;
+	private static final int CHANGED_SETTINGS = 43;
 	int selectionStart;
 	int selectionEnd;
 	Bundle mWebViewsState;
@@ -388,6 +388,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         mTts = new TextToSpeech(this, this);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
+        if(mStartTime == null){
+        	mStartTime = (long)0;
+        }
 	    
         tracker = GoogleAnalyticsTracker.getInstance();
 
