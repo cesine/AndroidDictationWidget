@@ -735,8 +735,8 @@ public class MainMenuActivity extends Activity {
 				// show what's new message
 				editor.putInt(PreferenceConstants.PREFERENCE_LAST_VERSION,
 						AuBlog.VERSION);
+				editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH, false);
 				editor.commit();
-
 				showDialog(WHATS_NEW_DIALOG);
 
 			}
