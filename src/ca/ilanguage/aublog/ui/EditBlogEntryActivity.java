@@ -278,7 +278,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			mAudioManager.setBluetoothScoOn(true);
 
 			setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-			mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+			mAudioManager.setMode(AudioManager.MODE_IN_CALL);
 			mAudioSource = "maybe bluetooth";
 			}//end iff to change bluetooth settings
 			/*
@@ -322,8 +322,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			}else{
 				//tablets
 			}
-			mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-			//TODO try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
+			mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+			//DONE changing to modeincommuncations doesnt appear to work. only mode in call (tested on HTC desire 2.2) try changing this to MODE_IN_COMMUNICATION, all bluetooth discussions say must use IN_CALL but it appears to be inappropriate for non-telephoney apps.
 			}
 			if (!mAudioManager.isBluetoothScoOn()){
 				mAudioSource = "internal microphone";
