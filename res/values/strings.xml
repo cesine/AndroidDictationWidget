@@ -120,9 +120,9 @@
 <string name="whats_new_dialog_message">Thanks for downloading AuBlog.\n\n
 This is an open source project.  If you are interested in how it works, or would like to add your
 own modules, check out the source at our web site, aublog.net.
-\n
+\n\n
 New in this version: Menus on all screens, machine transcription and long press to play nodes in the View Drafts Tree. 
-\n
+\n\n
 Also note that the app sends anonymous statistics back to a server to detect frequent user functions which should be automated.  If you’d rather not
 allow that, you can turn it off in the settings screen. </string>
 
