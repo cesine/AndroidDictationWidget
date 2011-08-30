@@ -579,8 +579,24 @@ public class MainMenuActivity extends Activity {
 			mTicker.setSelected(true);
 		}
 
-		mJustCreated = true;
-
+//		mJustCreated = true;
+//		String s="Debug-infos:";
+//		s += "OS Version: " + System.getProperty("os.version") + "(" + android.os.Build.VERSION.INCREMENTAL + ")";
+//		s += "\t OS API Level: " + android.os.Build.VERSION.SDK;
+//		s += "\t Device: " + android.os.Build.DEVICE;
+//		s += "\t Model (and Product): " + android.os.Build.MODEL + " ("+ android.os.Build.PRODUCT + ")";
+//		s += "\t Window width: " + getWindow().getWindowManager().getDefaultDisplay().getWidth();
+//		s += "\t Window height: " + getWindow().getWindowManager().getDefaultDisplay().getHeight();
+//		s += "\t Keyboard: " + getResources().getConfiguration().keyboard;
+//		Toast.makeText(	MainMenuActivity.this,s, Toast.LENGTH_LONG).show();
+//		
+//		if (Build.PRODUCT.contains("xoom") ||	// Motorola Cliq/Dext
+//    			Build.MODEL.contains("gtab") ||	// Huawei Pulse
+//    			Build.MODEL.contains("U8220") ||	// Huawei Pulse
+//    			Build.MODEL.contains("U8230") ||	// Huawei U8230
+//    			Build.MODEL.contains("MB300") ||	// Motorola Backflip
+//    			Build.MODEL.contains("MB501") ||	// Motorola Quench / Cliq XT
+//    			Build.MODEL.contains("Behold+II")) {	// Samsung Behold II
 	}
 
 	@Override
