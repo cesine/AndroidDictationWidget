@@ -317,8 +317,17 @@ public class DictationRecorderService extends Service {
 	    	//http://www.benmccann.com/dev-blog/android-audio-recording-tutorial/
 			mRecordingNow = true;
 	    	mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-		    mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-		    mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
+	    	mRecorder.setAudioChannels(1); //mono
+	    	mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+		    int sdk =  android.os.Build.VERSION.SDK_INT;
+		    // gingerbread and up can have wide band ie 16,000 hz recordings (much better for transcription)
+		    if( sdk >= 10){
+		    	mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
+		    	mRecorder.setAudioSamplingRate(16000);
+		    }else{
+		    	// other devices will have to use narrow band, ie 8,000 hz (same quality as a phone call)
+			    mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+		    }
 		    mRecorder.setOutputFile(mAudioResultsFile);
 		    mRecorder.prepare();
 		    mStartTime=System.currentTimeMillis();
@@ -405,8 +414,12 @@ public class DictationRecorderService extends Service {
 				mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recording stopped.";
 				mEndTime=System.currentTimeMillis();
 				mRecordingNow=false;
+				try{
 			   	mRecorder.stop();
 			   	mRecorder.release();
+				}catch (Exception e) {
+					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recording not saved, your device does not support 16,000 hz recording.: "+e;
+				}
 			   	mRecorder = null;
 			   	mTimeAudioWasRecorded=mEndTime-mStartTime;
 			   	tracker.trackEvent(
