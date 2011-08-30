@@ -500,7 +500,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 				// TODO: handle exception
         		Log.w(TAG, "Problem upgrading, unable to clear sample data."+e);
 			}
-        	String performUpgrade = "BEGIN TRANSACTION; " +
+        	String performUpgrade = 
         			"INSERT INTO "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME
         			+"("+AuBlogHistory._ID
         			+", "+AuBlogHistory.PUBLISHED
@@ -528,8 +528,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
         			+", "+AuBlogHistory.TIME_CREATED
         			+", "+AuBlogHistory.TIME_EDITED
         			+" " +
-        			"FROM "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"backup1;"+
-        			"COMMIT;";
+        			"FROM "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"backup1;";
         	try{
 	        	db.execSQL(performUpgrade);
 			}catch (Exception e) {
