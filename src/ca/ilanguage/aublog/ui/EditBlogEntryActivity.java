@@ -1226,6 +1226,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				recheckAublogSettings();// if audio settings have changed use
 										// the new ones.
 				preparePlayerAttachedAudioFile();
+				mWebView.loadUrl("javascript:checkRecordingNow()");
 				// request transcription from the server, normally put this in a
 				// timer in javascript
 				mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");

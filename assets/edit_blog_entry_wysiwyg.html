@@ -220,6 +220,8 @@ $(document).ready(function()	{
     function checkRecordingNow(){
     	if (Android.getValueRecordingNowJS() == 1){
     		document.getElementById('recordButton').value="Stop Dictation";
+    	}else{
+    		document.getElementById('recordButton').value="New Dictation";
     	}
     }
     /*
