@@ -493,9 +493,13 @@ public class AuBlogHistoryProvider extends ContentProvider {
         	onCreate(db);
         	
         	//delete data
-        	String clearSampleData = "DELETE * FROM "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+";";
-        	db.execSQL(clearSampleData);
-        	
+        	String clearSampleData = "DELETE FROM "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+";";
+        	try{
+        		db.execSQL(clearSampleData);
+        	}catch (Exception e) {
+				// TODO: handle exception
+        		Log.w(TAG, "Problem upgrading, unable to clear sample data."+e);
+			}
         	String performUpgrade = "BEGIN TRANSACTION; " +
         			"INSERT INTO "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME
         			+"("+AuBlogHistory._ID
@@ -526,8 +530,12 @@ public class AuBlogHistoryProvider extends ContentProvider {
         			+" " +
         			"FROM "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"backup1;"+
         			"COMMIT;";
-	
-        	db.execSQL(performUpgrade);
+        	try{
+	        	db.execSQL(performUpgrade);
+			}catch (Exception e) {
+				// TODO: handle exception
+				Log.w(TAG, "Problem upgrading, unable to copy user data."+e);
+			}
         	
         }
         /*
