@@ -220,8 +220,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		}
 		if (mAudioFilePath.length() > 0) {
 			mNotificationMessage= mAudioFilePath;
-		}else if (mAudioFilePath.contains("exported_drafts")){
-			mShowNotification = false;
 		}else{
 			mNotificationMessage ="No file";
 			return;
@@ -230,6 +228,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		File outSRTFile;
 		if(mAudioFilePath.endsWith(".mp3")){
 			outSRTFile =  new File(mAudioFilePath.replace(".mp3","_client.srt"));
+		}else if (mAudioFilePath.contains("exported_drafts")){
+			mShowNotification = false;
+			outSRTFile =  new File(mAudioFilePath.replace(".js","backup.js"));
 		}else{
 			outSRTFile =  new File(mAudioFilePath.replace("_client.srt","_server.srt"));
 		}
