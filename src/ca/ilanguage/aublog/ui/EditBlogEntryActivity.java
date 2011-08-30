@@ -311,8 +311,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			/*
 			 * If user wants to play audio through the phone's in-call speaker,
 			 */
-				
-			if (getWindow().getWindowManager().getDefaultDisplay().getHeight() < 1000){
+			int maxScreenDimension = getWindow().getWindowManager().getDefaultDisplay().getWidth();
+			if (getWindow().getWindowManager().getDefaultDisplay().getHeight() > maxScreenDimension){
+				maxScreenDimension = getWindow().getWindowManager().getDefaultDisplay().getHeight();
+			}
+			if (maxScreenDimension < 1000 ){
 				//phones
 				mAudioManager.setSpeakerphoneOn(false);
 				setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
@@ -1414,7 +1417,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		String s="Debug-infos:";
 		s += "OS Version: " + System.getProperty("os.version") + "(" + android.os.Build.VERSION.INCREMENTAL + ")";
-		s += "\t OS API Level: " + android.os.Build.VERSION.SDK;
+		s += "\t OS API Level: " + android.os.Build.VERSION.SDK_INT;
 		s += "\t Device: " + android.os.Build.DEVICE;
 		s += "\t Model (and Product): " + android.os.Build.MODEL + " ("+ android.os.Build.PRODUCT + ")";
 		s += "\t Window width: " + getWindow().getWindowManager().getDefaultDisplay().getWidth();
