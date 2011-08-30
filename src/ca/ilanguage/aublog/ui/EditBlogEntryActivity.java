@@ -868,6 +868,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	      savedInstanceState.putString("audiofilestatus",mAudioResultsFileStatus);
 	      savedInstanceState.putBoolean("deleted", mDeleted);
 	      savedInstanceState.putBoolean("recordingNow", mRecordingNow);
+	      savedInstanceState.putLong("startTime", mStartTime);
 	      savedInstanceState.putString("parentid", mPostParent);
 	      savedInstanceState.putString("id",mPostId);
 	      
@@ -899,6 +900,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       mFreshEditScreen = savedInstanceState.getBoolean("fresheditscreen");
       mAudioResultsFileStatus = savedInstanceState.getString("audiofilestatus");
       mRecordingNow = savedInstanceState.getBoolean("recordingNow");
+      mStartTime = savedInstanceState.getLong("startTime");
       mDeleted = savedInstanceState.getBoolean("deleted");
       mPostParent = savedInstanceState.getString("parentid");
       mPostId = savedInstanceState.getString("id");
@@ -1226,6 +1228,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				recheckAublogSettings();// if audio settings have changed use
 										// the new ones.
 				preparePlayerAttachedAudioFile();
+				mRecordingNow = false;
 				mWebView.loadUrl("javascript:checkRecordingNow()");
 				// request transcription from the server, normally put this in a
 				// timer in javascript
