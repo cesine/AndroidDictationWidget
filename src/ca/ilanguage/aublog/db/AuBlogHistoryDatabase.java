@@ -40,6 +40,7 @@ public class AuBlogHistoryDatabase {
 	    String PUBLISHED_IN = "publishedin";
 	    //the full path of an audiofile of blog entry corresponding directly to that entry)
 	    String AUDIO_FILE = "audiofile";
+	    String AUDIO_FILES_DEPRECIATED = "audiofiles";
 	    String AUDIO_FILE_STATUS = "audiofilestatus";
 	    //arrange entry histories in a heirarchy based on edits
 	    String PARENT_ENTRY = "parententry";
