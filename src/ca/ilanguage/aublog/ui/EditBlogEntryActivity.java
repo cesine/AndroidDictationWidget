@@ -1058,14 +1058,16 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		if (audioFileUpdateReceiver == null){
 			audioFileUpdateReceiver = new AudioFileUpdateReceiver();
 		}
+		IntentFilter intentFilterTrans = new IntentFilter(REFRESH_TRANSCRIPTION_INTENT);
+		registerReceiver(audioFileUpdateReceiver, intentFilterTrans);
+		
 		IntentFilter intentFilter = new IntentFilter(REFRESH_AUDIOFILE_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentFilter);
 		IntentFilter intentDictSent = new IntentFilter(DICTATION_SENT_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentDictSent);
 		IntentFilter intentDictRunning = new IntentFilter(DICTATION_STILL_RECORDING_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentDictRunning);
-		IntentFilter intentFilterTrans = new IntentFilter(REFRESH_TRANSCRIPTION_INTENT);
-		registerReceiver(audioFileUpdateReceiver, intentFilterTrans);
+		
 		mBackButtonHasBeenPressed = false;
 		super.onResume();
 	}
@@ -1221,29 +1223,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public class AudioFileUpdateReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			// refresh audiofile REFRESH_AUDIOFILE_INTENT is too soon to check
-			// because the transcription service
-			// will be in the middle of sending the .mp3 when we want to listen
-			// to it. instead, wait until the upload service replys
-			if (intent.getAction().equals(DICTATION_SENT_INTENT)) {
-				mAudioResultsFileStatus = intent.getExtras().getString(
-						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-				recheckAublogSettings();// if audio settings have changed use
-										// the new ones.
-				preparePlayerAttachedAudioFile();
-				mRecordingNow = false;
-				mWebView.loadUrl("javascript:checkRecordingNow()");
-				// request transcription from the server, normally put this in a
-				// timer in javascript
-				mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
-			} else if (intent.getAction().equals(REFRESH_TRANSCRIPTION_INTENT)) {
+			String action = intent.getAction();
+			if (action.equals(REFRESH_TRANSCRIPTION_INTENT)) {
 				/*
 				 * If its the transcription for this post, process it.
 				 */
 				if (intent.getData() == mUri) {
 					mAudioResultsFileStatus = intent.getExtras().getString(
 							DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-					
+
 					Boolean askUser = intent
 							.getExtras()
 							.getBoolean(
@@ -1255,7 +1243,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 							// Toast.makeText(EditBlogEntryActivity.this,
 							// "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.",
 							// Toast.LENGTH_LONG).show();
-							//removeStickyBroadcast(intent);
+							// removeStickyBroadcast(intent);
 							mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
 							// mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
 						} else {
@@ -1274,8 +1262,26 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					// of the transcription sent since roughly 1-2 minutes have
 					// passed.
 				}
-			} else if (intent.getAction().equals(
-					DICTATION_STILL_RECORDING_INTENT)) {
+			}
+			// refresh audiofile REFRESH_AUDIOFILE_INTENT is too soon to check
+			// because the transcription service
+			// will be in the middle of sending the .mp3 when we want to listen
+			// to it. instead, wait until the upload service replys
+			if (action.equals(DICTATION_SENT_INTENT)) {
+				mAudioResultsFileStatus = intent.getExtras().getString(
+						DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
+				recheckAublogSettings();// if audio settings have changed use
+										// the new ones.
+				preparePlayerAttachedAudioFile();
+				mRecordingNow = false;
+				mWebView.loadUrl("javascript:checkRecordingNow()");
+				// request transcription from the server, normally put this in a
+				// timer in javascript
+				mWebView.loadUrl("javascript:queryServerIfTranscriptionIsReady()");
+			}
+
+
+			if (action.equals(DICTATION_STILL_RECORDING_INTENT)) {
 				/*
 				 * if the uri is the uri we are editing, then set its recording
 				 * to true so the user can click stop case 1: we are editing and
@@ -1304,7 +1310,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					mWebView.loadUrl("javascript:checkRecordingNow()");
 				}
 			} // end ifs to check intent
-		}//end on receive
+		}// end on receive
 	}
 	/**
 	 * If the media player is instantiated, release it and make it null
