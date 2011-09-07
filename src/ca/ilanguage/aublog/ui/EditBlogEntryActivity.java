@@ -1228,7 +1228,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				/*
 				 * If its the transcription for this post, process it.
 				 */
-				if (intent.getData() == mUri) {
+				if(true){//if (intent.getData() == mUri) {
 					mAudioResultsFileStatus = intent.getExtras().getString(
 							DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 
@@ -1244,7 +1244,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 							// "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.",
 							// Toast.LENGTH_LONG).show();
 							// removeStickyBroadcast(intent);
-							mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
+							mWebView.loadUrl("javascript:promptUserImportTranscription()");
 							// mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
 						} else {
 							// Toast.makeText(EditBlogEntryActivity.this,
@@ -1834,6 +1834,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 		if (mTranscription != null){
 			if(mTranscription.length() <1){
+				Toast.makeText(
+						EditBlogEntryActivity.this,
+						"The transcription server processed your audio dictation, but couldn't figure out what you said.", Toast.LENGTH_LONG)
+						.show();
 				return "";
 			}else{
 					
@@ -1879,20 +1883,22 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    	//throw away file info by detecting the timecodes and discarding 2 lines after. 
             if (line.contains("0:00:00.000,0:00:00.000")){
             	line = reader.readLine();
-            	while (! line.contains("0:00:00.020,0:00:00.020")){
+            	while ((line != null) && ! line.contains("0:00:00.020,0:00:00.020")){
             		line = reader.readLine();
             	}
             	line = reader.readLine();
             	line = reader.readLine();
             	line = reader.readLine();
             }
-            //throw away additional time codes
-            matcher = pattern.matcher(line);
-    		if (matcher.find()){
-    			//its a time code do nothing.
-    		}else{
-    			results += line+ " ";
-    		}
+            if(line != null){
+	            //throw away additional time codes
+	            matcher = pattern.matcher(line);
+	    		if (matcher.find()){
+	    			//its a time code do nothing.
+	    		}else{
+	    			results += line+ " ";
+	    		}
+            }
 	    }
 	    reader.close();
 	    return results;

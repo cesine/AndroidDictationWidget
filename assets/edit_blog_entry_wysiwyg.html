@@ -177,7 +177,9 @@ $(document).ready(function()	{
 	    Android.downloadTranscriptionFromServerJS();
 	    Android.askUserIfImportJS(document.getElementById('markItUp').value); //will open the _server.srt and ask the user if they want to import it, it will put it in the markitup.
 	*/
-    
+    function promptUserImportTranscription(){
+		Android.askUserIfImportJS(document.getElementById('markItUp').value); //will open the _server.srt and ask the user if they want to import it, it will put it in the markitup.
+    }
     
     function readTTSPost(){
     	Android.readToTTSJS("This is what your blog entry says... "+document.getElementById('markItUp').value);
