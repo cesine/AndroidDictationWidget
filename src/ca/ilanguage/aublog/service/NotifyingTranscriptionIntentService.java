@@ -349,9 +349,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				//this is showing up for when the audio is not sent, but the client srt is...
 				//mNotificationMessage = "...";// null;
 			}
-
-
-
 			FileOutputStream outSRT;
 			try {
 				outSRT = new FileOutputStream(outSRTFile);
@@ -434,7 +431,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 
 		if(mAudioFilePath.endsWith(".srt")){
 			Intent i = new Intent(EditBlogEntryActivity.REFRESH_TRANSCRIPTION_INTENT);
-			i.setData(mUri);
+			//i.setData(mUri);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			i.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
 			sendBroadcast(i);
