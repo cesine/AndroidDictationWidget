@@ -81,6 +81,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	private String mFileNameOnServer="";
 	private int mSplitType = 0;
 	private ArrayList<String> mTimeCodes;
+	private String mTranscription = "";
+	private String mTranscriptionStatus = "";
 
 	public static final String EXTRA_RESULTS = "splitUpResults";
 	public static final String EXTRA_SPLIT_TYPE = "splitOn";
@@ -210,6 +212,11 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mAudioResultsFileStatus = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 			mPostContents=intent.getExtras().getString(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS);
 			mAskUserImport=intent.getExtras().getBoolean(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
+			if(mAskUserImport == true){
+				mTranscriptionStatus= "transcription fresh";
+			}else{
+				mTranscriptionStatus = "transcription not fresh"; 
+			}
 			
 			mSplitType = intent.getExtras().getInt(EXTRA_SPLIT_TYPE);
 
@@ -364,6 +371,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				 * the time codes and transcription are read line by line from the in the server's response. 
 				 */
 				for(int i = 0; i < mTimeCodes.size(); i++){
+					mTranscription = mTranscription + mTimeCodes.get(i) + "\n"; 
 					outSRT.write(mTimeCodes.get(i).getBytes());
 					outSRT.write("\n".getBytes());
 					//						outSRT.write("\n--Unknown--".getBytes());
@@ -489,6 +497,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				}
 				ContentValues values = new ContentValues();
 				values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
+				values.put(AuBlogHistory.TRANSCRIPTION_STATUS, mTranscriptionStatus);
+				values.put(AuBlogHistory.TRANSCRIPTION_RESULT, mTranscription);
 				getContentResolver().update(mUri, values,null, null);
 				mDBLastModified = Long.toString(System.currentTimeMillis());
 				getContentResolver().notifyChange(AuBlogHistory.CONTENT_URI, null);
