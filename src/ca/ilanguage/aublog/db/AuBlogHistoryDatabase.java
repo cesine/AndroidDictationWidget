@@ -42,6 +42,8 @@ public class AuBlogHistoryDatabase {
 	    String AUDIO_FILE = "audiofile";
 	    String AUDIO_FILES_DEPRECIATED = "audiofiles";
 	    String AUDIO_FILE_STATUS = "audiofilestatus";
+	    String TRANSCRIPTION_STATUS = "transcriptionstatus";
+	    String TRANSCRIPTION_RESULT = "transcription";
 	    //arrange entry histories in a heirarchy based on edits
 	    String PARENT_ENTRY = "parententry";
 	    String DELETED = "deleted";//changed from daughter entry

@@ -30,7 +30,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
     private static final String TAG = "AuBlogHistoryProvider";
 
     private static final String DATABASE_NAME = "aubloghistory.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     //private static final String  AUBLOG_HISTORY_TABLE_NAME= AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME;
 
     private static HashMap<String, String> sAuBlogHistoryProjectionMap;
@@ -217,6 +217,15 @@ public class AuBlogHistoryProvider extends ContentProvider {
         if (values.containsKey(AuBlogHistory.AUDIO_FILE_STATUS) == false) {
             values.put(AuBlogHistory.AUDIO_FILE_STATUS, "");
         }
+        
+        if (values.containsKey(AuBlogHistory.TRANSCRIPTION_STATUS) == false) {
+            values.put(AuBlogHistory.TRANSCRIPTION_STATUS, "");
+        }
+        
+        if (values.containsKey(AuBlogHistory.TRANSCRIPTION_RESULT) == false) {
+            values.put(AuBlogHistory.TRANSCRIPTION_RESULT, "");
+        }
+        
         if (values.containsKey(AuBlogHistory.PUBLISHED_IN) == false) {
             values.put(AuBlogHistory.PUBLISHED_IN, "");
         }       
@@ -337,6 +346,8 @@ public class AuBlogHistoryProvider extends ContentProvider {
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.TIME_EDITED, AuBlogHistory.TIME_EDITED);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.AUDIO_FILE, AuBlogHistory.AUDIO_FILE);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.AUDIO_FILE_STATUS, AuBlogHistory.AUDIO_FILE_STATUS);
+	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.TRANSCRIPTION_STATUS, AuBlogHistory.TRANSCRIPTION_STATUS);
+	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.TRANSCRIPTION_RESULT, AuBlogHistory.TRANSCRIPTION_RESULT);
 
 	        // Support for Live Folders.
 	        sLiveFolderProjectionMap = new HashMap<String, String>();
@@ -375,6 +386,8 @@ public class AuBlogHistoryProvider extends ContentProvider {
             		+ AuBlogHistory.PUBLISHED_IN + " TEXT,"
             		+ AuBlogHistory.AUDIO_FILE + " TEXT,"
             		+ AuBlogHistory.AUDIO_FILE_STATUS + " TEXT,"
+            		+ AuBlogHistory.TRANSCRIPTION_STATUS + " TEXT,"
+            		+ AuBlogHistory.TRANSCRIPTION_RESULT + " TEXT,"
             		+ AuBlogHistory.LAST_MODIFIED + " INTEGER,"
             		+ AuBlogHistory.TIME_CREATED + " INTEGER,"
             		+ AuBlogHistory.TIME_EDITED + " INTEGER"
@@ -400,6 +413,8 @@ public class AuBlogHistoryProvider extends ContentProvider {
 			values.put(AuBlogHistory.ENTRY_LABELS, "");
 			values.put(AuBlogHistory.AUDIO_FILE, "");
 			values.put(AuBlogHistory.AUDIO_FILE_STATUS, "");
+			values.put(AuBlogHistory.TRANSCRIPTION_STATUS, "");
+			values.put(AuBlogHistory.TRANSCRIPTION_RESULT, "");
 			values.put(AuBlogHistory.PUBLISHED_IN, "");
 			// it seems suspicious to only be the content of PARENT_ENTRY, ah its the nullcolumnhack
 			long saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
