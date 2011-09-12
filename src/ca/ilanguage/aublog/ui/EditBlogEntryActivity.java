@@ -154,25 +154,30 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			// Note that a language may not be available, and the result will
 			// indicate this.
 			int result = mTts.setLanguage(Locale.US);
-			// Try this someday for some interesting results.
+			// Try this someday for some interesting results. TODO localize aublog to do language detection
 			// int result mTts.setLanguage(Locale.FRANCE);
 			if (result == TextToSpeech.LANG_MISSING_DATA
 					|| result == TextToSpeech.LANG_NOT_SUPPORTED) {
 				// Language data is missing or the language is not supported.
+				tracker.trackEvent(
+						mAuBlogInstallId,  // Category
+			            "TTS language not availible",  // Action
+			            "User doesnt have this language (probably English due to setLanguage(Locale.US): "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+			            (int)System.currentTimeMillis());       // Value
+
 				Log.e(TAG, "Language is not available.");
 				//Toast.makeText(EditBlogEntryActivity.this, "The English TextToSpeech isn't installed, you can go into the \nAndroid's settings in the \nVoice Input and Output menu to turn it on. ", Toast.LENGTH_LONG).show();
-
 			} else {
 				//everything is working.
 			}
 		} else {
 			// Initialization failed.
 			tracker.trackEvent(
-		            "DependantPackages",  // Category
-		            "FileManager",  // Action
-		            "user doesnt have TTS, in the init failed section, didnt take them to package manager: "+mAuBlogInstallId, // Label
-		            301);       // Value
-        	
+					mAuBlogInstallId,  // Category
+		            "TTS not initializing",  // Action
+		            "User doesnt have TTS, in the init failed section, didnt take them to package manager: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+
 			Log.e(TAG, "Sorry, I can't talk to you because I could not initialize TextToSpeech.");
 		}
 	}
@@ -200,8 +205,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 		
 	 */
-    
-
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
@@ -400,10 +403,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	    // Start the tracker in manual dispatch mode...
 	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
 
-	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
-	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
-		
-        
 	    mPlayingNow = false;
 	    if(mRecordingNow == null){
 			mRecordingNow = false;
@@ -603,10 +602,10 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		readTTS(message);
         	}else{
         		tracker.trackEvent(
-        	            "TTS",  // Category
-        	            "notUsed",  // Action
-        	            "there was a message that was not read via TTS because it is off in the settings: "+message+" : "+mAuBlogInstallId, // Label
-        	            362);       // Value
+    					mAuBlogInstallId,  // Category
+    		            "TTS not used by user choice",  // Action
+    		            "There was a message that was not read via TTS because it is off in the settings: "+message+" :  "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+    		            (int)System.currentTimeMillis());       // Value
         	}
         }
         /**
@@ -787,11 +786,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 //        	if(flag){
 //        		flagDraftTreeAsNeedingToBeReGenerated();
 //        	}
+
         	tracker.trackEvent(
-    	            "AuBlogLifeCycleEvent",  // Category
-    	            "saveSTate",  // Action
-    	            "state was saved via javascript "+strTitle+" : "+strLabels+" : "+strContent+" : "+mAuBlogInstallId, // Label
-    	            34);       // Value
+					mAuBlogInstallId,  // Category
+		            "SaveState",  // Action
+		            "state was saved via javascript "+strTitle+" : "+strLabels+" : "+strContent+" :  "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
         	//takes too long saveStateToActivity(strTitle, strContent, strLabels);
         }
         /**
@@ -837,11 +837,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         			|| (mPostTitle == null)
         			|| (mPostContent.length() == 0)
         			|| (mPostContent == null)) {
-        		tracker.trackEvent(
-			            "Publish",  // Category
-			            "Error",  // Action
-			            "displayed Toast:"+R.string.title_or_content_empty_error+" : "+mAuBlogInstallId, // Label
-			            30);       // Value
+            	tracker.trackEvent(
+    					mAuBlogInstallId,  // Category
+    		            "Publish missing info",  // Action
+    		            "displayed Toast:"+R.string.title_or_content_empty_error+" :  "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+    		            (int)System.currentTimeMillis());       // Value
         		Toast.makeText(EditBlogEntryActivity.this, R.string.title_or_content_empty_error, Toast.LENGTH_LONG).show();
         	} else {
         		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
@@ -849,17 +849,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         		mBloggerPassword = prefs.getString(PreferenceConstants.PREFERENCE_PASSWORD, "see settings");
         		if( (!mBloggerAccount.contains("@") ) || mBloggerPassword.length()<4 ){
         			tracker.trackEvent(
-    			            "Publish",  // Category
-    			            "Error",  // Action
-    			            "displayed Toast: Taking you to the settings to add a Blogger account.: "+mAuBlogInstallId, // Label
-    			            302);       // Value
+        					mAuBlogInstallId,  // Category
+        		            "Publish missing info",  // Action
+    			            "displayed Toast: Taking you to the settings to add a Blogger account.: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+    			            (int)System.currentTimeMillis());       // Value
         			Toast.makeText(EditBlogEntryActivity.this, "No Blogger account found.\n\nTaking you to the settings to \n\nConfigure a Blogger account.", Toast.LENGTH_LONG).show();
         			Intent i = new Intent(EditBlogEntryActivity.this, SetPreferencesActivity.class);
         			startActivityForResult(i, CHANGED_SETTINGS);
         		}else{
-        		
-	        		tracker.setCustomVar(1, "Navigation Type", "Button click", 22);
-	    			tracker.trackPageView("/publishBlogEntryScreen");
+        			tracker.trackPageView("/publishBlogEntryScreen");
 	    			
 	        		Intent i = new Intent(EditBlogEntryActivity.this, PublishActivity.class);
 	        		//tell the i the mUri that is supposed to be published
@@ -931,47 +929,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
       
 //      mUri = new Uri(savedInstanceState.getString("uri"));
     }
-    /* dont import transcriptions in android, do it in javascript
-    @Override
-	protected void onStart() {
-    	
-		//find out if the intent has a new transcription to insert into the blog content. 
-    	mReturnedTranscription = getIntent().getBooleanExtra(EXTRA_TRANSCRIPTION_RETURNED,false);
-    	if( ! mReturnedTranscription ){
-    		// nothing to do if no returned transcription
-    	}else{
-    		/*
-    		 * Insert transcription into the blog entry content. Keep current content below the transcription.
-    		 
-    		mAudioResultsFileStatus="transcriptionintegratedinblogentry";
-    		BufferedReader in;
-    		String transcription="";
-			try {
-				in = new BufferedReader(new FileReader(mAudioResultsFile.replace(".mp3",".srt")));
-				String line ="";
-				while((line = in.readLine()) != null){
-					transcription = transcription + line + "\n";
-				}
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-				mAudioResultsFileStatus=mAudioResultsFileStatus+"problemcopyingfromsdcardtoblogpost";
-				mPostContent= "There was a problem reading the transcriptions from the SDCARD to, maybe the device is connected to a computer?\n\n"+mPostContent;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-				mAudioResultsFileStatus=mAudioResultsFileStatus+"problemcopyingfromsdcardtoblogpost";
-				mPostContent= "There was a problem reading the transcriptions from the SDCARD to, maybe the device is connected to a computer?\n\n"+mPostContent;
-				//relaunch the pending intent, or create a new method that put transcriptions into aublgo entries, run it out of the main generate drafts tree functions?
-			}
-			mPostContent=transcription+mPostContent;
-    		
-    		mWebView.loadUrl("javascript:fillFromAndroidActivity()");
-    		saveAsSelfToDB();
-    		//Toast.makeText(EditBlogEntryActivity.this, "onResume, there is a transcription to load. Show alert yes no.", Toast.LENGTH_LONG).show();
-    	}
-    	super.onStart();
-	}*/
+
 
 	/**
 	 * 
@@ -1021,11 +979,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		//created a new function in the javascript interface to save directly to the database to avoid the rotate bug. 
 		mWebView.loadUrl("javascript:savePostAsSelfToDB()");//this is saving to the database but the main menu is generating the tree before its saved. 
  		mFreshEditScreen=false;
-		tracker.trackEvent(
-	            "Event",  // Category
-	            "Pause",  // Action
-	            "event was paused: "+mAuBlogInstallId, // Label
-	            38);       // Value
+
+
 		// put back button logic here, and just set a boolean for back button to make this code run.
 		if(mBackButtonHasBeenPressed){
 			//should be set by the savestate call.
@@ -1053,12 +1008,24 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 							EditBlogEntryActivity.this,
 							"Discarding entry " + mUri.getLastPathSegment(),// + " it's empty and it has no daughters.",
 							Toast.LENGTH_LONG).show();
+					tracker.trackEvent(
+							mAuBlogInstallId,  // Category
+				            "Back button discard",  // Action
+				            "Edit blog entry was discarded because user didn't enter anything "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+				            (int)System.currentTimeMillis());       // Value
+					
 				} else {
 					//Toast.makeText(EditBlogEntryActivity.this,"Not Deleting " + mUri.getLastPathSegment()+ " it has" + cursor.getCount()+ " daughters.", Toast.LENGTH_LONG).show();
 				}
 			}else{
 				//do nothing: backbutton acts as save as self to database.
 				//as it calls onPause next, and onPause saves to the database.
+				tracker.trackEvent(
+						mAuBlogInstallId,  // Category
+			            "Pause saving entry",  // Action
+			            "Edit blog entry was saved to DB and paused: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+			            (int)System.currentTimeMillis());       // Value
+				
 			}
 		}//end if to process backbutton
 //		if(mURIDeleted == true){
@@ -1187,11 +1154,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	}
 	public void deleteEntry(Uri uri){
     	mDeleted = true;
-    	tracker.trackEvent(
-	            "AuBlogLifeCycleEvent",  // Category
+		tracker.trackEvent(
+				mAuBlogInstallId,  // Category
 	            "Delete",  // Action
-	            "entry was flagged as deleted in the database"+uri.getLastPathSegment()+" : "+mAuBlogInstallId, // Label
-	            39);       // Value
+	            "Entry was flagged as deleted in the edit blog entry : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+	            (int)System.currentTimeMillis());       // Value
+		
     	/*
 		 * Flag entry as deleted
 		 */
@@ -1213,10 +1181,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 */
 	public void readTTS(String message){
 		tracker.trackEvent(
-	            "TTS",  // Category
-	            "Use",  // Action
-	            "spoke message: "+message+" : "+mAuBlogInstallId, // Label
-	            361);       // Value
+				mAuBlogInstallId,  // Category
+	            "TTS used",  // Action
+	            "spoke message: "+message+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+	            (int)System.currentTimeMillis());       // Value
+		
 		mTts.speak(message,TextToSpeech.QUEUE_ADD, null);	
 	}
 
@@ -1268,6 +1237,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 							mTranscription = intent.getExtras().getString(EditBlogEntryActivity.EXTRA_FRESH_TRANSCRIPTION_CONTENTS);
 							mTranscriptionStatus = "transcription fresh";
 							mWebView.loadUrl("javascript:displayImportButton()");
+
 							//mWebView.loadUrl("javascript:promptUserImportTranscription()");
 							// mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
 						} else {
@@ -1415,11 +1385,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public String beginRecording(String strTitle){
 		//recheckAublogSettings();//check if bluetooth is ready, use it if it is
 		mAudioResultsFileStatus = "recordingstarted";
-		tracker.trackEvent(
-	            "Clicks",  // Category
-	            "Button",  // Action
-	            "record audio via "+mAudioSource+" : "+mAuBlogInstallId, // Label
-	            34);       // Value
 
 		mStartTime=System.currentTimeMillis();
 		mDateString = (String) android.text.format.DateFormat.format("yyyy-MM-dd_kk.mm", new java.util.Date());
@@ -1555,12 +1520,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	   	//Javascript changes the blog content to add the length of the recording 
 	   	//Javascript simpulates a click on the save button, so most likely it will be saved as a daughter. 
 	   	
-	   	tracker.trackEvent(
-	            "AuBlogLifeCycleEvent",  // Category
-	            "Dictation",  // Action
-	            "stop audio recording "+mTimeAudioWasRecorded/100+"sec, in the edit screen.: "+mAuBlogInstallId, // Label
-	            35);       // Value
-	   	       
+		tracker.trackEvent(
+				mAuBlogInstallId,  // Category
+	            "Dictation stopped",  // Action
+	            "User clicked Stop Dictation  "+mTimeAudioWasRecorded/100+"sec long in Edit blog entry : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+	            (int)System.currentTimeMillis());       // Value
+		
         /*
          * Transcription possibilities:
          * 1. using googles not published speech API
@@ -1634,10 +1599,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				&& mAudioResultsFile.length() < 5  ) {
 			saveStateToActivity(strTitle, strContent, strLabels);
 			saveAsSelfToDB();
-			tracker.trackEvent("AuBlogLifeCycleEvent", // Category
-					"Save", // Action
-					"save as self:no new text: " + mAuBlogInstallId, // Label
-					311); // Value
+
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Save as self",  // Action
+		            "Save as daughter became save as self, no new text. : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+			
 			return;
 		}
 		
@@ -1655,12 +1623,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 //        	daughterValues.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus); //TODO dont need to write the status ever from here?
           	daughterValues.put(AuBlogHistory.PARENT_ENTRY, mUri.getLastPathSegment());	
     		Uri daughterUri = getContentResolver().insert(AuBlogHistory.CONTENT_URI, daughterValues);
-    		tracker.trackEvent(
-    	            "AuBlogLifeCycleEvent",  // Category
-    	            "Save",  // Action
-    	            "save as daughter: "+mAuBlogInstallId, // Label
-    	            312);       // Value
-
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Save as daughter",  // Action
+		            "Save as daughter, it had new text. : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+			
     		/*
     		 * Set the daughter to the active mUri, and reinitialize the state values to the daughers values
     		 */
@@ -1772,7 +1740,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             mAudioResultsFileStatus=mCursor.getString(11);
         }
 		mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Sent to transcription service at "+System.currentTimeMillis()+" (after a delay).";
-		/*create an empty subtitles file */
+		/* TODO remove this it is unncesary create an empty subtitles file */
 		File outSRTFile =  new File(mAudioResultsFile.replace(".mp3","_client.srt"));
 		FileOutputStream outSRT;
 		try {
@@ -1790,7 +1758,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			outSRT.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-		}
+		}//TODO remove this it is unesseary
 		Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
 		intent.setData(mUri);
         intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, mAudioResultsFile);
@@ -1803,7 +1771,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			mBackButtonHasBeenPressed = true;
-			
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Exit edit",  // Action
+		            "User clicked back button to exit the edit blog entry. : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
 		}
 		switch (keyCode) {
 		case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
@@ -1906,6 +1878,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			        	            "exception "+e+" : "+mAuBlogInstallId, // Label
 			        	            3202);       // Value
 			        	}
+			        	tracker.trackEvent(
+								mAuBlogInstallId,  // Category
+					            "Import transcription yes",  // Action
+					            "User said okay to import this transcription"+mTranscription+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+					            (int)System.currentTimeMillis());       // Value
 					}
 				};
 				OnClickListener no = new OnClickListener() {
@@ -1913,12 +1890,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					public void onClick(DialogInterface dialog, int which) {
 						//if the user doesnt want to import, chances are high that the transcirption is bad or not fresh.
 						//download from the server, hope its fresher keep the status as fresh, the import button will stay on, the user can click on it or not to trigger a new download.
+
 						tracker.trackEvent(
-		        	            "AuBlogLifeCycle",  // Category
-		        	            "ImportTranscription",       // Action
-		        	            "User didnt want to import this transcription"+mTranscription+" : "+mAuBlogInstallId, // Label
-		        	            3272);       // Value
-						
+								mAuBlogInstallId,  // Category
+					            "Import transcription didnt want",  // Action
+					            "User didnt want to import this transcription"+mTranscription+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+					            (int)System.currentTimeMillis());       // Value
 						downloadTranscription(currentPostContents,true);
 					}
 				};
@@ -2000,29 +1977,32 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		case R.id.open_settings:
 			tracker.trackPageView("/settingsScreen");
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked settings in the edit blog entry menu: "+mAuBlogInstallId, // Label
-		            34);       // Value
+					mAuBlogInstallId,  // Category
+		            "Clicked settings",  // Action
+		            "Clicked settings on edit blog entry page "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+
 			Intent i = new Intent(getBaseContext(),	SetPreferencesActivity.class);
 			startActivity(i);
 			return true;
 		case R.id.issue_tracker:
+			tracker.trackPageView("/issueTracker");
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked bugs in the edit blog entry menu: "+mAuBlogInstallId, // Label
-		            34);       // Value
+					mAuBlogInstallId,  // Category
+		            "Clicked bugs",  // Action
+		            "Clicked bugs on edit blog entry page "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+
 			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://code.google.com/p/aublog/issues/entry"));
 			startActivity(browserIntent);
 			return true;
 		case R.id.new_entry:
 			tracker.trackPageView("/editBlogEntryScreen");
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked new entry in the edit blog entry menu: "+mAuBlogInstallId, // Label
-		            32);       // Value
+					mAuBlogInstallId,  // Category
+		            "Clicked New Entry",  // Action
+		            "Clicked new entry on edit blog entry page "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
 
 			Intent intent = new Intent(getBaseContext(), EditBlogEntryActivity.class);
 
