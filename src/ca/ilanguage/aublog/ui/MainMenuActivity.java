@@ -263,7 +263,7 @@ public class MainMenuActivity extends Activity {
 
 	private View.OnClickListener sOptionButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
-
+			//TODO change category to installid 
 			tracker.setCustomVar(1, "Navigation Type", "Button click", 14);
 			tracker.trackPageView("/settingsScreen");
 			tracker.trackEvent(
