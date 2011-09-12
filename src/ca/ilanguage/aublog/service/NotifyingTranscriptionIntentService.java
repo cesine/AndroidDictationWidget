@@ -3,7 +3,6 @@ package ca.ilanguage.aublog.service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -359,10 +358,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				//this is showing up for when the audio is not sent, but the client srt is...
 				//mNotificationMessage = "...";// null;
 			}
-			mTranscription = "transcription results";//readAsTranscriptionString();  
+			 
 			FileOutputStream outSRT;
 			try {
-				outSRT = new FileOutputStream(outSRTFile);
+				outSRT = new FileOutputStream(outSRTFile,false);//false for dont append
 				outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
 				outSRT.write(mAudioResultsFileStatus.getBytes());
 				outSRT.write("\n\n".getBytes());
@@ -421,7 +420,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				File outSRTFileClient =  new File(mAudioFilePath.replace(".mp3","_client.srt"));
 				FileOutputStream outSRT;
 				try {
-					outSRT = new FileOutputStream(outSRTFileClient);
+					outSRT = new FileOutputStream(outSRTFileClient,false);//false for dont append
 					outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
 					outSRT.write(mAudioResultsFileStatus.getBytes());
 					outSRT.write("\n\n".getBytes());
@@ -446,6 +445,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			i.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
 			if(mAskUserImport){
+				mTranscription = readAsTranscriptionString(); 
 				i.putExtra(EditBlogEntryActivity.EXTRA_FRESH_TRANSCRIPTION_CONTENTS, mTranscription);
 				mNotificationMessage = "Transcription results received.";
 				mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
