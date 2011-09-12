@@ -1857,16 +1857,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         
     }*/
 	public String askUserIfImport(final String currentPostContents){
-		
-		mTranscription = "";
-		
-//		try {
-//			mTranscription = readSRTFileAsTranscriptionString(mAudioResultsFile.replace(".mp3", "_server.srt"));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			//e.printStackTrace();
-//			mTranscription ="Error reading file from SDCard";
-//		}
+		String dbTranscription = "";
 		
 		//retrieve transcription from database
 		mCursor = managedQuery(mUri, PROJECTION, null, null, null);
@@ -1876,11 +1867,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             // Make sure we are at the one and only row in the cursor.
             mCursor.moveToFirst();
 			try {
-				
-				mTranscription = mCursor.getString(12);
+				dbTranscription = mCursor.getString(12);
 			}catch(Exception e){
-				Log.e(TAG, "error reading database for trascription");
+				Log.d(TAG, "error reading database for trascription");
 			}
+		}
+		if (dbTranscription.length() > mTranscription.length()){
+			mTranscription = dbTranscription;
 		}
 		 
 		if (mTranscription != null){
@@ -1920,7 +1913,6 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			        	            "exception "+e+" : "+mAuBlogInstallId, // Label
 			        	            3202);       // Value
 			        	}
-						
 					}
 				};
 				OnClickListener no = new OnClickListener() {
