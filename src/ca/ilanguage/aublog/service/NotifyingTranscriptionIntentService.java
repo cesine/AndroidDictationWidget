@@ -445,6 +445,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			//i.setData(mUri);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			i.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
+			if(mAskUserImport){
+				i.putExtra(EditBlogEntryActivity.EXTRA_FRESH_TRANSCRIPTION_CONTENTS, mTranscription);
+			}
 			sendBroadcast(i);
 			if (mAskUserImport){
 				mNotificationMessage = "Transcription merged with server results.";

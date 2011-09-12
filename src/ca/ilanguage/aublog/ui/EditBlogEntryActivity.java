@@ -106,6 +106,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	public static final String EXTRA_TRANSCRIPTION_RETURNED = "returnedTranscriptionBoolean";
 	public static final String EXTRA_FROM_NOTIFICATION_RECORDING_STILL_RUNNING ="recordingStillRunning";
 	public static final String EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG = "askUserIfWantToImportTranscriptionIntoBlogEntry";
+	public static final String EXTRA_FRESH_TRANSCRIPTION_CONTENTS = "freshTranscriptionContents";
 	//private Boolean mReturnedTranscription; //check on reload?
 	public static final String REFRESH_AUDIOFILE_INTENT = NonPublicConstants.NONPUBLIC_INTENT_AUDIOFILE_RECORDED_AND_SAVED;
 	public static final String REFRESH_TRANSCRIPTION_INTENT = NonPublicConstants.NONPUBLIC_INTENT_TRANSCRIPTION_RECEIVED;
@@ -673,7 +674,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         }
         
 		public String hasFreshTranscriptionJS() {
-			if (hasFreshTranscription()) {
+			if ("transcription fresh".equals(mTranscriptionStatus)) {
 				return "true";
 			} else {
 				return "false";
@@ -1271,6 +1272,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 							// "Asking user to import transcription for post "+intent.getData().getLastPathSegment()+" received.",
 							// Toast.LENGTH_LONG).show();
 							// removeStickyBroadcast(intent);
+							mTranscription = intent.getExtras().getString(EditBlogEntryActivity.EXTRA_FRESH_TRANSCRIPTION_CONTENTS);
 							mTranscriptionStatus = "transcription fresh";
 							mWebView.loadUrl("javascript:displayImportButton()");
 							//mWebView.loadUrl("javascript:promptUserImportTranscription()");
@@ -1387,13 +1389,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	}
 	}
 	
-	public Boolean hasFreshTranscription(){
-		if ("transcription fresh".equals(mTranscriptionStatus)){
-    		return true;
-    	}else{
-    		return false;
-    	}
-	}
+
 	
 	/**
 	 * Launches a service to record, it sends the service the name of the audio file to record
