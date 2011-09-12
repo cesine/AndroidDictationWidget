@@ -166,6 +166,7 @@ $(document).ready(function()	{
     function promptUserImportTranscription(){
     	if(document.getElementById('importButton').value=="Import"){
     		Android.askUserIfImportJS(document.getElementById('markItUp').value); //will open the _server.srt and ask the user if they want to import it, it will put it in the markitup.
+    		document.getElementById('importButton').value='Re-check'; // show import button
     	}else{
     		Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value); //will download the transcrition from server.
     		document.getElementById('importButton').value='Checking...'; // show import button
@@ -199,7 +200,7 @@ $(document).ready(function()	{
     	}else{
     		freshTranscription = false;
     		document.getElementById('importButton').style.visibility='visible'; // show import button
-    		document.getElementById('importButton').value='Check Machine transcription'; // show import button
+    		document.getElementById('importButton').value='Re-check'; // show import button
     	}
     	var doit = Android.hasAudioFileJS();
     	if (doit == "false" ){
