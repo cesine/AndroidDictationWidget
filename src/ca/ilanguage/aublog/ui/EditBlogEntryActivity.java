@@ -456,7 +456,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					mPostParent = mCursor.getString(6);
 					mAudioResultsFile = mCursor.getString(10);
 					mAudioResultsFileStatus = mCursor.getString(11);
-					//mTranscription = mCursor.getString(12);
+					mTranscription = "";//mCursor.getString(12);
 					mTranscriptionStatus = mCursor.getString(13);
 					//Toast.makeText(EditBlogEntryActivity.this, "The audio results file is "+mAudioResultsFile, Toast.LENGTH_LONG).show();
 		    		if (mAudioResultsFile.length() > 5){
