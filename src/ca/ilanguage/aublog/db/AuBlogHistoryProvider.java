@@ -231,6 +231,9 @@ public class AuBlogHistoryProvider extends ContentProvider {
         if (values.containsKey(AuBlogHistory.LANGUAGE_MODEL_WEBPAGES) == false) {
             values.put(AuBlogHistory.LANGUAGE_MODEL_WEBPAGES, "");
         }
+        if (values.containsKey(AuBlogHistory.EVOLVING_INFORMATION_STRUCTURE) == false) {
+            values.put(AuBlogHistory.EVOLVING_INFORMATION_STRUCTURE, "");
+        }
         if (values.containsKey(AuBlogHistory.PUBLISHED_IN) == false) {
             values.put(AuBlogHistory.PUBLISHED_IN, "");
         }       
@@ -355,6 +358,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.TRANSCRIPTION_RESULT, AuBlogHistory.TRANSCRIPTION_RESULT);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.LANGUAGE_MODEL_PDFS, AuBlogHistory.LANGUAGE_MODEL_PDFS);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.LANGUAGE_MODEL_WEBPAGES, AuBlogHistory.LANGUAGE_MODEL_WEBPAGES);
+	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.EVOLVING_INFORMATION_STRUCTURE, AuBlogHistory.EVOLVING_INFORMATION_STRUCTURE);
 
 	        // Support for Live Folders.
 	        sLiveFolderProjectionMap = new HashMap<String, String>();
@@ -397,6 +401,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
             		+ AuBlogHistory.TRANSCRIPTION_RESULT + " TEXT,"
             		+ AuBlogHistory.LANGUAGE_MODEL_PDFS + " TEXT,"
             		+ AuBlogHistory.LANGUAGE_MODEL_WEBPAGES + " TEXT,"
+            		+ AuBlogHistory.EVOLVING_INFORMATION_STRUCTURE + " TEXT,"
             		+ AuBlogHistory.LAST_MODIFIED + " INTEGER,"
             		+ AuBlogHistory.TIME_CREATED + " INTEGER,"
             		+ AuBlogHistory.TIME_EDITED + " INTEGER"

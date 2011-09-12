@@ -46,6 +46,7 @@ public class AuBlogHistoryDatabase {
 	    String TRANSCRIPTION_RESULT = "transcription";
 	    String LANGUAGE_MODEL_PDFS= "languagemodelpdfs";
 	    String LANGUAGE_MODEL_WEBPAGES= "languagemodelwebpages";
+	    String EVOLVING_INFORMATION_STRUCTURE = "evolvinginfostruc";
 	    //arrange entry histories in a heirarchy based on edits
 	    String PARENT_ENTRY = "parententry";
 	    String DELETED = "deleted";//changed from daughter entry
