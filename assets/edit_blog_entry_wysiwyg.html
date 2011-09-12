@@ -97,7 +97,7 @@ $(document).ready(function()	{
 <input type="button"  id="deleteButton"  value="Delete" onClick="deletePost()" />
 <input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecordingController()" />
 <input type="button"  id="playButton" value="Play" onClick="playPauseAudioController()" />
-<input type="button"  id="importButton" value="Import" onClick="promptUserImportTranscription()" />
+<input type="button"  id="importButton" value="Transcription" onClick="promptUserImportTranscription()" />
 </span>
 <script type="text/javascript">
 	//http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
@@ -157,12 +157,28 @@ $(document).ready(function()	{
     		document.getElementById('playButton').value=Android.playOrPauseAudioJS();
     	}
     }
+    /*
+    There are three states of transcription:
+    	null (no audio, no play button, no transcription button)
+    	stale transcription or not downloaded yet (Check machine transcription, or Re-check)
+    	fresh transcription (Import)
+    */
+    function promptUserImportTranscription(){
+    	if(document.getElementById('importButton').value=="Import"){
+    		Android.askUserIfImportJS(document.getElementById('markItUp').value); //will open the _server.srt and ask the user if they want to import it, it will put it in the markitup.
+    	}else{
+    		Android.downloadTranscriptionFromServerJS(document.getElementById('markItUp').value); //will download the transcrition from server.
+    		document.getElementById('importButton').value='Checking...'; // show import button
+    	}
+    }
     function displayPlayButton(){
     	if (hasAudio == true){
     		//do nothing, it is already visible
     	}else{
     		hasAudio = true;
     		document.getElementById('playButton').style.visibility='visible'; // hide play button
+    		document.getElementById('importButton').style.visibility='visible'; // show import button
+    		
     		/*
     		var playButtn  = document.createElement("input");
         	playButtn.setAttribute("type","button");
@@ -179,8 +195,14 @@ $(document).ready(function()	{
     	if (doit == "true" ){
     		freshTranscription = true;
     		document.getElementById('importButton').style.visibility='visible'; // show import button
+    		document.getElementById('importButton').value='Import'; // show import button
     	}else{
     		freshTranscription = false;
+    		document.getElementById('importButton').style.visibility='visible'; // show import button
+    		document.getElementById('importButton').value='Check Machine transcription'; // show import button
+    	}
+    	var doit = Android.hasAudioFileJS();
+    	if (doit == "false" ){
     		document.getElementById('importButton').style.visibility='hidden'; // hide import button
     	}
     	
@@ -193,9 +215,7 @@ $(document).ready(function()	{
 	    Android.downloadTranscriptionFromServerJS();
 	    Android.askUserIfImportJS(document.getElementById('markItUp').value); //will open the _server.srt and ask the user if they want to import it, it will put it in the markitup.
 	*/
-    function promptUserImportTranscription(){
-		Android.askUserIfImportJS(document.getElementById('markItUp').value); //will open the _server.srt and ask the user if they want to import it, it will put it in the markitup.
-    }
+    
     
     function readTTSPost(){
     	Android.readToTTSJS("This is what your blog entry says... "+document.getElementById('markItUp').value);
@@ -231,10 +251,7 @@ $(document).ready(function()	{
     		displayPlayButton();
     		document.getElementById('recordButton').value="New Dictation";
     	}
-    	
-    	displayImportButton();
-    	
-    	
+	   	displayImportButton();
     }
     function fillPostContentFromAndroidActivity(){
     	document.getElementById('markItUp').value=Android.fetchPostContentJS();
