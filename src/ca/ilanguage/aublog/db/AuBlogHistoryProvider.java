@@ -410,21 +410,8 @@ public class AuBlogHistoryProvider extends ContentProvider {
              */
 			ContentValues values = new ContentValues();
 			Long now = Long.valueOf(System.currentTimeMillis());
-			// Make sure that the fields are all set
-			values.put(AuBlogHistory.TIME_CREATED, now);
-			values.put(AuBlogHistory.LAST_MODIFIED, now);
-			values.put(AuBlogHistory.TIME_EDITED, "0");
-			values.put(AuBlogHistory.PUBLISHED, "0");
-			values.put(AuBlogHistory.PARENT_ENTRY, "0");
-			values.put(AuBlogHistory.DELETED, "0");
-			values.put(AuBlogHistory.ENTRY_TITLE, "");
-			values.put(AuBlogHistory.ENTRY_CONTENT, "");
-			values.put(AuBlogHistory.ENTRY_LABELS, "");
-			values.put(AuBlogHistory.AUDIO_FILE, "");
-			values.put(AuBlogHistory.AUDIO_FILE_STATUS, "");
-			values.put(AuBlogHistory.TRANSCRIPTION_STATUS, "");
-			values.put(AuBlogHistory.TRANSCRIPTION_RESULT, "");
-			values.put(AuBlogHistory.PUBLISHED_IN, "");
+			// the fields are all set by the insert, by default
+			
 			// it seems suspicious to only be the content of PARENT_ENTRY, ah its the nullcolumnhack
 			long saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
