@@ -244,37 +244,44 @@ public class MainMenuActivity extends Activity {
 	   	}
 	}
 	@Override
-	  protected void onDestroy() {
-	    tracker.stop();// Stop the tracker when it is no longer needed.
-	    if (audioFileUpdateReceiver != null) {
+	protected void onDestroy() {
+		tracker.trackEvent(mAuBlogInstallId, // Category
+				"ExitAuBlog", // Action
+				"Exit AuBlog " + (int) System.currentTimeMillis() + " : "
+						+ mAuBlogInstallId, // Label
+				(int) System.currentTimeMillis()); // Value
+		tracker.stop();// Stop the tracker when it is no longer needed.
+		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
 		}
-	    /*cant get the kill intent to get to the dictation or transcription services in time. this is called after the transcription is started. so this might reach it.*/
-	    if (mKillAuBlog != null){
-			if(mKillAuBlog){
+		/*
+		 * cant get the kill intent to get to the dictation or transcription
+		 * services in time. this is called after the transcription is started.
+		 * so this might reach it.
+		 */
+		if (mKillAuBlog != null) {
+			if (mKillAuBlog) {
 				Intent intent = new Intent(MainMenuActivity.KILL_AUBLOG_INTENT);
 				sendBroadcast(intent);
 			}
 		}
-	    super.onDestroy();
-	  }
+		super.onDestroy();
+	}
 
 	// Create an anonymous implementation of OnClickListener
 
 	private View.OnClickListener sOptionButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
-			//TODO change category to installid 
-			tracker.setCustomVar(1, "Navigation Type", "Button click", 14);
 			tracker.trackPageView("/settingsScreen");
+
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked settings: "+mAuBlogInstallId, // Label
-		            14);       // Value
+					mAuBlogInstallId,  // Category
+		            "Clicked settings",  // Action
+		            "Clicked settings on main menu "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
 
 			Intent i = new Intent(getBaseContext(),
 					SetPreferencesActivity.class);
-
 			v.startAnimation(mButtonFlickerAnimation);
 			mFadeOutAnimation
 					.setAnimationListener(new StartActivityAfterAnimation(i));
@@ -289,15 +296,13 @@ public class MainMenuActivity extends Activity {
 
 	private View.OnClickListener sExtrasButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
-
-			tracker.setCustomVar(1, "Navigation Type", "Button click", 13);
 			tracker.trackPageView("/userGuideScreen");
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked user guide: "+mAuBlogInstallId, // Label
-		            13);       // Value
-			
+					mAuBlogInstallId,  // Category
+		            "Clicked user guide",  // Action
+		            "Clicked user guide on main menu "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+
 			Intent i = new Intent(getBaseContext(), AboutActivity.class);
 
 			v.startAnimation(mButtonFlickerAnimation);
@@ -319,7 +324,7 @@ public class MainMenuActivity extends Activity {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 			return true;
 		}
@@ -340,14 +345,12 @@ public class MainMenuActivity extends Activity {
 	}
 	private View.OnClickListener sDraftsButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
-			tracker.setCustomVar(1, "Navigation Type", "Button click", 11);
 			tracker.trackPageView("/viewDraftsTreeScreen");
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked drafts: "+mAuBlogInstallId, // Label
-		            11);       // Value
-
+					mAuBlogInstallId,  // Category
+		            "Clicked view drafts",  // Action
+		            "Clicked view drafts on main menu "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
 			/*
 			 * If the drafts tree is fresh (no new changes) return.
 			 */
@@ -355,12 +358,13 @@ public class MainMenuActivity extends Activity {
 			if  (true == prefs.getBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false) ){
 				Toast.makeText(MainMenuActivity.this,
 						"Not re-creating drafts tree, using cached. ",
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_LONG).show(); 
 				tracker.trackEvent(
-			            "CPU",  // Category
-			            "Use",  // Action
-			            "not creating new drafts tree: "+mAuBlogInstallId, // Label
-			            111);   
+						mAuBlogInstallId,  // Category
+			            "Use CPU",  // Action
+			            "Not creating new drafts tree "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+			            (int)System.currentTimeMillis());       // Value
+
 				Intent i = new Intent(getBaseContext(), ViewDraftTreeActivity.class);
 
 				v.startAnimation(mButtonFlickerAnimation);
@@ -368,23 +372,15 @@ public class MainMenuActivity extends Activity {
 						.setAnimationListener(new StartActivityAfterAnimation(i));
 				return ;// "no tree created, it is already fresh";
 			}
-
 			/*
 			 * Else if the drafts tree is not fresh, create a new Async task to generate the drafts tree
 			 */
-//			generateDraftsTree = new Runnable(){
-//				@Override
-//				public void run() {
-//					generateDraftTree();
-//				}
-//			};
-//			Thread thread =  new Thread(null, generateDraftsTree, "MagentoBackground");
-//			thread.start();
 			tracker.trackEvent(
-		            "CPU",  // Category
-		            "Use",  // Action
-		            "creating new drafts tree: "+mAuBlogInstallId, // Label
-		            112);  
+					mAuBlogInstallId,  // Category
+		            "Use CPU",  // Action
+		            "Creating new drafts tree "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+
 			/*
 			 * Getting force closes if user rotates while generating drafts tree. since this might happen often because the main menu is nice in portrait, but the drafts tree is nice in landscape, should handle this
 			 * http://stackoverflow.com/questions/1111980/how-to-handle-screen-orientation-change-when-progress-dialog-and-background-threa
@@ -393,51 +389,22 @@ public class MainMenuActivity extends Activity {
 			 * android:configChanges="orientation|keyboardHidden"
 			 */
 			new GenerateTreeTask().execute();
-			
-			
-			
 			/*
 			 * Mean while set the flag that the draft tree is fresh
 			 */
 			SharedPreferences.Editor editor = prefs.edit();
 	    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,true);
 	    	editor.commit();
-			
-			
-
 		}
 	};
-
 	private View.OnClickListener sStartButtonListener = new View.OnClickListener() {
 		public void onClick(View v) {
-
-			// Intent i = new Intent(getBaseContext(),
-			// DifficultyMenuActivity.class);
-			// i.putExtra("newGame", true);
-
-			/*
-			 * A full working sample client, containing all the sample code
-			 * shown in this document, is available in the Java client library
-			 * distribution, under the directory
-			 * gdata/java/sample/blogger/BloggerClient.java. I. Public feeds
-			 * don't require any authentication, but they are read-only. If you
-			 * want to modify blogs, then your client needs to authenticate
-			 * before requesting private feeds. this document assume you have an
-			 * authenticated GoogleService object.
-			 */
-
-			// Alert
-			// .showAlert(MainMenuActivity.this,
-			// "Profile is not created",
-			// "Please, input 'login/password' in settings");
-			
-			tracker.setCustomVar(1, "Navigation Type", "Button click", 12);
 			tracker.trackPageView("/editBlogEntryScreen");
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked new entry: "+mAuBlogInstallId, // Label
-		            12);       // Value
+					mAuBlogInstallId,  // Category
+		            "Clicked New Entry",  // Action
+		            "Clicked new entry on main menu "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
 
 			Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
 
@@ -497,16 +464,12 @@ public class MainMenuActivity extends Activity {
 	public void onConfigurationChanged(Configuration newConfig) {
 	  super.onConfigurationChanged(newConfig);
 	  setContentView(R.layout.mainmenu);
-	  
-
 		mStartButton = findViewById(R.id.startButton);
 		mOptionsButton = findViewById(R.id.optionButton);
 		mBackground = findViewById(R.id.mainMenuBackground);
-
 		if (mOptionsButton != null) {
 			mOptionsButton.setOnClickListener(sOptionButtonListener);
 		}
-
 		mExtrasButton = findViewById(R.id.extrasButton);
 		mExtrasButton.setOnClickListener(sExtrasButtonListener);
 
@@ -540,11 +503,9 @@ public class MainMenuActivity extends Activity {
 		}
 		tracker = GoogleAnalyticsTracker.getInstance();
 
-	    // Start the tracker in manual dispatch mode...
+	    // Start the tracker in 20 sec interval dispatch mode...
 	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
 
-	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
-	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
 	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
@@ -602,11 +563,7 @@ public class MainMenuActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		  
-		
-		
 		super.onPause();
-
 	}
 
 	@Override
@@ -635,11 +592,7 @@ public class MainMenuActivity extends Activity {
 		mButtonFlickerAnimation.setAnimationListener(null);
 
 		if (mStartButton != null) {
-
-			
-			// Change "start" to "continue" if its in a resume.
 			SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-			
 
 			((ImageView) mStartButton).setImageDrawable(getResources()
 					.getDrawable(R.drawable.ui_button_start));
@@ -649,9 +602,6 @@ public class MainMenuActivity extends Activity {
 					PreferenceConstants.PREFERENCE_LAST_VERSION, 0);
 
 			if (Math.abs(lastVersion) < Math.abs(AuBlog.VERSION)) {
-				
-				
-				
 				// This is a new install or an upgrade.
 				SharedPreferences.Editor editor = prefs.edit();
 				
@@ -672,9 +622,23 @@ public class MainMenuActivity extends Activity {
 				if (installID.length()< 5){
 					Long currentTimeStamp = System.currentTimeMillis();
 					Long randomNumberToAvoidSameSecondInstallsClash = (Math.round(Math.random()*10000));
-					newInstallID = currentTimeStamp.toString()+randomNumberToAvoidSameSecondInstallsClash.toString();
+					newInstallID = AuBlog.VERSION+currentTimeStamp.toString()+randomNumberToAvoidSameSecondInstallsClash.toString();
 					editor.putString(PreferenceConstants.AUBLOG_INSTALL_ID, newInstallID);
 					mAuBlogInstallId = newInstallID;
+					tracker.trackEvent(
+							mAuBlogInstallId,  // Category
+				            "New install",  // Action
+				            "New install of AuBlog (either from market or from clear data) "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+				            (int)System.currentTimeMillis());       // Value
+
+				}else{
+					//its an upgrade
+					tracker.trackEvent(
+							mAuBlogInstallId,  // Category
+				            "AuBlog Upgrade",  // Action
+				            "Upgrade of AuBlog from version "+lastVersion+" to version "+AuBlog.VERSION+" at "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+				            (int)System.currentTimeMillis());       // Value
+
 				}
 				
 				///data/data/ca.ilanguage.aublog/databases/aubloghistory.db
@@ -689,19 +653,15 @@ public class MainMenuActivity extends Activity {
 				// Rename file (or directory)
 				boolean success = file.renameTo(file2);
 				if (!success) {
-					tracker.trackEvent(
-				            "Clicks",  // Category
-				            "Button",  // Action
-				            "new user: "+mAuBlogInstallId, // Label
-				            18);       // Value
+					//new user
 
 				}else{
+					//upgrade from 1.0
 					tracker.trackEvent(
-				            "Clicks",  // Category
-				            "Button",  // Action
-				            "user upgraded aublog: "+mAuBlogInstallId, // Label
-				            18);       // Value
-
+							mAuBlogInstallId,  // Category
+				            "AuBlog Upgrade",  // Action
+				            "Upgrade of AuBlog (1.0) sending old drafts tree to server. From version "+lastVersion+" to version "+AuBlog.VERSION+" at "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+				            (int)System.currentTimeMillis());       // Value
 
 					Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
 					intent.setData(AuBlogHistory.CONTENT_URI.buildUpon().appendPath("1").build());
@@ -812,7 +772,7 @@ public class MainMenuActivity extends Activity {
 					.setTitle(R.string.whats_new_dialog_title)
 					.setPositiveButton(R.string.whats_new_dialog_ok, null)
 					.setMessage(R.string.whats_new_dialog_message).create();
-			
+			//TODO flush out the null click event into taking user directly to drafts tree, or in some other way, bring user to drafts tree more often. new users are not even finding it.
 		} 
 		else if (id == GENERATING_TREE_DIALOG) {
 			dialog = new ProgressDialog.Builder(this)
@@ -827,18 +787,10 @@ public class MainMenuActivity extends Activity {
 
 
 	public String generateDraftTree() {
-
-		
-		
 		/*
 		 * TODO: use the appl cache for the drafts tree
 		 * http://developer.android.com/guide/topics/data/data-storage.html
 		 */
-		// BufferedWriter mOut;
-
-		
-		
-		
 		
 		String mResultsFile = "draft_tree_data.js";
 		// FileWriter fstream;
@@ -905,31 +857,15 @@ public class MainMenuActivity extends Activity {
 
 		}
 
-		
-		
-//    	try {
-//			Thread.sleep(1000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-    	//from retrieving experiments which was original from where?
-//    	runOnUiThread(returnRes);
 		return "drafts tree file created";
 	}
-//	private Runnable returnRes = new Runnable() {
-//
-//		@Override
-//		public void run() {
-//			
-//			m_ProgressDialog.dismiss();
-//			
-//		}
-//	};
+
 
 	public String getSubtree(String id) {
 		/*
-		 * TODO get location of audio file so that can add a class to the space tree that indicates its playable, and a button to play it, requires adding to the projection?
+		 * DONE get location of audio file so that can add a class to the space
+		 * tree that indicates its playable, and a button to play it, requires
+		 * adding to the projection?
 		 */
 		String[] PROJECTION = new String[] { AuBlogHistory._ID, // 0
 				AuBlogHistory.ENTRY_TITLE, AuBlogHistory.ENTRY_CONTENT, // 2
@@ -939,7 +875,6 @@ public class MainMenuActivity extends Activity {
 		String node = "";
 		Boolean firstChild = true;
 		try {
-
 			/*
 			 * find all nodes with this node as its parent
 			 */
