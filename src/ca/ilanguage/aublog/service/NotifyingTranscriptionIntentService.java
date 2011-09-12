@@ -447,6 +447,18 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			i.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
 			if(mAskUserImport){
 				i.putExtra(EditBlogEntryActivity.EXTRA_FRESH_TRANSCRIPTION_CONTENTS, mTranscription);
+				mNotificationMessage = "Transcription results received.";
+				mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+				if (mShowNotification){
+					mNM.notify(NOTIFICATION, mNotification);
+				}
+			}else{
+				mNotificationMessage = "Dication sent for transcription.";
+				mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+				if (mShowNotification){
+					mNM.notify(NOTIFICATION, mNotification);
+				}
+				//mNM.cancel(NOTIFICATION);
 			}
 			sendBroadcast(i);
 			if (mAskUserImport){
