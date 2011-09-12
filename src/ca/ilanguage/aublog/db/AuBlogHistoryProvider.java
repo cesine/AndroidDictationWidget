@@ -30,7 +30,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
     private static final String TAG = "AuBlogHistoryProvider";
 
     private static final String DATABASE_NAME = "aubloghistory.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
     //private static final String  AUBLOG_HISTORY_TABLE_NAME= AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME;
 
     private static HashMap<String, String> sAuBlogHistoryProjectionMap;
@@ -225,7 +225,12 @@ public class AuBlogHistoryProvider extends ContentProvider {
         if (values.containsKey(AuBlogHistory.TRANSCRIPTION_RESULT) == false) {
             values.put(AuBlogHistory.TRANSCRIPTION_RESULT, "");
         }
-        
+        if (values.containsKey(AuBlogHistory.LANGUAGE_MODEL_PDFS) == false) {
+            values.put(AuBlogHistory.LANGUAGE_MODEL_PDFS, "");
+        }
+        if (values.containsKey(AuBlogHistory.LANGUAGE_MODEL_WEBPAGES) == false) {
+            values.put(AuBlogHistory.LANGUAGE_MODEL_WEBPAGES, "");
+        }
         if (values.containsKey(AuBlogHistory.PUBLISHED_IN) == false) {
             values.put(AuBlogHistory.PUBLISHED_IN, "");
         }       
@@ -348,6 +353,8 @@ public class AuBlogHistoryProvider extends ContentProvider {
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.AUDIO_FILE_STATUS, AuBlogHistory.AUDIO_FILE_STATUS);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.TRANSCRIPTION_STATUS, AuBlogHistory.TRANSCRIPTION_STATUS);
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.TRANSCRIPTION_RESULT, AuBlogHistory.TRANSCRIPTION_RESULT);
+	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.LANGUAGE_MODEL_PDFS, AuBlogHistory.LANGUAGE_MODEL_PDFS);
+	        sAuBlogHistoryProjectionMap.put(AuBlogHistory.LANGUAGE_MODEL_WEBPAGES, AuBlogHistory.LANGUAGE_MODEL_WEBPAGES);
 
 	        // Support for Live Folders.
 	        sLiveFolderProjectionMap = new HashMap<String, String>();
@@ -388,6 +395,8 @@ public class AuBlogHistoryProvider extends ContentProvider {
             		+ AuBlogHistory.AUDIO_FILE_STATUS + " TEXT,"
             		+ AuBlogHistory.TRANSCRIPTION_STATUS + " TEXT,"
             		+ AuBlogHistory.TRANSCRIPTION_RESULT + " TEXT,"
+            		+ AuBlogHistory.LANGUAGE_MODEL_PDFS + " TEXT,"
+            		+ AuBlogHistory.LANGUAGE_MODEL_WEBPAGES + " TEXT,"
             		+ AuBlogHistory.LAST_MODIFIED + " INTEGER,"
             		+ AuBlogHistory.TIME_CREATED + " INTEGER,"
             		+ AuBlogHistory.TIME_EDITED + " INTEGER"

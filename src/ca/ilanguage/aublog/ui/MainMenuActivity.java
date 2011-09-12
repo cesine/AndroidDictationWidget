@@ -699,19 +699,20 @@ public class MainMenuActivity extends Activity {
 					tracker.trackEvent(
 				            "Clicks",  // Category
 				            "Button",  // Action
-				            "user upgraded database: "+mAuBlogInstallId, // Label
+				            "user upgraded aublog: "+mAuBlogInstallId, // Label
 				            18);       // Value
 
+
+					Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
+					intent.setData(AuBlogHistory.CONTENT_URI.buildUpon().appendPath("1").build());
+			        intent.putExtra(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS,"This is a back up of your data from install ."+mAuBlogInstallId);
+					intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, backupFileName);
+			        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
+			        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, "Status backing up previous data. at "+System.currentTimeMillis());
+			        intent.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, false);
+			        startService(intent); 
 				}
 			
-				Intent intent = new Intent(this, NotifyingTranscriptionIntentService.class);
-				intent.setData(AuBlogHistory.CONTENT_URI.buildUpon().appendPath("1").build());
-		        intent.putExtra(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS,"This is a back up of your data from install ."+mAuBlogInstallId);
-				intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH, backupFileName);
-		        intent.putExtra(NotifyingTranscriptionIntentService.EXTRA_SPLIT_TYPE, NotifyingTranscriptionIntentService.SPLIT_ON_SILENCE);
-		        intent.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, "Status backing up previous data. at "+System.currentTimeMillis());
-		        intent.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, false);
-		        startService(intent); 
 		        
 		        
 				/* This code checks for device compatibility
