@@ -450,7 +450,7 @@ public class DictationRecorderService extends Service {
 		File outSRTFile =  new File(mAudioResultsFile.replace(".mp3","_client.srt"));
 		FileOutputStream outSRT;
 		try {
-			outSRT = new FileOutputStream(outSRTFile);
+			outSRT = new FileOutputStream(outSRTFile,false);
 			outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
 			outSRT.write(mAudioResultsFileStatus.getBytes());
 			outSRT.write("\n\n".getBytes());
