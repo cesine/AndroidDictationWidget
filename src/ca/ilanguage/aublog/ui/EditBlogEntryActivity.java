@@ -593,6 +593,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         public void zeroOutParentResultFileJS(){
         	mAudioResultsFile="";
         	mAudioResultsFileStatus="";
+        	mTranscriptionStatus = "";
+        	mTranscription = "";
         }
         public Boolean findOutIfFreshDataJS(){
         	return mFreshEditScreen;
@@ -670,7 +672,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	}
         }
         
-		public String hasTranscriptionFileJS() {
+		public String hasFreshTranscriptionJS() {
 			if (hasFreshTranscription()) {
 				return "true";
 			} else {
@@ -889,6 +891,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	      savedInstanceState.putString("audiofile",mAudioResultsFile);
 	      savedInstanceState.putBoolean("fresheditscreen",mFreshEditScreen);
 	      savedInstanceState.putString("audiofilestatus",mAudioResultsFileStatus);
+		  savedInstanceState.putString("mtranscriptionstatus",mTranscriptionStatus);
+		  savedInstanceState.putString("mtranscription",mTranscription);
 	      savedInstanceState.putBoolean("deleted", mDeleted);
 	      savedInstanceState.putBoolean("recordingNow", mRecordingNow);
 	      savedInstanceState.putLong("startTime", mStartTime);
@@ -915,6 +919,9 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
     	
       // Restore UI state from the savedInstanceState.
       // This bundle has also been passed to onCreate.
+       
+	  mTranscriptionStatus = savedInstanceState.getString("mtranscriptionstatus");
+	  mTranscription = savedInstanceState.getString("mtranscription");
       mPostTitle = savedInstanceState.getString("title");
       mPostContent = savedInstanceState.getString("content");
       mPostLabels = savedInstanceState.getString("labels");
@@ -1266,7 +1273,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 							// removeStickyBroadcast(intent);
 							mTranscriptionStatus = "transcription fresh";
 							mWebView.loadUrl("javascript:displayImportButton()");
-							mWebView.loadUrl("javascript:promptUserImportTranscription()");
+							//mWebView.loadUrl("javascript:promptUserImportTranscription()");
 							// mWebView.loadUrl("javascript:Android.askUserIfImportJS(document.getElementById('markItUp').value)");
 						} else {
 							// Toast.makeText(EditBlogEntryActivity.this,

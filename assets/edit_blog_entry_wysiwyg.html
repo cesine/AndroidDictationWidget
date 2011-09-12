@@ -47,6 +47,7 @@ function autoSize() {
 <!--
 $(document).ready(function()	{
 	document.getElementById('playButton').style.visibility='hidden'; // hide play button
+	document.getElementById('importButton').style.visibility='hidden'; // hide import button
 	checkRecordingNow();
 	fillFromAndroidActivity();
 	// Add markItUp! to your textarea in one line
@@ -96,6 +97,7 @@ $(document).ready(function()	{
 <input type="button"  id="deleteButton"  value="Delete" onClick="deletePost()" />
 <input type="button"  id="recordButton" value="Record Dictation" onClick="startStopRecordingController()" />
 <input type="button"  id="playButton" value="Play" onClick="playPauseAudioController()" />
+<input type="button"  id="importButton" value="Import" onClick="promptUserImportTranscription()" />
 </span>
 <script type="text/javascript">
 	//http://stackoverflow.com/questions/2314886/how-can-i-debug-javascript-on-android
@@ -105,6 +107,7 @@ $(document).ready(function()	{
 	console.warn('4');
 	
 	var hasAudio = false;
+	var freshTranscription = false;
 	
     function startStopRecordingController() {
     	if(document.getElementById('recordButton').value=="Stop Dictation"){
@@ -170,6 +173,16 @@ $(document).ready(function()	{
         	*/
     	}
     }
+    
+    function displayImportButton(){
+    	if(freshTranscription == true){
+    		document.getElementById('importButton').style.visibility='visible'; // show import button
+    	}
+    	else{
+    		document.getElementById('importButton').style.visibility='hidden'; // hide import button
+    	}
+    }
+    
     /* Additional Interface contents:
 		Android.getTimeRecordedJS();
 	    Android.showToastJS(toast);
@@ -215,9 +228,24 @@ $(document).ready(function()	{
     		displayPlayButton();
     		document.getElementById('recordButton').value="New Dictation";
     	}
+    	doit = Android.hasFreshTranscriptionJS();
+    	if (doit == "true" ){
+    		freshTranscription = true;
+    		displayImportButton();
+    	}
+    	
     }
     function fillPostContentFromAndroidActivity(){
     	document.getElementById('markItUp').value=Android.fetchPostContentJS();
+    	var doit = Android.hasFreshTranscriptionJS();
+    	if (doit == "true" ){
+    		freshTranscription = true;
+    		displayImportButton();
+    	}
+    	else{
+    		freshTranscription = false;
+    		displayImportButton();
+    	}
     }
     function checkRecordingNow(){
     	if (Android.getValueRecordingNowJS() == 1){
