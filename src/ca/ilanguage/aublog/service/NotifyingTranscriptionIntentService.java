@@ -359,6 +359,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				//this is showing up for when the audio is not sent, but the client srt is...
 				//mNotificationMessage = "...";// null;
 			}
+			mTranscription = "transcription results";//readAsTranscriptionString();  
 			FileOutputStream outSRT;
 			try {
 				outSRT = new FileOutputStream(outSRTFile);
@@ -373,8 +374,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				 * Append time codes SRT array to srt file.
 				 * the time codes and transcription are read line by line from the in the server's response. 
 				 */
-				for(int i = 0; i < mTimeCodes.size(); i++){
-					mTranscription = mTranscription + mTimeCodes.get(i) + "\n"; 
+				for(int i = 0; i < mTimeCodes.size(); i++){					
 					outSRT.write(mTimeCodes.get(i).getBytes());
 					outSRT.write("\n".getBytes());
 					//						outSRT.write("\n--Unknown--".getBytes());
@@ -528,28 +528,31 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	
 	/**
 	 * 
-	 * @param filePath TODO remove and just use mTimeCodes
-	 * @return
+	 * @return string of transcription results only concatinated with spaces.
 	 * @throws java.io.IOException
 	 */
-	public static String readAsTranscriptionString(String filePath) throws java.io.IOException
+	public String readAsTranscriptionString() 
 	{
-	    BufferedReader reader = new BufferedReader(new FileReader(filePath));
 	    String line;
 	    String results="";
 	    Pattern pattern = Pattern.compile("^\\d:\\d\\d:\\d\\d.\\d\\d\\d,\\d:\\d\\d:\\d\\d.\\d\\d\\d");
 		Matcher matcher;
-	    while((line = reader.readLine()) != null)
-	    {
+		for(int i = 0; i < mTimeCodes.size(); i++){	 
+			line = mTimeCodes.get(i);
 	    	//throw away file info by detecting the timecodes and discarding 2 lines after. 
             if (line.contains("0:00:00.000,0:00:00.000")){
-            	line = reader.readLine();
+            	i++;
+            	line = mTimeCodes.get(i);
             	while ((line != null) && ! line.contains("0:00:00.020,0:00:00.020")){
-            		line = reader.readLine();
+            		i++;
+                	line = mTimeCodes.get(i);
             	}
-            	line = reader.readLine();
-            	line = reader.readLine();
-            	line = reader.readLine();
+            	i++;
+            	line = mTimeCodes.get(i);
+            	i++;
+            	line = mTimeCodes.get(i);
+            	i++;
+            	line = mTimeCodes.get(i);
             }
             if(line != null){
 	            //throw away additional time codes
@@ -561,7 +564,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	    		}
             }
 	    }
-	    reader.close();
 	    return results;
 	}
 }
