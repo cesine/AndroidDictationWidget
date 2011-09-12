@@ -2,7 +2,6 @@ package ca.ilanguage.aublog.ui;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,7 +10,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-import com.google.gdata.client.youtube.YouTubeQuery.SafeSearch;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -24,14 +22,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
@@ -45,14 +40,12 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
-import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
 import ca.ilanguage.aublog.preferences.SetPreferencesActivity;
 import ca.ilanguage.aublog.service.DictationRecorderService;
 import ca.ilanguage.aublog.service.NotifyingTranscriptionIntentService;
-import ca.ilanguage.aublog.service.NotifyingTranscriptionService;
 
 /**
  * Demonstrates how to embed a WebView in your activity. Also demonstrates how
