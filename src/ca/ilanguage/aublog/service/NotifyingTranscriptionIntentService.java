@@ -3,9 +3,12 @@ package ca.ilanguage.aublog.service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -81,6 +84,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	private String mFileNameOnServer="";
 	private int mSplitType = 0;
 	private ArrayList<String> mTimeCodes;
+	private String mTranscription = "";
+	private String mTranscriptionStatus = "";
 
 	public static final String EXTRA_RESULTS = "splitUpResults";
 	public static final String EXTRA_SPLIT_TYPE = "splitOn";
@@ -210,6 +215,11 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mAudioResultsFileStatus = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
 			mPostContents=intent.getExtras().getString(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS);
 			mAskUserImport=intent.getExtras().getBoolean(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
+			if(mAskUserImport == true){
+				mTranscriptionStatus= "transcription fresh";
+			}else{
+				mTranscriptionStatus = "transcription not fresh"; 
+			}
 			
 			mSplitType = intent.getExtras().getInt(EXTRA_SPLIT_TYPE);
 
@@ -349,6 +359,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				//this is showing up for when the audio is not sent, but the client srt is...
 				//mNotificationMessage = "...";// null;
 			}
+			mTranscription = "transcription results";//readAsTranscriptionString();  
 			FileOutputStream outSRT;
 			try {
 				outSRT = new FileOutputStream(outSRTFile);
@@ -363,7 +374,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				 * Append time codes SRT array to srt file.
 				 * the time codes and transcription are read line by line from the in the server's response. 
 				 */
-				for(int i = 0; i < mTimeCodes.size(); i++){
+				for(int i = 0; i < mTimeCodes.size(); i++){					
 					outSRT.write(mTimeCodes.get(i).getBytes());
 					outSRT.write("\n".getBytes());
 					//						outSRT.write("\n--Unknown--".getBytes());
@@ -434,6 +445,21 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			//i.setData(mUri);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			i.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
+			if(mAskUserImport){
+				i.putExtra(EditBlogEntryActivity.EXTRA_FRESH_TRANSCRIPTION_CONTENTS, mTranscription);
+				mNotificationMessage = "Transcription results received.";
+				mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+				if (mShowNotification){
+					mNM.notify(NOTIFICATION, mNotification);
+				}
+			}else{
+				mNotificationMessage = "Dication sent for transcription.";
+				mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+				if (mShowNotification){
+					mNM.notify(NOTIFICATION, mNotification);
+				}
+				//mNM.cancel(NOTIFICATION);
+			}
 			sendBroadcast(i);
 			if (mAskUserImport){
 				mNotificationMessage = "Transcription merged with server results.";
@@ -450,10 +476,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 			mNotificationMessage = "Dication sent for transcription.";
-			//			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-			/*if (mShowNotification){
-			mNM.notify(NOTIFICATION, mNotification);
-			}*/	
+			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+			if (mShowNotification){
+				mNM.notify(NOTIFICATION, mNotification);
+			}
 		}
 		//mNM.cancel(NOTIFICATION);
 
@@ -489,6 +515,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				}
 				ContentValues values = new ContentValues();
 				values.put(AuBlogHistory.AUDIO_FILE_STATUS, mAudioResultsFileStatus);
+				values.put(AuBlogHistory.TRANSCRIPTION_STATUS, mTranscriptionStatus);
+				values.put(AuBlogHistory.TRANSCRIPTION_RESULT, mTranscription);
 				getContentResolver().update(mUri, values,null, null);
 				mDBLastModified = Long.toString(System.currentTimeMillis());
 				getContentResolver().notifyChange(AuBlogHistory.CONTENT_URI, null);
@@ -512,11 +540,45 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 
 	}
 
-	public String splitOnSilence(){
-		//    	mTimeCodes.add("0:00:02.350,0:00:06.690");
-		//    	mTimeCodes.add("0:00:07.980,0:00:12.780");
-		//    	mTimeCodes.add("0:00:14.529,0:00:17.970");
-		//    	mTimeCodes.add("0:00:17.970,0:00:20.599");
-		return "right now, these are fake timecodes";
+	
+	/**
+	 * 
+	 * @return string of transcription results only concatinated with spaces.
+	 * @throws java.io.IOException
+	 */
+	public String readAsTranscriptionString() 
+	{
+	    String line;
+	    String results="";
+	    Pattern pattern = Pattern.compile("^\\d:\\d\\d:\\d\\d.\\d\\d\\d,\\d:\\d\\d:\\d\\d.\\d\\d\\d");
+		Matcher matcher;
+		for(int i = 0; i < mTimeCodes.size(); i++){	 
+			line = mTimeCodes.get(i);
+	    	//throw away file info by detecting the timecodes and discarding 2 lines after. 
+            if (line.contains("0:00:00.000,0:00:00.000")){
+            	i++;
+            	line = mTimeCodes.get(i);
+            	while ((line != null) && ! line.contains("0:00:00.020,0:00:00.020")){
+            		i++;
+                	line = mTimeCodes.get(i);
+            	}
+            	i++;
+            	line = mTimeCodes.get(i);
+            	i++;
+            	line = mTimeCodes.get(i);
+            	i++;
+            	line = mTimeCodes.get(i);
+            }
+            if(line != null){
+	            //throw away additional time codes
+	            matcher = pattern.matcher(line);
+	    		if (matcher.find()){
+	    			//its a time code do nothing.
+	    		}else{
+	    			results += line+ " ";
+	    		}
+            }
+	    }
+	    return results;
 	}
 }
