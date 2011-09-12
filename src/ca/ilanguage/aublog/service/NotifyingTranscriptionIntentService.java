@@ -476,10 +476,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 			mNotificationMessage = "Dication sent for transcription.";
-			//			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
-			/*if (mShowNotification){
-			mNM.notify(NOTIFICATION, mNotification);
-			}*/	
+			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
+			if (mShowNotification){
+				mNM.notify(NOTIFICATION, mNotification);
+			}
 		}
 		//mNM.cancel(NOTIFICATION);
 
