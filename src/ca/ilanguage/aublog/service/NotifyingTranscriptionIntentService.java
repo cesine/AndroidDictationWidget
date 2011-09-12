@@ -3,7 +3,6 @@ package ca.ilanguage.aublog.service;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -246,6 +245,26 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			outSRTFile =  new File(mAudioFilePath.replace(".js","backup.js"));
 		}else{
 			outSRTFile =  new File(mAudioFilePath.replace("_client.srt","_server.srt"));
+			
+			//write the current contents to the client file which will be sent.
+			File outSRTFileClient =  new File(mAudioFilePath);
+			FileOutputStream outSRT;
+			try {
+				outSRT = new FileOutputStream(outSRTFileClient,false);//false for dont append
+				outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
+				outSRT.write(mAudioResultsFileStatus.getBytes());
+				outSRT.write("\n\n".getBytes());
+
+				outSRT.write("0:00:01.000,0:00:01.000\n".getBytes());
+				outSRT.write(mPostContents.getBytes());
+				outSRT.write("\n\n".getBytes());
+				outSRT.flush();
+				outSRT.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				mNotificationMessage ="Cannot write null results to SDCARD";
+			}
 		}
 
 		if (mNM == null){
@@ -359,17 +378,17 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				//this is showing up for when the audio is not sent, but the client srt is...
 				//mNotificationMessage = "...";// null;
 			}
-			mTranscription = "transcription results";//readAsTranscriptionString();  
+			 
 			FileOutputStream outSRT;
 			try {
-				outSRT = new FileOutputStream(outSRTFile);
-				outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
-				outSRT.write(mAudioResultsFileStatus.getBytes());
-				outSRT.write("\n\n".getBytes());
-
-				outSRT.write("0:00:00.010,0:00:00.010\n".getBytes());
-				outSRT.write(mPostContents.getBytes());
-				outSRT.write("\n\n".getBytes());
+				outSRT = new FileOutputStream(outSRTFile,false);//false for dont append
+//				outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
+//				outSRT.write(mAudioResultsFileStatus.getBytes());
+//				outSRT.write("\n\n".getBytes());
+//
+//				outSRT.write("0:00:00.010,0:00:00.010\n".getBytes());
+//				outSRT.write(mPostContents.getBytes());
+//				outSRT.write("\n\n".getBytes());
 				/*
 				 * Append time codes SRT array to srt file.
 				 * the time codes and transcription are read line by line from the in the server's response. 
@@ -415,29 +434,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			}
 			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Dictation audio wasn't sent for transcription, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 			saveMetaDataToDatabase();
-			if(mAudioFilePath.endsWith(".mp3")){
-				//if unable to send the mp3, create a client srt anyway.
-				//overwrite the srt file witht he most recent status message, saying why the file wasn't sent for transcription.
-				File outSRTFileClient =  new File(mAudioFilePath.replace(".mp3","_client.srt"));
-				FileOutputStream outSRT;
-				try {
-					outSRT = new FileOutputStream(outSRTFileClient);
-					outSRT.write("0:00:00.000,0:00:00.000\n".getBytes());
-					outSRT.write(mAudioResultsFileStatus.getBytes());
-					outSRT.write("\n\n".getBytes());
-
-					outSRT.write("0:00:01.000,0:00:01.000\n".getBytes());
-					outSRT.write(mPostContents.getBytes());
-					outSRT.write("\n\n".getBytes());
-					outSRT.flush();
-					outSRT.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					//e.printStackTrace();
-					mNotificationMessage ="Cannot write null results to SDCARD";
-				}
-			}//end if to make an empty srt file if the mp3 was not uploaded
-
+			
 		}//end if for max file size for upload
 
 		if(mAudioFilePath.endsWith(".srt")){
@@ -446,6 +443,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			i.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
 			if(mAskUserImport){
+				mTranscription = readAsTranscriptionString(); 
 				i.putExtra(EditBlogEntryActivity.EXTRA_FRESH_TRANSCRIPTION_CONTENTS, mTranscription);
 				mNotificationMessage = "Transcription results received.";
 				mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);

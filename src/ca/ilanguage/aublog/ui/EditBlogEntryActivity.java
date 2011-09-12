@@ -456,7 +456,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					mPostParent = mCursor.getString(6);
 					mAudioResultsFile = mCursor.getString(10);
 					mAudioResultsFileStatus = mCursor.getString(11);
-					//mTranscription = mCursor.getString(12);
+					mTranscription = "";//mCursor.getString(12);
 					mTranscriptionStatus = mCursor.getString(13);
 					//Toast.makeText(EditBlogEntryActivity.this, "The audio results file is "+mAudioResultsFile, Toast.LENGTH_LONG).show();
 		    		if (mAudioResultsFile.length() > 5){
@@ -1883,7 +1883,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					public void onClick(DialogInterface dialog, int which) {
 						mTranscriptionStatus = "transcription not fresh"; 
 						//TODO use constants 
-						mPostContent = currentPostContents+mTranscription;
+						mPostContent = currentPostContents+"\n"+mTranscription;
 						mWebView.loadUrl("javascript:fillPostContentFromAndroidActivity()");
 						
 						try{
@@ -1911,7 +1911,15 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				OnClickListener no = new OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						//do nothing.				
+						//if the user doesnt want to import, chances are high that the transcirption is bad or not fresh.
+						//download from the server, hope its fresher keep the status as fresh, the import button will stay on, the user can click on it or not to trigger a new download.
+						tracker.trackEvent(
+		        	            "AuBlogLifeCycle",  // Category
+		        	            "ImportTranscription",       // Action
+		        	            "User didnt want to import this transcription"+mTranscription+" : "+mAuBlogInstallId, // Label
+		        	            3272);       // Value
+						
+						downloadTranscription(currentPostContents,true);
 					}
 				};
 				/*
@@ -1925,7 +1933,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 				.setTitle("Import Transcription")
 				.setPositiveButton("Import", yes)
 				.setNegativeButton("Don't Import", no)
-				.setMessage("Here is the what your entry will look like.\n\n"+currentPostContents+mTranscription).create();
+				.setMessage("Here is the what your entry will look like.\n\n"+currentPostContents+"\n"+mTranscription).create();
 				dialog.show();
 			}
 		}
