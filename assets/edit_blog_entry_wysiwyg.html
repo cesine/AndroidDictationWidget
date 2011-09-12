@@ -175,12 +175,15 @@ $(document).ready(function()	{
     }
     
     function displayImportButton(){
-    	if(freshTranscription == true){
+    	doit = Android.hasFreshTranscriptionJS();
+    	if (doit == "true" ){
+    		freshTranscription = true;
     		document.getElementById('importButton').style.visibility='visible'; // show import button
-    	}
-    	else{
+    	}else{
+    		freshTranscription = false;
     		document.getElementById('importButton').style.visibility='hidden'; // hide import button
     	}
+    	
     }
     
     /* Additional Interface contents:
@@ -228,24 +231,15 @@ $(document).ready(function()	{
     		displayPlayButton();
     		document.getElementById('recordButton').value="New Dictation";
     	}
-    	doit = Android.hasFreshTranscriptionJS();
-    	if (doit == "true" ){
-    		freshTranscription = true;
-    		displayImportButton();
-    	}
+    	
+    	displayImportButton();
+    	
     	
     }
     function fillPostContentFromAndroidActivity(){
     	document.getElementById('markItUp').value=Android.fetchPostContentJS();
-    	var doit = Android.hasFreshTranscriptionJS();
-    	if (doit == "true" ){
-    		freshTranscription = true;
-    		displayImportButton();
-    	}
-    	else{
-    		freshTranscription = false;
-    		displayImportButton();
-    	}
+    	displayImportButton();
+    	
     }
     function checkRecordingNow(){
     	if (Android.getValueRecordingNowJS() == 1){
