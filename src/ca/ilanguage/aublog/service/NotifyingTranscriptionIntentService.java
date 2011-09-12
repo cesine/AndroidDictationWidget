@@ -187,7 +187,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					mAudioManager.stopBluetoothSco();
 				}
 				mAudioManager.setMode(AudioManager.MODE_NORMAL);
-				mAudioManager.setSpeakerphoneOn(true);
+				//mAudioManager.setSpeakerphoneOn(true);
 				android.os.Process.killProcess(android.os.Process.myPid());	
 			}
 		}

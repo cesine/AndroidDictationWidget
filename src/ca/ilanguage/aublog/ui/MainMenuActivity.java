@@ -174,7 +174,7 @@ public class MainMenuActivity extends Activity {
 						mAudioManager.stopBluetoothSco();
 					}
 					mAudioManager.setMode(AudioManager.MODE_NORMAL);
-					mAudioManager.setSpeakerphoneOn(true);
+					//mAudioManager.setSpeakerphoneOn(true);
 					if (mKillAuBlog) {
 						//call the super method, then kill aublog. 
 						supersvalue = super.onKeyDown(keyCode, event);
