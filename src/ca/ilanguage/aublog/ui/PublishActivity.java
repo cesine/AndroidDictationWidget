@@ -98,10 +98,11 @@ public class PublishActivity extends Activity  {
 		
 		if( (!mBloggerAccount.contains("@") ) || mBloggerPassword.length()<4 ){
 			tracker.trackEvent(
-		            "Publish",  // Category
-		            "Error",  // Action
-		            "In the publish activity but the blogger acount info isnt set, it should have been checked by the edit blog entry activity."+" : "+mAuBlogInstallId, // Label
-		            6021);       // Value
+					mAuBlogInstallId,  // Category
+		            "Publish missing info",  // Action
+		            "displayed Toast: Taking you to the settings to add a Blogger account.: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+			
 			//Toast.makeText(PublishActivity.this, "Taking you to the settings to add a Blogger account.", Toast.LENGTH_LONG).show();
 			//Intent i = new Intent(PublishActivity.this, SetPreferencesActivity.class);
     		//startActivityForResult(i, BLOGGER_ACCOUNT_ENTERED);
@@ -160,10 +161,11 @@ public class PublishActivity extends Activity  {
 		publishProgress = ProgressDialog.show(this, "Publishing blog entry",
 		"Starting to publish blog entry...");
 		tracker.trackEvent(
-	            "AuBlogLifeCycleEvent",  // Category
-	            "Publish",  // Action
-	            "starting to publish blog entry "+myEntry.toString()+" : "+mAuBlogInstallId, // Label
-	            61);       // Value
+				mAuBlogInstallId,  // Category
+	            "Publish started",  // Action
+	            "starting to publish blog entry "+myEntry.toString()+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+	            (int)System.currentTimeMillis());       // Value
+		
 		Thread publish = new Thread() {
 			@SuppressWarnings("static-access")
 			public void run() {
@@ -199,20 +201,23 @@ public class PublishActivity extends Activity  {
 						attempt++;
 						// Log.e(TAG, "AuthenticationException " +
 						// e.getMessage());
+
 						tracker.trackEvent(
-					            "Blogger",  // Category
-					            "Bug",  // Action
-					            "AuthenticationException " +e.getMessage()+" : "+mAuBlogInstallId, // Label
-					            603);       // Value
+								mAuBlogInstallId,  // Category
+					            "Publish error",  // Action
+					            "AuthenticationException " +e.getMessage()+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+					            (int)System.currentTimeMillis());       // Value
+						
 					}  catch (Exception e) {
 						// Log.e(TAG, "Exception: " + e.getMessage());
 						Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
 						//stop the thread and go back to publish activity
 						tracker.trackEvent(
-					            "Internet",  // Category
-					            "Bug",  // Action
-					            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e+" : "+mAuBlogInstallId, // Label
-					            604);       // Value
+								mAuBlogInstallId,  // Category
+					            "Publish error",  // Action
+					            "General exception, maybe internet " +e.getMessage()+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+					            (int)System.currentTimeMillis());       // Value
+						
 						finish();
 					}
 
@@ -245,10 +250,11 @@ public class PublishActivity extends Activity  {
 							// Log.e(TAG, "Exception: " + e.getMessage());
 							Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
 							tracker.trackEvent(
-						            "Internet",  // Category
-						            "Bug",  // Action
-						            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e+" : "+mAuBlogInstallId, // Label
-						            605);       // Value
+									mAuBlogInstallId,  // Category
+						            "Publish error",  // Action
+						            "General exception, maybe internet " +e.getMessage()+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+						            (int)System.currentTimeMillis());       // Value
+							
 							finish();
 						}
 					}
@@ -297,10 +303,11 @@ public class PublishActivity extends Activity  {
 							Toast.makeText(PublishActivity.this, "Internet connection failed, please check your Wireless and network settings.", Toast.LENGTH_LONG).show();
 							//finish thread?
 							tracker.trackEvent(
-						            "Internet",  // Category
-						            "Bug",  // Action
-						            "Toasted user: Internet connection failed, please check your Wireless and network settings." +e+" : "+mAuBlogInstallId, // Label
-						            606);       // Value
+									mAuBlogInstallId,  // Category
+						            "Publish error",  // Action
+						            "General exception, maybe internet " +e.getMessage()+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+						            (int)System.currentTimeMillis());       // Value
+							
 							finish();
 						}
 					}
@@ -358,12 +365,13 @@ public class PublishActivity extends Activity  {
 			/*
 			 * Update mUri to have a published flag
 			 */
-			tracker.trackEvent(
-		            "AuBlogLifeCycleEvent",  // Category
-		            "Publish",  // Action
-		            "successfully published blog entry "+myEntry.toString()+" : "+mAuBlogInstallId, // Label
-		            612);       // Value
 
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Publish completed",  // Action
+		            "Successfully published blog entry "+myEntry.toString()+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+			
 			final Dialog dlg = new AlertDialog.Builder(PublishActivity.this)
 			//					.setIcon(ca.ilanguage.aublog.R.drawable.ic_dialog_alert)
 			.setTitle("Publish status").setPositiveButton("OK", null)
@@ -383,11 +391,13 @@ public class PublishActivity extends Activity  {
 			dlg.show();
 		} else {
 			attempt = 0;
+
 			tracker.trackEvent(
-		            "AuBlogLifeCycleEvent",  // Category
-		            "Publish",  // Action
-		            "failedto publish blog entry "+myEntry.toString()+" Error code "+ publishStatus+" : "+mAuBlogInstallId, // Label
-		            610);       // Value
+					mAuBlogInstallId,  // Category
+		            "Publish error",  // Action
+		            "Failedto publish blog entry "+myEntry.toString()+" Error code "+ publishStatus+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+			
 			Alert.showAlert(this, "Publishing failed, your Blogger account and/or password may be incorrectly entered in the Settings.", "Error code "
 					+ publishStatus, "Try again",
 					new DialogInterface.OnClickListener() {
@@ -395,20 +405,22 @@ public class PublishActivity extends Activity  {
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.dismiss();
 					tracker.trackEvent(
-				            "Click",  // Category
-				            "Button",  // Action
-				            "user clicked on Try again button "+myEntry.toString()+" Error code "+ publishStatus+" : "+mAuBlogInstallId, // Label
-				            612);       // Value
+							mAuBlogInstallId,  // Category
+				            "Publish error",  // Action
+				            "User clicked on Try again button in publish"+myEntry.toString()+" Error code "+ publishStatus+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+				            (int)System.currentTimeMillis());       // Value
+					
 					publishBlogEntry();
 				}
 			}, "Cancel", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					tracker.trackEvent(
-				            "Click",  // Category
-				            "Button",  // Action
-				            "user clicked on cancel button "+myEntry.toString()+" Error code "+ publishStatus+" : "+mAuBlogInstallId, // Label
-				            613);       // Value
+							mAuBlogInstallId,  // Category
+				            "Publish error",  // Action
+				            "User clicked on cancel button in publish"+myEntry.toString()+" Error code "+ publishStatus+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+				            (int)System.currentTimeMillis());       // Value
+					
 					dialog.cancel();
 				}
 			});
