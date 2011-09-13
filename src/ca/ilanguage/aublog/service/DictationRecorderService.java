@@ -96,6 +96,7 @@ public class DictationRecorderService extends Service {
     private Boolean mRecordingNow = false;
     private RecordingReceiver audioFileUpdateReceiver;
     private Boolean mKillAuBlog;
+    
 	
   //uri of the entry being edited.
 	private Uri mUri;
@@ -128,7 +129,7 @@ public class DictationRecorderService extends Service {
 		registerReceiver(audioFileUpdateReceiver, intentDictRunning);
 		IntentFilter intentkill = new IntentFilter(MainMenuActivity.KILL_AUBLOG_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentkill);
-		
+
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		// The PendingIntent to launch our activity if the user selects this notification
 		Intent i = new Intent(this, NotifyingController.class);
@@ -167,6 +168,7 @@ public class DictationRecorderService extends Service {
 		if (audioFileUpdateReceiver != null) {
 			unregisterReceiver(audioFileUpdateReceiver);
 		}
+		tracker.stop();
 //		if (mUseBluetooth){
 //			mAudioManager.setBluetoothScoOn(false);
 //		}
@@ -239,7 +241,7 @@ public class DictationRecorderService extends Service {
 		i.setData(mUri);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
-		
+
 		startForeground(startId, mNotification);
 		mUri = intent.getData();
 		/*
@@ -422,11 +424,13 @@ public class DictationRecorderService extends Service {
 				}
 			   	mRecorder = null;
 			   	mTimeAudioWasRecorded=mEndTime-mStartTime;
-			   	tracker.trackEvent(
-			            "AuBlogLifeCycleEvent",  // Category
+				
+				tracker.trackEvent(
+						mAuBlogInstallId,  // Category
 			            "Dictation",  // Action
-			            "Saved audio recording "+mTimeAudioWasRecorded/100+"sec: "+mAuBlogInstallId, // Label
-			            735);       // Value
+			            "Dictation saved by service.: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+			            (int)System.currentTimeMillis());       // Value
+				
 			   	       
 				// Tell the user we saved recording.
 	            //Toast.makeText(this, "Recording saved to SDCard.", Toast.LENGTH_SHORT).show();
@@ -472,8 +476,13 @@ public class DictationRecorderService extends Service {
         //can put a settings like 5 times, and the set it to false because the user has learned how to use the aublog. 
         intent.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, true);
         startService(intent); 
-        
 		
+		tracker.trackEvent(
+				mAuBlogInstallId,  // Category
+	            "Transcription",  // Action
+	            "Transcription requested by dictation by service.: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+	            (int)System.currentTimeMillis());       // Value
+
 	}
 
 }

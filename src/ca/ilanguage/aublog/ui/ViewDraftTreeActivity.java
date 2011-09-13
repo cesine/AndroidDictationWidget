@@ -187,11 +187,12 @@ public class ViewDraftTreeActivity extends Activity {
         }
         public void editId(String id){
         	tracker.trackPageView("/editBlogEntryScreen");
-        	tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "user clicked on edit, Toasted: Editing draft number "+id+" : "+mAuBlogInstallId, // Label
-		            21);       // Value
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Clicked Edit Entry",  // Action
+		            "Clicked edit entry on view drafts page Toasted: Editing draft number "+id+" :  "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+
         	Toast.makeText(mContext, "Editing draft number "+id, Toast.LENGTH_SHORT).show();
         	Intent i = new Intent(getBaseContext(), EditBlogEntryActivity.class);
         	i.setData( AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build() );
@@ -200,13 +201,12 @@ public class ViewDraftTreeActivity extends Activity {
         }
 
 	    public void deleteId(String id){
-	    	tracker.trackEvent(
-		            "AuBlogLifeCycleEvent",  // Category
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
 		            "Delete",  // Action
-		            "user clicked on delete, Toasted: Are you sure you want to delete post number "+id+" : "+mAuBlogInstallId, // Label
-		            23);       // Value
-	    	
-	    	Toast.makeText(mContext, "Are you sure you want to delete post number "+id, Toast.LENGTH_SHORT).show();
+		            "Entry "+id+"was flagged as deleted in the view drafts tree : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+	    	Toast.makeText(mContext, "Flagged as deleted post number "+id, Toast.LENGTH_SHORT).show();
 	    	Uri uri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
 			/*
 			 * Flag entry as deleted
@@ -219,11 +219,12 @@ public class ViewDraftTreeActivity extends Activity {
 			refreshTree();
 		}
 	    public void refreshTree(){
-	    	tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "refreshing tree : "+mAuBlogInstallId, // Label
-		            24);       // Value
+
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Potential javascript bug",  // Action
+		            "User clicked refresh in the view drafts tree : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
 	    	/*
 	    	 * TODO get the javascript to be regenerated, or simply open the json file and change the deleted flag on that entry?
 	    	 */
@@ -237,12 +238,11 @@ public class ViewDraftTreeActivity extends Activity {
 //	    	intent.setDataAndType(Uri.fromFile(file), "text/*");
 //	    	startActivity(intent); 
 	    	
-	    	tracker.trackEvent(
-		            "AuBlogLifeCycleEvent",  // Category
-		            "Export",  // Action
-		            "user clicked on email/export from the view drafts tree layout : "+mAuBlogInstallId, // Label
-		            25);       // Value
-	    	
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Export data",  // Action
+		            "User clicked on email/export drafts tree from the view drafts tree : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
 	    	File file = new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
 
 	    	Intent mailto = new Intent(Intent.ACTION_SEND); 
@@ -377,29 +377,32 @@ public class ViewDraftTreeActivity extends Activity {
 		case R.id.open_settings:
 			tracker.trackPageView("/settingsScreen");
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked settings in view drafts tree menu: "+mAuBlogInstallId, // Label
-		            24);       // Value
+					mAuBlogInstallId,  // Category
+		            "Clicked settings",  // Action
+		            "Clicked settings on view drafts tree page "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+
 			Intent i = new Intent(getBaseContext(),	SetPreferencesActivity.class);
 			startActivity(i);
 			return true;
 		case R.id.issue_tracker:
+			tracker.trackPageView("/issueTracker");
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked bugs in the edit blog entry menu: "+mAuBlogInstallId, // Label
-		            24);       // Value
+					mAuBlogInstallId,  // Category
+		            "Clicked bugs",  // Action
+		            "Clicked bugs on view drafts tree page "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+
 			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://code.google.com/p/aublog/issues/entry"));
 			startActivity(browserIntent);
 			return true;
 		case R.id.new_entry:
 			tracker.trackPageView("/editBlogEntryScreen");
 			tracker.trackEvent(
-		            "Clicks",  // Category
-		            "Button",  // Action
-		            "clicked new entry in view drafts tree menu: "+mAuBlogInstallId, // Label
-		            22);       // Value
+					mAuBlogInstallId,  // Category
+		            "Clicked New Entry",  // Action
+		            "Clicked new entry on view drafts tree page "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
 
 			Intent intent = new Intent(getBaseContext(), EditBlogEntryActivity.class);
 

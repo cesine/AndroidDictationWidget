@@ -119,12 +119,11 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         exportTree.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				
 				tracker.trackEvent(
-			            "Clicks",  // Category
-			            "Button",  // Action
-			            "user clicked on email from the settings screen : "+mAuBlogInstallId, // Label
-			            65);       // Value
+						mAuBlogInstallId,  // Category
+			            "Export data",  // Action
+			            "User clicked on email drafts tree from the settings screen : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+			            (int)System.currentTimeMillis());       // Value
 				File file = new File(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+PreferenceConstants.OUTPUT_FILE_NAME_FOR_DRAFT_EXPORT);
 
 		    	Intent mailto = new Intent(Intent.ACTION_SEND); 
@@ -151,6 +150,11 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 					 * If the user is trying to use bluetooth in aublog, ask them to turn on their bluetooth connection.
 					 * REQUIRES: <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />TODO ?	
 					 */
+					tracker.trackEvent(
+							mAuBlogInstallId,  // Category
+				            "Bluetooth",  // Action
+				            "User clicked on use bluetooth in the settings screen : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+				            (int)System.currentTimeMillis());       // Value
 					BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 					if (!bluetoothAdapter.isEnabled()) {
 						Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -196,19 +200,21 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         			"it allows you to browse your SDCARD directly on your mobile device.", Toast.LENGTH_LONG).show();
         	Intent goToMarket = new Intent(Intent.ACTION_VIEW)
             .setData(Uri.parse("market://details?id=org.openintents.filemanager"));
-        	tracker.trackEvent(
-		            "DependantPackages",  // Category
-		            "FileManager",  // Action
-		            "user doesnt have a filemanager so export is disnabled, took them to the market to install it.: "+mAuBlogInstallId, // Label
-		            60);       // Value
+
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Dependency",  // Action
+		            "User doesnt have a filemanager so export is disnabled, took them to the market to install it : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
         	startActivity(goToMarket);
         }
         if ( ! fileManagerChecked &&  fileManagerAvailable){
-        	tracker.trackEvent(
-		            "DependantPackages",  // Category
-		            "FileManager",  // Action
-		            "user has a filemanager so export is enabled: "+mAuBlogInstallId, // Label
-		            61);       // Value
+
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Dependency",  // Action
+		            "User  has a filemanager so export is enabled : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
         	
         	/*
         	 * Enable the export and open possibilities
@@ -268,11 +274,13 @@ public class SetPreferencesActivity extends PreferenceActivity implements
 			 */
 			startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS));
 			//wipeUserData
+
 			tracker.trackEvent(
-		            "AuBlogLifeCycleEvent",  // Category
-		            "UserWipe",  // Action
-		            "user wants to wipe their draft data, taking them to the device settings where they can click clear data, but dont know if they really clicked it.: "+mAuBlogInstallId, // Label
-		            63);       // Value
+					mAuBlogInstallId,  // Category
+		            "Dependency",  // Action
+		            "User wants to wipe their draft data, taking them to the device settings where they can click clear data, but dont know if they really clicked it : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+        	
 			
 			Toast.makeText(this, R.string.saved_data_erased_notification,
                     Toast.LENGTH_SHORT).show();

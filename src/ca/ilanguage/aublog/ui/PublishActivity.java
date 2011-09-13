@@ -76,14 +76,9 @@ public class PublishActivity extends Activity  {
 		setContentView(R.layout.transparent_activity);
 		
 		tracker = GoogleAnalyticsTracker.getInstance();
-
-	    // Start the tracker in manual dispatch mode...
+	    // Start the tracker in 20 sec interval dispatch mode...
 	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
-
-	    // ...alternatively, the tracker can be started with a dispatch interval (in seconds).
-	    //tracker.start("UA-YOUR-ACCOUNT-HERE", 20, this);
-	    
-		
+	
 		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
 		/*
 		 * set the installid for appending to the labels

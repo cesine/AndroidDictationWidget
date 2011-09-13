@@ -20,6 +20,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
@@ -127,7 +129,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	// Use a layout id for a unique identifier
 	private static int AUBLOG_NOTIFICATIONS = R.layout.status_bar_notifications;
 	private String mNotificationMessage;
-
+	GoogleAnalyticsTracker tracker;
 
 	@Override
 	public void onCreate() {
@@ -139,6 +141,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		IntentFilter intentDictRunning = new IntentFilter(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT);
 		registerReceiver(mKillAublogReceiver, intentDictRunning);
 
+		tracker = GoogleAnalyticsTracker.getInstance();
+	    // Start the tracker in 20 sec interval dispatch mode...
+	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
+	
 		super.onCreate();
 
 		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -168,9 +174,11 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	}
 	@Override
 	public void onDestroy() {
+		
 		if (mKillAublogReceiver != null) {
 			unregisterReceiver(mKillAublogReceiver);
 		}//never unregister, then maybe we will get the kill commands?
+		   tracker.stop();
 		super.onDestroy();
 		/*
 		 * This is a terrible workaround for issue
@@ -372,6 +380,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 					mTimeCodes.add(line);
 				}
 				reader.close();
+				
 				//mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"File saved on server as "+mFileNameOnServer+" .";
 			} catch (Exception e) {
 				Log.e(e.getClass().getName(), e.getMessage(), e);
@@ -459,6 +468,13 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				//mNM.cancel(NOTIFICATION);
 			}
 			sendBroadcast(i);
+			
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Transcription Sent and Received",  // Action
+		            "User sent and recieved transcription (askuser:"+mAskUserImport+") from server: "+mTranscription+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+			
 			if (mAskUserImport){
 				mNotificationMessage = "Transcription merged with server results.";
 			}else{
@@ -473,6 +489,12 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			Intent i = new Intent(EditBlogEntryActivity.DICTATION_SENT_INTENT);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Dictation Uploaded",  // Action
+		            "Client uploaded an mp3 to the server: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+			
 			mNotificationMessage = "Dication sent for transcription.";
 			mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
 			if (mShowNotification){
@@ -530,9 +552,6 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			} catch (Exception e) {
 
 			}
-
-
-
 
 		}//end if where cursor has content.
 

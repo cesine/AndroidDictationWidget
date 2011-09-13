@@ -566,6 +566,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         	return downloadTranscription(strContents, askUserToImport);
         }
         public String downloadTranscriptionFromServerJS(String strContents){
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Transcription",  // Action
+		            "User requested transcription from UI: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+			
         	Boolean askUserToImport = true;
         	return downloadTranscription(strContents, askUserToImport);
         	
@@ -615,6 +621,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
          * @return an internal status message
          */
         public String startToRecordJS(String title){
+			tracker.trackEvent(
+					mAuBlogInstallId,  // Category
+		            "Dictation",  // Action
+		            "User requested dictation from UI.: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            (int)System.currentTimeMillis());       // Value
+			
         	return beginRecording(title);
         }
         /**
@@ -1157,7 +1169,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		tracker.trackEvent(
 				mAuBlogInstallId,  // Category
 	            "Delete",  // Action
-	            "Entry was flagged as deleted in the edit blog entry : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+	            "Entry "+mPostId+" was flagged as deleted in the edit blog entry : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
 	            (int)System.currentTimeMillis());       // Value
 		
     	/*
@@ -1847,6 +1859,11 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 						EditBlogEntryActivity.this,
 						"The transcription server processed your audio dictation, but couldn't figure out what you said.", Toast.LENGTH_LONG)
 						.show();
+	        	tracker.trackEvent(
+						mAuBlogInstallId,  // Category
+			            "Bug",  // Action
+			            "The transcription server processed your audio dictation, but couldn't figure out what you said."+mTranscription+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+			            (int)System.currentTimeMillis());       // Value
 				return "";
 			}else{
 					
