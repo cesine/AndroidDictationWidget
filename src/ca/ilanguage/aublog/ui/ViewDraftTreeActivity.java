@@ -216,6 +216,14 @@ public class ViewDraftTreeActivity extends Activity {
 			getContentResolver().update(uri, values,null, null);
 //			getContentResolver().delete(uri, null, null);
 			//Toast.makeText(ViewDraftTreeActivity.this, "Will refresh here Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();
+			/*
+	    	 * Flag the draft tree as needing to be regenerated
+	    	 */
+	    	SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+	    	SharedPreferences.Editor editor = prefs.edit();
+	    	editor.putBoolean(PreferenceConstants.PREFERENCE_DRAFT_TREE_IS_FRESH,false);
+	    	editor.commit();
+	    	
 			refreshTree();
 		}
 	    public void refreshTree(){
