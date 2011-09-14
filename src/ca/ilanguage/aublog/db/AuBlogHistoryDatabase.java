@@ -26,7 +26,7 @@ public class AuBlogHistoryDatabase {
      * constant to be able to control it better
      */
     public static final String ROOT_ID_DEFAULT= "1";
-
+    public static final String ROOT_TRASH_TREE= "2";
     public interface SyncColumns {
     	String UPDATED = "updated";
     }
