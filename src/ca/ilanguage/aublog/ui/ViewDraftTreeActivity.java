@@ -30,6 +30,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
@@ -213,6 +214,7 @@ public class ViewDraftTreeActivity extends Activity {
 			 */
 			ContentValues values = new ContentValues();
 			values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
+			values.put(AuBlogHistory.PARENT_ENTRY, AuBlogHistoryDatabase.ROOT_TRASH_TREE);
 			getContentResolver().update(uri, values,null, null);
 //			getContentResolver().delete(uri, null, null);
 			//Toast.makeText(ViewDraftTreeActivity.this, "Will refresh here Post " +uri.getLastPathSegment()+" deleted.", Toast.LENGTH_LONG).show();

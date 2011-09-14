@@ -55,6 +55,7 @@ public class AuBlogHistoryDatabase {
 	    String TIME_EDITED = "timeedited";  //should be used by editblog entry to indicate a user edit.
 	    String LAST_MODIFIED = "lastmodified"; //used by database provider, automatically set when entry is updated
 	    String ROOT_ID_DEFAULT= "1";
+	    String ROOT_TRASH_TREE="2";
     }
     
     public static final String AUTHORITY = "ca.ilanguage.aublog.provider.AuBlogHistory";

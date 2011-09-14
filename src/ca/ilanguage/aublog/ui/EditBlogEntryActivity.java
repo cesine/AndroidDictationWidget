@@ -40,6 +40,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import ca.ilanguage.aublog.R;
+import ca.ilanguage.aublog.db.AuBlogHistoryDatabase;
 import ca.ilanguage.aublog.db.AuBlogHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.aublog.preferences.NonPublicConstants;
 import ca.ilanguage.aublog.preferences.PreferenceConstants;
@@ -1177,6 +1178,8 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		 */
 		ContentValues values = new ContentValues();
 		values.put(AuBlogHistory.DELETED,"1");//sets deleted flag to true
+		values.put(AuBlogHistory.PARENT_ENTRY, AuBlogHistoryDatabase.ROOT_TRASH_TREE);
+		
 		/*
 		 * TODO decide if want to change the parent node to "trash" so that the entry appears as deleted.
 		 * ** if it has children then its children will be "deleted" too.

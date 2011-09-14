@@ -421,7 +421,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
             values.put(AuBlogHistory.LAST_MODIFIED, now);
             values.put(AuBlogHistory.TIME_EDITED, "0");
             values.put(AuBlogHistory.PUBLISHED, "0");
-            values.put(AuBlogHistory.PARENT_ENTRY, "0");
+            values.put(AuBlogHistory.PARENT_ENTRY, AuBlogHistoryDatabase.ROOT_ID_DEFAULT);
             values.put(AuBlogHistory.DELETED, "0");
             values.put(AuBlogHistory.ENTRY_TITLE, "");
             values.put(AuBlogHistory.ENTRY_CONTENT, "");
@@ -434,7 +434,9 @@ public class AuBlogHistoryProvider extends ContentProvider {
 			// it seems suspicious to only be the content of PARENT_ENTRY, ah its the nullcolumnhack
 			long saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
-			
+			values.put(AuBlogHistory.PARENT_ENTRY, AuBlogHistoryDatabase.ROOT_TRASH_TREE);
+			values.put(AuBlogHistory.ENTRY_TITLE, "Trash");//post 2 is the trash.
+			db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			/*
 			 * Branch for sample Entry About Me
 			 * 			*
