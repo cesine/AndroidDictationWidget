@@ -339,7 +339,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 * earphones mode.
 			 */
 			mAudioManager.setMode(AudioManager.MODE_NORMAL);
-			mAudioManager.setSpeakerphoneOn(true);
+			//mAudioManager.setSpeakerphoneOn(true);
 		}
 		/*
 		 * then the app can use the media player, and the recorder as usual
