@@ -1857,12 +1857,12 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			if(mTranscription.length() <1){
 				Toast.makeText(
 						EditBlogEntryActivity.this,
-						"The transcription server processed your audio dictation, but couldn't figure out what you said.", Toast.LENGTH_LONG)
+						"Is your wifi off? There are no transcription results.", Toast.LENGTH_LONG)
 						.show();
 	        	tracker.trackEvent(
 						mAuBlogInstallId,  // Category
 			            "Bug",  // Action
-			            "The transcription server processed your audio dictation, but couldn't figure out what you said."+mTranscription+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+			            "Is your wifi off? There are no transcription results."+mTranscription+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
 			            (int)System.currentTimeMillis());       // Value
 				return "";
 			}else{
