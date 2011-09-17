@@ -621,7 +621,7 @@ public class MainMenuActivity extends Activity {
 				String newInstallID;
 				if (installID.length()< 5){
 					Long currentTimeStamp = System.currentTimeMillis();
-					Long randomNumberToAvoidSameSecondInstallsClash = (Math.round(Math.random()*10000));
+					Long randomNumberToAvoidSameSecondInstallsClash = (Math.round(Math.random()*100));
 					newInstallID = AuBlog.VERSION+currentTimeStamp.toString()+randomNumberToAvoidSameSecondInstallsClash.toString();
 					editor.putString(PreferenceConstants.AUBLOG_INSTALL_ID, newInstallID);
 					mAuBlogInstallId = newInstallID;

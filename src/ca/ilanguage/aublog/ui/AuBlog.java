@@ -11,7 +11,7 @@ public class AuBlog extends Activity{
 	
 	// If the version is a negative number, debug features (logging and a debug menu)
     // are enabled.
-    public static final int VERSION = 4;
+    public static final int VERSION = 5;
     public static final int AMOUNTOFATTEMPTS = 3;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

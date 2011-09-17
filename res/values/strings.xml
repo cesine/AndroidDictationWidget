@@ -121,7 +121,7 @@
 This is an open source project.  If you are interested in how it works, or would like to add your
 own modules, check out the source at our web site, aublog.net.
 \n\n
-New in this version: Menus on all screens, button to import machine transcription and long press to play nodes in the View Drafts Tree. 
+New in this version: Menus on all screens, button to import machine transcription, delete button deletes entire tree branch under that node, and long press to play nodes in the View Drafts Tree. 
 \n\n
 Also note that the app sends anonymous statistics back to a server to detect frequent user functions which should be automated.  If you’d rather not
 allow that, you can turn it off in the settings screen. </string>
@@ -156,7 +156,7 @@ new On-Screen Controls instead, or stick with Tilt?
 \n<small>You can change this setting at any time by choosing Configure Controls under Options.</small>
 </string>
 
-<string name="whats_new_ticker">In previous versions: Publish to Blogger accounts. HTML markup blog editing, transcribe sentence by sentence dictation using Google Voice and navigate drafts tree. Full data export. Record long dictations. This version: automatic speech recognition services for long dictations. Future versions: eyes free widget, Official Blogger client integration, publish to podcasts.</string>
+<string name="whats_new_ticker">In previous versions: Publish to Blogger accounts. HTML markup blog editing, transcribe sentence by sentence dictation using Google Voice and navigate drafts tree. Full data export. Record long dictations. This version: automatic speech recognition services for long dictations, user can delete entire tree branches in the draft tree. Future versions: eyes free widget, Official Blogger client integration, publish to podcasts.</string>
 
 <string name="baby_description">No challenge at all.</string>
 <string name="kids_description">A comfortable ride to the end.</string>

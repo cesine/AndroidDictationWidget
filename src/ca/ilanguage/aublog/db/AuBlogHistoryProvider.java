@@ -31,6 +31,7 @@ public class AuBlogHistoryProvider extends ContentProvider {
 
     private static final String DATABASE_NAME = "aubloghistory.db";
     private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_CHANGED_COLUMN_NAMES = 3;
     //private static final String  AUBLOG_HISTORY_TABLE_NAME= AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME;
 
     private static HashMap<String, String> sAuBlogHistoryProjectionMap;
@@ -531,7 +532,12 @@ public class AuBlogHistoryProvider extends ContentProvider {
 				// TODO: handle exception
         		Log.w(TAG, "Problem upgrading, unable to clear sample data."+e);
 			}
-        	String performUpgrade = 
+        	String performUpgrade = "";
+        	/*
+        	 * Prior to version 3, the Audio_file column was called Audio_files
+        	 */
+        	if (oldVersion < DATABASE_CHANGED_COLUMN_NAMES){
+        		performUpgrade = 
         			"INSERT INTO "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME
         			+"("+AuBlogHistory._ID
         			+", "+AuBlogHistory.PUBLISHED
@@ -560,6 +566,46 @@ public class AuBlogHistoryProvider extends ContentProvider {
         			+", "+AuBlogHistory.TIME_EDITED
         			+" " +
         			"FROM "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"backup1;";
+        	}else if (oldVersion == 3){
+        		/*
+        		 * Version 3 and above the columns are not renamed but just new columns are added
+        		 */
+        		performUpgrade = 
+        			"INSERT INTO "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME
+        			+"("+AuBlogHistory._ID
+        			+", "+AuBlogHistory.PUBLISHED
+        			+", "+AuBlogHistory.ENTRY_CONTENT
+        			+", "+AuBlogHistory.ENTRY_LABELS
+        			+", "+AuBlogHistory.ENTRY_TITLE
+        			+", "+AuBlogHistory.PARENT_ENTRY
+        			+", "+AuBlogHistory.DELETED
+        			+", "+AuBlogHistory.PUBLISHED_IN
+        			+", "+AuBlogHistory.AUDIO_FILE
+        			+", "+AuBlogHistory.AUDIO_FILE_STATUS
+        			+", "+AuBlogHistory.LAST_MODIFIED
+        			+", "+AuBlogHistory.TIME_CREATED
+        			+", "+AuBlogHistory.TIME_EDITED
+        			+") " +
+        			"SELECT "+AuBlogHistory._ID
+        			+", "+AuBlogHistory.PUBLISHED
+        			+", "+AuBlogHistory.ENTRY_CONTENT
+        			+", "+AuBlogHistory.ENTRY_LABELS
+        			+", "+AuBlogHistory.ENTRY_TITLE
+        			+", "+AuBlogHistory.PARENT_ENTRY
+        			+", "+AuBlogHistory.DELETED
+        			+", "+AuBlogHistory.PUBLISHED_IN
+        			+", "+AuBlogHistory.AUDIO_FILE
+        			+", "+AuBlogHistory.AUDIO_FILE_STATUS
+        			+", "+AuBlogHistory.LAST_MODIFIED
+        			+", "+AuBlogHistory.TIME_CREATED
+        			+", "+AuBlogHistory.TIME_EDITED
+        			+" " +
+        			"FROM "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"backup1;";
+        	}/* else if (oldVersion  == 5){
+        	//look at create table version of db 5 to copy over all the columns of 5 to the new db
+        	        	
+        	}*/
+        	
         	try{
 	        	db.execSQL(performUpgrade);
 			}catch (Exception e) {
