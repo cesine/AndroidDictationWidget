@@ -1727,6 +1727,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 	 * @return
 	 */
 	private String downloadTranscription(String strContents, Boolean askUserToImportTranscriptionIntoBlog){
+		mCursor = managedQuery(mUri, PROJECTION, null, null, null);
 		if (mCursor != null) {
 			// Requery in case something changed 
 			mCursor.requery();
