@@ -301,10 +301,11 @@ public class DictationRecorderService extends Service {
 		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
 		tracker.trackEvent(
-	            "Clicks",  // Category
-	            "Button",  // Action
-	            "Record audio via "+mAudioSource+" : "+mAuBlogInstallId, // Label
-	            734);       // Value
+	            mAuBlogInstallId,  // Category
+	            "DictationStarted",  // Action
+	            "Record audio via "+mAudioSource+" : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+                  (int)System.currentTimeMillis());       // Value
+ 
 		/*
 		 * turn on the recorder
 		 */
@@ -428,7 +429,7 @@ public class DictationRecorderService extends Service {
 				tracker.trackEvent(
 						mAuBlogInstallId,  // Category
 			            "Dictation",  // Action
-			            "Dictation saved by service.: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+			            "Dictation saved by service. : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
 			            (int)System.currentTimeMillis());       // Value
 				
 			   	       
