@@ -247,7 +247,7 @@ public class MainMenuActivity extends Activity {
 	protected void onDestroy() {
 		tracker.trackEvent(mAuBlogInstallId, // Category
 				"ExitAuBlog", // Action
-				"Exit AuBlog " + (int) System.currentTimeMillis() + " : "
+				"Exit AuBlog : " +  System.currentTimeMillis() + " : "
 						+ mAuBlogInstallId, // Label
 				(int) System.currentTimeMillis()); // Value
 		tracker.stop();// Stop the tracker when it is no longer needed.
@@ -494,20 +494,27 @@ public class MainMenuActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		tracker = GoogleAnalyticsTracker.getInstance();
+
+      // Start the tracker in 20 sec interval dispatch mode...
+    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
+		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
+    mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+
 		if(savedInstanceState != null){
 			mRecordingNow = savedInstanceState.getBoolean("recordingNow");
 		}else{
 			if(mRecordingNow == null){
 				mRecordingNow = false;
 			}
+			tracker.trackEvent(mAuBlogInstallId, // Category
+        "EnterAuBlog", // Action
+        "Enter AuBlog :" + (int) System.currentTimeMillis() + " : "
+            + mAuBlogInstallId, // Label
+        (int) System.currentTimeMillis()); // Value
+
 		}
-		tracker = GoogleAnalyticsTracker.getInstance();
 
-	    // Start the tracker in 20 sec interval dispatch mode...
-	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
-
-	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
 		
 		mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		
@@ -622,7 +629,7 @@ public class MainMenuActivity extends Activity {
 				if (installID.length()< 5){
 					Long currentTimeStamp = System.currentTimeMillis();
 					Long randomNumberToAvoidSameSecondInstallsClash = (Math.round(Math.random()*100));
-					newInstallID = AuBlog.VERSION+currentTimeStamp.toString()+randomNumberToAvoidSameSecondInstallsClash.toString();
+					newInstallID = "dev"+AuBlog.VERSION+currentTimeStamp.toString()+randomNumberToAvoidSameSecondInstallsClash.toString();
 					editor.putString(PreferenceConstants.AUBLOG_INSTALL_ID, newInstallID);
 					mAuBlogInstallId = newInstallID;
 					tracker.trackEvent(

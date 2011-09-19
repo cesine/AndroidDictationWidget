@@ -853,7 +853,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
             	tracker.trackEvent(
     					mAuBlogInstallId,  // Category
     		            "Publish missing info",  // Action
-    		            "displayed Toast:"+R.string.title_or_content_empty_error+" :  "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+    		            "displayed Toast: "+R.string.title_or_content_empty_error+" :  "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
     		            (int)System.currentTimeMillis());       // Value
         		Toast.makeText(EditBlogEntryActivity.this, R.string.title_or_content_empty_error, Toast.LENGTH_LONG).show();
         	} else {
@@ -864,7 +864,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
         			tracker.trackEvent(
         					mAuBlogInstallId,  // Category
         		            "Publish missing info",  // Action
-    			            "displayed Toast: Taking you to the settings to add a Blogger account.: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+    			            "displayed Toast: Taking you to the settings to add a Blogger account. : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
     			            (int)System.currentTimeMillis());       // Value
         			Toast.makeText(EditBlogEntryActivity.this, "No Blogger account found.\n\nTaking you to the settings to \n\nConfigure a Blogger account.", Toast.LENGTH_LONG).show();
         			Intent i = new Intent(EditBlogEntryActivity.this, SetPreferencesActivity.class);
