@@ -1,0 +1,5 @@
+
+remove dev prefix from install id in MainMenuActivity
+change debugable to false in manifest
+change aublog version in manifest
+test release candidate upgrade by installing previous signed apk(adding new nodes, both with and without audio files and transcirptions), with new signed apk (verify database integrety by clicking on drafts)
