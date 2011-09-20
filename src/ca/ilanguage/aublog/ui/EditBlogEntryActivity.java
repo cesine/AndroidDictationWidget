@@ -1478,7 +1478,14 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 * mMediaPlayer.seekTo(startPlayingFromSecond);
 			 * mMediaPlayer.prepare();
 			 */
-			mPlayingNow = false;
+			mPlayingNow = false;i
+			tracker.trackEvent(
+         mAuBlogInstallId,  // Category
+              "Audio Paused",  // Action
+              "User clicked Pause in Edit blog entry, it is now playing : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+              (int)System.currentTimeMillis());       // Value
+
+
 			//TODO might be able to recheck audio settings here recheckAublogSettings();
 			return "Play";
 		}
@@ -1487,6 +1494,13 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		try {
 			mPlayingNow = true;
 			mMediaPlayer.start();
+	
+			tracker.trackEvent(
+      	 mAuBlogInstallId,  // Category
+              "Audio Playing",  // Action
+              "User clicked Play in Edit blog entry, it is now playing : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+              (int)System.currentTimeMillis());       // Value
+
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 

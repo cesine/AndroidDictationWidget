@@ -102,7 +102,7 @@ var json = dataIn;
         
         onBeforeCompute: function(node){
             Log.write("loading " + node.name);
-            Android.setSelectedId(node.id);
+            Android.setSelectedId(node.id,node.name);
         },
         
         onAfterCompute: function(node){

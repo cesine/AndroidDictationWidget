@@ -170,9 +170,15 @@ public class ViewDraftTreeActivity extends Activity {
         public void showToast(String toast) {
             Toast.makeText(mContext, toast, Toast.LENGTH_LONG).show();
         }
-        public void setSelectedId(String id){
+        public void setSelectedId(String id, String title){
         	mUri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
         	mSelectedDraftId = id;
+					tracker.trackEvent(
+          	mAuBlogInstallId,  // Category
+                "TreeNode",  // Action
+                "User clicked on "+id +"   "+title+" tree node in the view drafts tree : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+                (int)System.currentTimeMillis());       // Value
+
         	//playNode();
         }
         public String getCenteredNode(){
@@ -184,7 +190,7 @@ public class ViewDraftTreeActivity extends Activity {
         }
         public void playSelectedId(){
         	//mUri = AuBlogHistory.CONTENT_URI.buildUpon().appendPath(id).build();
-        	playNode();
+					playNode();
         }
         public void editId(String id){
         	tracker.trackPageView("/editBlogEntryScreen");
@@ -233,7 +239,7 @@ public class ViewDraftTreeActivity extends Activity {
 			tracker.trackEvent(
 					mAuBlogInstallId,  // Category
 		            "Potential javascript bug",  // Action
-		            "User clicked refresh in the view drafts tree : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+		            "User clicked refresh in the view drafts tree, they will probably only click this if the tree looks funny. : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
 		            (int)System.currentTimeMillis());       // Value
 	    	/*
 	    	 * TODO get the javascript to be regenerated, or simply open the json file and change the deleted flag on that entry?
@@ -290,6 +296,11 @@ public class ViewDraftTreeActivity extends Activity {
 							mMediaPlayer.setDataSource(audioResultsFile);
 							mMediaPlayer.prepare();
 							mMediaPlayer.start();
+							mAuBlogInstallId,  // Category
+                "TreeNode",  // Action
+                "User long clicked on a node and it played node "+mSelectedDraftId+" audio file "+audioResultsFile +" tree node to play the audio in the view drafts tree : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+                (int)System.currentTimeMillis());       // Value
+
 						} catch (IllegalArgumentException e) {
 							Toast.makeText(ViewDraftTreeActivity.this, "Problem with opening the audio file "+e, Toast.LENGTH_LONG).show();
 						} catch (IllegalStateException e) {
