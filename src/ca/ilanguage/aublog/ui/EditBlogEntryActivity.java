@@ -1538,7 +1538,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 		tracker.trackEvent(
 				mAuBlogInstallId,  // Category
 	            "Dictation stopped",  // Action
-	            "User clicked Stop Dictation  "+mTimeAudioWasRecorded/100+"sec long in Edit blog entry : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+	            "User clicked Stop Dictation  "+mTimeAudioWasRecorded/1000+"sec long in Edit blog entry : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
 	            (int)System.currentTimeMillis());       // Value
 		
         /*

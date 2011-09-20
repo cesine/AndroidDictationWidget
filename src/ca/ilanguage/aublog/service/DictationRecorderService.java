@@ -438,7 +438,7 @@ public class DictationRecorderService extends Service {
 	            //mContentIntent = open file browser? or open in music player playlist?
 			   	//mNotification.setLatestEventInfo(this, "AuBlog Dictation", "Saved in AuBlog folder", mContentIntent);
 			   	
-			   	appendToContent ="Attached a "+mTimeAudioWasRecorded/100+" second Recording.\n";
+			   	appendToContent ="Attached a "+mTimeAudioWasRecorded/1000+" second Recording.\n";
 			   	mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+appendToContent;
 	            mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recording flagged for transcription.";
 	            
