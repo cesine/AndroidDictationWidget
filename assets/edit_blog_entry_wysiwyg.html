@@ -142,9 +142,10 @@ $(document).ready(function()	{
 	    	
     	}
     }
+    
     /*
-    This function is largely controlled by the MediaPlayer in the Android logic, so it only recieves the value of the buton frmo Android
-    The audio is played in a loop.
+    This function is largely controlled by the MediaPlayer in the Android logic, 
+    so it only recieves the value of the button from Android. The audio is played in a loop.
     a. if audio is playing, hitting the button will pause it.
     b. if audio is not playing, hitting the button wil play it. 
     */
@@ -157,6 +158,7 @@ $(document).ready(function()	{
     		document.getElementById('playButton').value=Android.playOrPauseAudioJS();
     	}
     }
+    
     /*
     There are three states of transcription:
     	null (no audio, no play button, no transcription button)

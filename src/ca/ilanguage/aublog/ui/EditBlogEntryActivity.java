@@ -1478,7 +1478,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			 * mMediaPlayer.seekTo(startPlayingFromSecond);
 			 * mMediaPlayer.prepare();
 			 */
-			mPlayingNow = false;i
+			mPlayingNow = false;
 			tracker.trackEvent(
          mAuBlogInstallId,  // Category
               "Audio Paused",  // Action
