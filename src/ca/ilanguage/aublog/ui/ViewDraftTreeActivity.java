@@ -46,7 +46,7 @@ public class ViewDraftTreeActivity extends Activity {
 	private Menu mMenu;
 	GoogleAnalyticsTracker tracker;
 	private String mAuBlogInstallId;
-    private static final String TAG = "CreateBlogEntryActivity";
+    private static final String TAG = "ViewDraftsActivity";
 
     private String mSelectedDraftId;
 	//uri of the entry being edited.

@@ -34,8 +34,8 @@
 <script language="javascript" type="text/javascript" >
 //http://stackoverflow.com/questions/3113429/how-can-i-fire-an-event-when-i-right-click-on-a-div-inside-a-canvas-with-jquery
 
-	$(document).ready(function() {
-		
+	//$(document).ready(function() {
+	var loadPage = function(){	
 		$(document)[0].oncontextmenu = function() {
 			return false;
 		}
@@ -61,7 +61,7 @@
 			//return false;
 
 		});
-	});
+	//});
 
 
 	function isNativeApp() {
@@ -133,7 +133,7 @@
 				init(draftTreeData);
 			});
 	}
-	
+}	
 </script>
  
 </head> 
@@ -147,7 +147,7 @@
  <h3>Draft Tree</h3>
  
 <!-- Didnt need anymore on 2.x, javascript was loading in sequential order but in 3.x it is not-->
-<input type="button" value="Refresh" onClick="refreshTree()" />
+<input type="button" value="Refresh" onClick="loadPage()" />
 <input type="button" value="Export/Email..." onClick="exportTree()" />
 <!-- TODO Itteration 3 add button "Hide Deleted Nodes" -->
 <h4>Tree Orientation</h4> 
