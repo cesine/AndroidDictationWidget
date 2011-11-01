@@ -296,7 +296,8 @@ public class ViewDraftTreeActivity extends Activity {
 							mMediaPlayer.setDataSource(audioResultsFile);
 							mMediaPlayer.prepare();
 							mMediaPlayer.start();
-							mAuBlogInstallId,  // Category
+							tracker.trackEvent(
+									mAuBlogInstallId,  // Category
                 "TreeNode",  // Action
                 "User long clicked on a node and it played node "+mSelectedDraftId+" audio file "+audioResultsFile +" tree node to play the audio in the view drafts tree : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
                 (int)System.currentTimeMillis());       // Value
