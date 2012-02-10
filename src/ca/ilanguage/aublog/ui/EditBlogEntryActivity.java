@@ -1886,7 +1886,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 			}else{
 					
 				OnClickListener yes = new OnClickListener() {
-					@Override
+					
 					public void onClick(DialogInterface dialog, int which) {
 						mTranscriptionStatus = "transcription not fresh"; 
 						//TODO use constants 
@@ -1921,7 +1921,7 @@ public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnIn
 					}
 				};
 				OnClickListener no = new OnClickListener() {
-					@Override
+					
 					public void onClick(DialogInterface dialog, int which) {
 						//if the user doesnt want to import, chances are high that the transcirption is bad or not fresh.
 						//download from the server, hope its fresher keep the status as fresh, the import button will stay on, the user can click on it or not to trigger a new download.

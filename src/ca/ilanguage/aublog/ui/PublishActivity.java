@@ -372,7 +372,7 @@ public class PublishActivity extends Activity  {
 			.setTitle("Publish status").setPositiveButton("OK", null)
 			.setMessage("Published").create();
 			dlg.setOnDismissListener(new OnDismissListener() {
-				@Override
+				
 				public void onDismiss(DialogInterface dialog) {
 					/*
 					 * Dont launch the main activity again, just finish it will return to main automatically
@@ -396,7 +396,7 @@ public class PublishActivity extends Activity  {
 			Alert.showAlert(this, "Publishing failed, your Blogger account and/or password may be incorrectly entered in the Settings.", "Error code "
 					+ publishStatus, "Try again",
 					new DialogInterface.OnClickListener() {
-				@Override
+				
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.dismiss();
 					tracker.trackEvent(
@@ -408,7 +408,7 @@ public class PublishActivity extends Activity  {
 					publishBlogEntry();
 				}
 			}, "Cancel", new DialogInterface.OnClickListener() {
-				@Override
+				
 				public void onClick(DialogInterface dialog, int which) {
 					tracker.trackEvent(
 							mAuBlogInstallId,  // Category

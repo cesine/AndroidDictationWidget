@@ -117,7 +117,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
         
         Preference exportTree = findPreference(PreferenceConstants.PREFERENCE_EMAIL_DRAFTS_TREE);
         exportTree.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-			@Override
+			
 			public boolean onPreferenceClick(Preference preference) {
 				tracker.trackEvent(
 						mAuBlogInstallId,  // Category
@@ -142,7 +142,7 @@ public class SetPreferencesActivity extends PreferenceActivity implements
          */
         mCheckBoxUseBluetooth = (CheckBoxPreference) findPreference(PreferenceConstants.PREFERENCE_USE_BLUETOOTH_AUDIO);
         mCheckBoxUseBluetooth.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-			@Override
+			
 			public boolean onPreferenceChange(Preference preference, Object newValue) {
 				
 				if (mCheckBoxUseBluetooth.isChecked() == false) {
