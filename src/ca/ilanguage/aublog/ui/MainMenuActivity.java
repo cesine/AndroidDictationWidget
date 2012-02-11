@@ -610,6 +610,8 @@ public class MainMenuActivity extends Activity {
 
 			if (Math.abs(lastVersion) < Math.abs(AuBlog.VERSION)) {
 				// This is a new install or an upgrade.
+				
+				
 				SharedPreferences.Editor editor = prefs.edit();
 				
 				/*

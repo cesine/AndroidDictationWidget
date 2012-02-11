@@ -23,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -378,6 +379,13 @@ public class ViewDraftTreeActivity extends Activity {
             result.confirm();
             return true;
         }
+        @Override
+        public boolean onConsoleMessage(ConsoleMessage cm) {
+          Log.d(TAG, cm.message() + " -- From line " + cm.lineNumber() + " of "
+              + cm.sourceId());
+          return true;
+        }
+
     }
     @Override
 	public boolean onCreateOptionsMenu(Menu menu) {
