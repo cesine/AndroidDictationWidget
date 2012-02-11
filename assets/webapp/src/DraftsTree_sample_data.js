@@ -1,4 +1,4 @@
-var draftTreeData={id: "1",
+var json = {id: "1",
 name: "Root",
 hidden: "0",
 data: { content:"empty"},

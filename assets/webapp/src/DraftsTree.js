@@ -1,3 +1,5 @@
+var labelType, useGradients, nativeTextSupport, animate;
+
 //Create a new ST instance  
 var st = new $jit.ST({  
     //id of viz container element  
@@ -110,3 +112,25 @@ st.compute();
 st.geom.translate(new $jit.Complex(-200, 0), "current");  
 //emulate a click on the root node.  
 st.onClick(st.root); 
+
+var top = $jit.id('r-top'), 
+    left = $jit.id('r-left'), 
+    bottom = $jit.id('r-bottom'), 
+    right = $jit.id('r-right'),
+    normal = $jit.id('s-normal');
+        
+function changeHandler() {
+     if(this.checked) {
+        top.disabled = bottom.disabled = right.disabled = left.disabled = true;
+        st.switchPosition(this.value, "animate", {
+            onComplete: function(){
+                top.disabled = bottom.disabled = right.disabled = left.disabled = false;
+            }
+        });
+    }
+};
+    
+top.onchange = left.onchange = bottom.onchange = right.onchange = changeHandler;
+    //end
+    
+

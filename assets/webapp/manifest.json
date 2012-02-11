@@ -4,7 +4,7 @@
   "description": "Audio Blogging.",
   "app": {
     "launch": {
-      "local_path": "view_draft_tree.html"
+      "local_path": "view/main.html"
     }
   },
   "offline_enabled": true
