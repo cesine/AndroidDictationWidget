@@ -13,6 +13,7 @@ import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 //import android.util.Log;
 
+@Deprecated
 public class SpannableBufferHelper {
 
 	// private final String TAG = "SpannableBufferHelper";

@@ -49,6 +49,7 @@ import ca.ilanguage.aublog.service.DictationRecorderService;
 import ca.ilanguage.aublog.service.NotifyingTranscriptionIntentService;
 
 /**
+ * @Deprecated
  * Demonstrates how to embed a WebView in your activity. Also demonstrates how
  * to have javascript in the WebView call into the activity, and how the activity 
  * can invoke javascript.
@@ -63,6 +64,7 @@ import ca.ilanguage.aublog.service.NotifyingTranscriptionIntentService;
  * code paths for this sort of communication.
  *
  */
+@Deprecated
 public class EditBlogEntryActivity extends Activity implements TextToSpeech.OnInitListener {
 
 	GoogleAnalyticsTracker tracker;

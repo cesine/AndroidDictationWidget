@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.text.style.ImageSpan; //import android.util.Log;
 import ca.ilanguage.aublog.R;
 
+@Deprecated
 public class HTMLEmbedSpan extends ImageSpan {
 
 	// private static final String TAG = "HTMLEmbedSpan";

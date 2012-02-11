@@ -36,7 +36,7 @@ import ca.ilanguage.aublog.util.Alert;
 import ca.ilanguage.aublog.R;
 import ca.ilanguage.aublog.service.*;
 
-
+@Deprecated
 public class PublishActivity extends Activity  {
 	GoogleAnalyticsTracker tracker;
 	private String mAuBlogInstallId;
