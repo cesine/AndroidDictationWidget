@@ -1,0 +1,12 @@
+{
+  "name": "Aublog",
+  "version": "1.6",
+  "description": "Audio Blogging.",
+  "app": {
+    "launch": {
+      "local_path": "view_draft_tree.html"
+    }
+  },
+  "offline_enabled": true
+  
+}
