@@ -106,8 +106,14 @@ var json = dataIn;
         },
         
         onAfterCompute: function(node){
-            Log.write("<input type='button' value='Edit "+node.name+"' onClick='editId("+node.id+")'/><br /><input type='button' value='Delete "+node.name+"' onClick='deleteId("+node.id+")'/>");
-        },
+        	if(node.name){
+        		console.log("In on after compute true "+node.name+" id "+node.id);
+        		Log.write("<input type='button' value='Edit "+node.name+"' onClick='editId("+node.id+")'/><br /><input type='button' value='Delete "+node.name+"' onClick='deleteId("+node.id+")'/>");
+        	}else{
+        		console.log("In on after compute false");
+        		Log.write("<input type='button' value='Edit "+node.name+"' onClick='editId("+node.id+")'/><br /><input type='button' value='Delete "+node.name+"' onClick='deleteId("+node.id+")'/>");
+            }
+       },
         
         //This method is called on DOM label creation.
         //Use this method to add event handlers and styles to
