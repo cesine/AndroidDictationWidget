@@ -55,44 +55,7 @@
                 android:persistent="true"
                 />
 
-		<PreferenceScreen
-				android:key="controlConfigScreen"
-                android:title="@string/preference_configure_controls"
-                xmlns:replica="http://schemas.android.com/apk/res/ca.ilanguage.dictation.widget">
-			<CheckBoxPreference
-       			android:key="enableClickAttack"
-                android:title="@string/preference_enable_blogger_account"
-                android:summaryOn="@string/preference_enable_blogger_account_summary"
-                android:summaryOff="@string/preference_enable_blogger_account_summary"
-                android:defaultValue="true"
-                android:persistent="true"
-                />
-    		<EditTextPreference 
-    			android:title="Blogger Account Name"
-				android:key="bloggerAccount" 
-				android:summary="Enter Your Blogger account (generally your email address)" android:dialogTitle="Enter Your Blogger account"
-				android:defaultValue=""
-				android:persistent="true"/>
-			
-			<EditTextPreference 
-				android:title="Blogger Account Password"
-				android:key="bloggerPassword"  android:password="true"
-				android:summary="Enter Your Password" android:dialogTitle="Enter Your password"
-				android:defaultValue=""
-				android:persistent="true"/>
-			
-            <EditTextPreference 
-				android:title="Blog Signature"
-				android:key="blogSignature"  
-				android:summary="You can add a signature if you want" android:dialogTitle="Enter Your blog signature"
-				android:defaultValue="Posted using my Android"
-				android:persistent="true"/>
-			<EditTextPreference 
-				android:title="Center Tree on Node"
-				android:key="lastSelectedDraftNode"  
-				android:defaultValue="1"
-				android:persistent="true"/>
-        </PreferenceScreen>
+		
             
                 
     </PreferenceCategory>
@@ -101,13 +64,7 @@
             android:title="@string/preference_manage_data">
             
 
-                
-        <Preference
-                android:title="@string/preference_email_data"
-				android:key="emailDraftsTree">
-				
-        </Preference>
-        
+       
          <CheckBoxPreference
        			android:key="fileManagerInstalled"
                 android:title="File Manager Installed"
@@ -116,16 +73,7 @@
                 android:defaultValue="false"
                 android:persistent="true"
                 />
-        
-        <PreferenceScreen
-        		android:key="openJsonTxt"
-                android:title="@string/preference_export_data"
-                android:enabled="false"
-	            android:selectable="false">
-            <intent android:action="org.openintents.action.PICK_FILE"
-                    android:data="file:///sdcard/AuBlog/aublog_exported_drafts_json_format.txt" />
-        </PreferenceScreen>
-        
+      
         <PreferenceScreen
         		android:key="openAudioDir"
                 android:title="@string/preference_view_recorded_audio_data"
@@ -149,15 +97,7 @@
 		        android:entries="@array/max_upload_on_moblie_network_options"
 		        android:entryValues="@array/max_upload_on_moblie_network_values"
 		        android:defaultValue="2000000" />
-		        
-       <ca.ilanguage.dictation.widget.preferences.YesNoDialogPreference
-       			android:key="erasegame"
-                android:title="@string/preference_erase_save_game"
-                android:dialogMessage="@string/preference_erase_save_game_dialog" 
-                android:dialogTitle="@string/preference_erase_save_game_dialog_title"
-                android:negativeButtonText="@string/preference_erase_save_game_dialog_cancel"
-                android:positiveButtonText="@string/preference_erase_save_game_dialog_ok"
-                />
+		
         <CheckBoxPreference
        			android:key="enableStats"
                 android:title="@string/preference_enable_statistics"
@@ -177,7 +117,7 @@
                 android:title="@string/preference_visit_site">
 
             <intent android:action="android.intent.action.VIEW"
-                    android:data="http://aublog.net" />
+                    android:data="http://ilanguage.ca" />
 
         </PreferenceScreen>
         

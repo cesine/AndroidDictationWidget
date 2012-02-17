@@ -33,9 +33,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 import ca.ilanguage.dictation.widget.R;
-import ca.ilanguage.dictation.widget.model.DictationWidget;
+import ca.ilanguage.dictation.widget.model.Constants;
 import ca.ilanguage.dictation.widget.model.NonPublicConstants;
-import ca.ilanguage.dictation.widget.preferences.PreferenceConstants;
 import ca.ilanguage.dictation.widget.service.DictationRecorderService;
 
 
@@ -74,8 +73,8 @@ public class NotifyingController extends Activity {
 
 	    // Start the tracker in manual dispatch mode...
 	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
-	    SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-	    mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
+	    SharedPreferences prefs = getSharedPreferences(Constants.PREFERENCE_NAME, MODE_PRIVATE);
+	    mAuBlogInstallId = prefs.getString(Constants.INSTALL_ID, "0");
 		
 	    tracker.trackEvent(
 				mAuBlogInstallId,  // Category
@@ -107,8 +106,8 @@ public class NotifyingController extends Activity {
         	stopService(intent);
     		tracker.trackEvent(
     				mAuBlogInstallId,  // Category
-    	            "DictationWidget stopped",  // Action
-    	            "User clicked Stop DictationWidget  in Notifying controller : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+    	            "Constants stopped",  // Action
+    	            "User clicked Stop Constants  in Notifying controller : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
     	            (int)System.currentTimeMillis());       // Value
         }
     };
@@ -116,7 +115,7 @@ public class NotifyingController extends Activity {
     private OnClickListener mStopListener = new OnClickListener() {
         public void onClick(View v) {
 
-            Intent i = new Intent(DictationWidget.DICTATION_STILL_RECORDING_INTENT);
+            Intent i = new Intent(Constants.DICTATION_STILL_RECORDING_INTENT);
             i.setData(mUri);
     		sendBroadcast(i);
         }

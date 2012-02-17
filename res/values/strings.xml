@@ -1,35 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">AuBlog</string>
-<string name="change_level">Switch Levels</string>
-<string name="test_animation">Test Animation</string>
-<string name="test_diary">Test Diary</string>
-<string name="unlock_levels">Unlock All Levels</string>
-<string name="unlock_next_level">Unlock Next Level</string>
-<string name="method_tracing">Toggle Method Tracing</string>
-
-<string name = "please_wait">PLEASE WAIT</string>
+<string name="app_name">Dictation Widget</string>
 <string name="status_bar_notifications_sending_message">Sending for transcription</string>
 
-<!-- Aublog -->
-<string name = "untitled_blog_title">Untitled</string>
-<string name = "title_or_content_empty_error">The title or content are empty, please be sure to fill them in.</string>
-<string name="user_agent_suffix">AuBlog/1.0</string>
-<string name="preference_manage_data">AuBlog Data</string>
-<string name="preference_export_data">Export blog drafts</string>
-<string name="preference_email_data">Email blog drafts</string>
-<string name="preference_view_recorded_audio_data">Open audio folder to hear recorded blog dictations</string>
-<string name="email_exported_json_text_content">Attached is a backup of the blog drafts. You can open it as text, and you can also open it as a Interactive Draft Tree on the AuBlog web interface at the http://aublog.net/webinterface/view_draft_tree.html on the website.</string>
-<!-- UI -->
-<string name="preference_save_game">AuBlog Data</string>
-<string name="preference_erase_save_game">Erase all drafts</string>
-<string name="preference_erase_save_game_dialog">Really erase your saved drafts?  All of your drafts will be lost!</string>
-<string name="preference_erase_save_game_dialog_title">Now wait just a minute</string>
-<string name="preference_erase_save_game_dialog_ok">Erase Drafts</string>
-<string name="preference_erase_save_game_dialog_cancel">Cancel</string>
+<string name="preference_manage_data"> Data</string>
+<string name="preference_export_data">Export drafts</string>
+<string name="preference_email_data">Email drafts</string>
+<string name="preference_view_recorded_audio_data">Open audio folder to hear recorded dictations</string>
 
-
-<string name="preference_app_settings">AuBlog Settings</string>
+<string name="preference_app_settings"> Settings</string>
 <string name="preference_enable_sound">Enable Text to Speech</string>
 <string name="preference_enable_sound_summary">The Text to Speech voice might be annoying for some users, you can search for Loquendo on the Market if you want a nice voice.</string>
 
@@ -42,131 +21,43 @@
 <string name="preference_enable_phone_earpiece_audio">Use In-call Speaker for Audio Playback</string>
 <string name="preference_enable_phone_earpiece_audio_summary">If checked the app will play audio through the phone earpiece, rather than through the speaker.</string>
 
-<string name="preference_safe_mode">Safe Mode</string>
-<string name="preference_safe_mode_summary">Enables safety hacks for broken devices (Cliq, etc), but causes some visual artifacts. Try this if you have problems.</string>
-
-<string name="preference_configure_controls">Configure Blogger Accounts</string>
-<string name="preference_enable_blogger_account">Use this account</string>
-<string name="preference_enable_blogger_account_summary">Use this blogger account to publish your posts by default.</string>
-
-<string name="preference_enable_click_attack">Click Attack</string>
-<string name="preference_enable_click_attack_summary">Use the trackball click or directional pad center button to attack.</string>
-<string name="preference_enable_screen_controls">On-Screen Controls</string>
-<string name="preference_enable_screen_controls_summary">Displays movement pad and buttons on screen.  Suggested for devices without a d-pad or trackball. Requires mulitouch.</string>
-
-<string name="preference_enable_tilt_controls">Tilt Controls</string>
-<string name="preference_enable_tilt_controls_summary">EXPERIMENTAL!  Tilt the phone left and right to drive the Android around.  Good for devices with no trackball or d-pad.</string>
-
-<string name="preference_movement_sensitivity">Motion Sensitivity</string>
-<string name="preference_movement_sensitivity_summary">Adjusts the sensitivity of the trackball, d-pad, or optical sensor.</string>
-<string name="preference_movement_min">Slow</string>
-<string name="preference_movement_max">Fast</string>
-
-<string name="preference_tilt_sensitivity">Tilt Sensitivity</string>
-<string name="preference_tilt_sensitivity_summary">Adjusts the sensitivity of the tilt controls.</string>
-<string name="preference_tilt_min">Slow</string>
-<string name="preference_tilt_max">Fast</string>
-
-<string name="preference_key_config">Configure Keyboard</string>
-<string name="preference_key_config_summary">Customize keys for phones with hard keyboards.</string>
-<string name="preference_key_config_dialog_title">Configure Keyboard</string>
-<string name="preference_key_config_dialog_ok">Save</string>
-<string name="preference_key_config_dialog_cancel">Cancel</string>
-<string name="preference_key_config_left">Left</string>
-<string name="preference_key_config_right">Right</string>
-<string name="preference_key_config_jump">Jump</string>
-<string name="preference_key_config_attack">Attack</string>
-
-
 <string name="preference_enable_statistics">Report my edit statistics</string>
 <string name="preference_enable_statistics_summary">Sends anonymous statistics to a server to help us make this app more useful and adaptive.</string>
 
 
 <string name="preference_about">About</string>
-<string name="preference_about_title">About AuBlog</string>
-<string name="preference_about_summary">AuBlog was made by Gina Cook and Siddhartha Kattoju, and produced by iLanguage Lab.</string>
-<string name="preference_visit_site">Go to the AuBlog web site</string>
+<string name="preference_about_title">About </string>
+<string name="preference_about_summary">This app was made by Gina Cook and Bahar Sateli, and produced by iLanguage Lab.</string>
+<string name="preference_visit_site">Go to the  web site</string>
 <string name="preference_thanks_title">Special Thanks</string>
-<string name="preference_thanks_summary">Special Thanks to the Montreal Computational Linguistics community, and the other Open Source developers for their work which directly or indirectly contributed to this project. If you like AuBlog share us with your friends!</string>
+<string name="preference_thanks_summary">Special Thanks to the Montreal Computational Linguistics community, and the other Open Source developers for their work which directly or indirectly contributed to this project. If you like this app share us with your friends!</string>
 <string name="preference_licence_title">License</string>
-<string name="preference_licence_summary">Portions of this AuBlog are modifications based on work created and shared by Open Source developers and used according to terms described in the GNU Lesser License, Apache 2.0 License, the MIT License and the Creative Commons 3.0 Attribution License.</string>
+<string name="preference_licence_summary">Portions of this this app are modifications based on work created and shared by Open Source developers and used according to terms described in the GNU Lesser License, Apache 2.0 License, the MIT License and the Creative Commons 3.0 Attribution License.</string>
 <string name="preference_misc">More Information</string>
 <string name="preference_enable_debug">Debug Log</string>
 <string name="preference_enable_debug_summary">Output various logs to logcat.  This option will slow the app down.</string>
 
+<string name="saved_data_erased_notification">Taking you to the Application Settings where you can select this app and "Clear data"...</string>
 
-
-<string name="saved_data_erased_notification">Taking you to the Application Settings where you can select AuBlog and "Clear data"...</string>
-
-<string name="quit_game_dialog_title">Quit AuBlog?</string>
-<string name="quit_game_dialog_ok">Quit</string>
-<string name="quit_game_dialog_cancel">Cancel</string>
-<string name="quit_game_dialog_message">Return to main menu?</string>
-
-<string name="new_game_dialog_title">Start New AuBlog?</string>
-<string name="new_game_dialog_ok">Start New AuBlog</string>
-<string name="new_game_dialog_cancel">Cancel</string>
-<string name="new_game_dialog_message">Starting a new AuBlog in this mode will erase your current AuBlog in progress.  Are you sure you want to start a new AuBlog?</string>
-
-<string name="extras_locked_dialog_title">Extra still brewing!</string>
-<string name="extras_locked_dialog_ok">Get to it!</string>
-<string name="extras_locked_dialog_message">This extra feature is still in the lab!</string>
-
-
-<string name="nav_type">Trackball</string>
-
-<string name="whats_new_dialog_title">AuBlog</string>
+<string name="whats_new_dialog_title">What\'s New</string>
 <string name="whats_new_dialog_ok">Let\'s get started!</string>
-<string name="whats_new_dialog_message">Thanks for downloading AuBlog.\n\n
+<string name="whats_new_dialog_message">Thanks for downloading.\n\n
 This is an open source project.  If you are interested in how it works, or would like to add your
-own modules, check out the source at our web site, aublog.net.
+own modules, check out the source at our web site, http://ilanguage.ca.
 \n\n
-New in this version: Menus on all screens, button to import machine transcription, delete button deletes entire tree branch under that node, and long press to play nodes in the View Drafts Tree. 
+New in this version: Eyes free widget, automatic import of machine transcription.
 \n\n
 Also note that the app sends anonymous statistics back to a server to detect frequent user functions which should be automated.  If you’d rather not
 allow that, you can turn it off in the settings screen. </string>
 
-<string name="control_setup_dialog_title">Control Setup</string>
-<string name="control_setup_dialog_ok">Leave it this way</string>
-<string name="control_setup_dialog_change">Change control settings</string>
-<string name="control_setup_dialog_message">
-Based on your device hardware, the following control scheme has been automatically selected:
-&lt;br>
-&lt;br>
-&lt;small>%1s&lt;/small>
-&lt;br>
-&lt;br>AuBlog supports many different blog configurations.  Control options can be changed at 
-any time using the Configure Controls button in Options.
-&lt;br>
-&lt;br>
-Are you ok with the control system selected above, or would you like to set up your control 
-settings manually now?</string>
-<string name="control_setup_dialog_trackball">&lt;b>Trackball / Trackpad&lt;/b> - Sensitivity can be adjusted in Options.</string>
-<string name="control_setup_dialog_dpad">&lt;b>Keyboard / Pad&lt;/b> - Key mappings can be changed in Options.</string>
-<string name="control_setup_dialog_screen">&lt;b>On-Screen Pad&lt;/b></string>
-<string name="control_setup_dialog_tilt">&lt;b>Tilt&lt;/b> - Sensitivity can be adjusted in Options.</string> 
-
-<string name="onscreen_tilt_dialog_title">New Control Scheme!</string>
-<string name="onscreen_tilt_dialog_ok">On-Screen Pad</string>
-<string name="onscreen_tilt_dialog_cancel">Stick with Tilt</string>
-<string name="onscreen_tilt_dialog_message">This version of AuBlog adds an option for 
-<b>On-Screen Controls</b> for multi-touch devices.  Your device supports this new 
-mode, but your options are currently set to <b>Tilt</b> controls.  Would you like to try the 
-new On-Screen Controls instead, or stick with Tilt? 
-\n<small>You can change this setting at any time by choosing Configure Controls under Options.</small>
-</string>
-
-<string name="whats_new_ticker">In previous versions: Publish to Blogger accounts. HTML markup blog editing, transcribe sentence by sentence dictation using Google Voice and navigate drafts tree. Full data export. Record long dictations. This version: automatic speech recognition services for long dictations, user can delete entire tree branches in the draft tree. Future versions: eyes free widget, Official Blogger client integration, publish to podcasts.</string>
-
-<string name="baby_description">No challenge at all.</string>
-<string name="kids_description">A comfortable ride to the end.</string>
-<string name="adults_description">True accomplishment requires hardship.</string>
 
 
-<!-- Toast Messages -->
-<string name="memory_playback_start">MEMORY PLAYBACK START</string>
-<string name="memory_playback_complete">MEMORY PLAYBACK COMPLETE</string>
-<string name = "diary_found">FOUND OLD DIARY</string>
+<string name="whats_new_ticker">In previous versions: Full data export. Record long dictations. This version: automatic speech recognition services for long dictations, eyes free widget.</string>
+
+<string name="baby_description">Easy, breezy, beautiful.</string>
+<string name="kids_description">More controls, loop pause etc.</string>
+<string name="adults_description">I\'m a pro, give me everything you got.</string>
+
 
 
 </resources>

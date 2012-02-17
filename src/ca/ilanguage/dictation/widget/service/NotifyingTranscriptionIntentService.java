@@ -23,10 +23,9 @@ import org.apache.http.protocol.HttpContext;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import ca.ilanguage.dictation.widget.R;
-import ca.ilanguage.dictation.widget.model.DictationWidget;
+import ca.ilanguage.dictation.widget.model.Constants;
 import ca.ilanguage.dictation.widget.model.NonPublicConstants;
 import ca.ilanguage.dictation.widget.model.TranscriptionHistoryDatabase.AuBlogHistory;
-import ca.ilanguage.dictation.widget.preferences.PreferenceConstants;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -126,7 +125,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 	public static final int SPLIT_ON_UPSPEAK = 8;
 
 	// Use a layout id for a unique identifier
-	private static int AUBLOG_NOTIFICATIONS = R.layout.status_bar_notifications;
+	private static int NOTIFICATIONS = R.layout.status_bar_notifications;
 	private String mNotificationMessage;
 	GoogleAnalyticsTracker tracker;
 
@@ -135,9 +134,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		if(mKillAublogReceiver == null){
 			mKillAublogReceiver = new KillAuBlogReciever();
 		}
-		IntentFilter intentkill = new IntentFilter(DictationWidget.KILL_AUBLOG_INTENT);
+		IntentFilter intentkill = new IntentFilter(Constants.KILL_INTENT);
 		registerReceiver(mKillAublogReceiver, intentkill);
-		IntentFilter intentDictRunning = new IntentFilter(DictationWidget.IS_DICTATION_STILL_RECORDING_INTENT);
+		IntentFilter intentDictRunning = new IntentFilter(Constants.IS_DICTATION_STILL_RECORDING_INTENT);
 		registerReceiver(mKillAublogReceiver, intentDictRunning);
 
 		tracker = GoogleAnalyticsTracker.getInstance();
@@ -157,14 +156,14 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			/*if main menu says to kill aublog, pass the message on to the transcription service*/
-			if (intent.getAction().equals(DictationWidget.KILL_AUBLOG_INTENT)) {
+			if (intent.getAction().equals(Constants.KILL_INTENT)) {
 				mKillAuBlog = true;
 			}
 			/*
 			 * If main menu asks if you're recording (it is trying to kill aublog), reply that yes, you are still working.
 			 */
-			if (intent.getAction().equals(DictationWidget.IS_DICTATION_STILL_RECORDING_INTENT)) {
-				Intent i = new Intent(DictationWidget.TRANSCRIPTION_STILL_CONTACTING_INTENT);
+			if (intent.getAction().equals(Constants.IS_DICTATION_STILL_RECORDING_INTENT)) {
+				Intent i = new Intent(Constants.TRANSCRIPTION_STILL_CONTACTING_INTENT);
 				i.setData(mUri);
 				i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 				sendBroadcast(i);
@@ -219,8 +218,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mUri = intent.getData();
 			mAudioFilePath = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH);
 			mAudioResultsFileStatus = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-			mPostContents=intent.getExtras().getString(DictationWidget.EXTRA_CURRENT_CONTENTS);
-			mAskUserImport=intent.getExtras().getBoolean(DictationWidget.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
+			mPostContents=intent.getExtras().getString(Constants.EXTRA_CURRENT_CONTENTS);
+			mAskUserImport=intent.getExtras().getBoolean(Constants.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
 			if(mAskUserImport == true){
 				mTranscriptionStatus= "transcription fresh";
 			}else{
@@ -292,7 +291,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mNM.notify(NOTIFICATION, mNotification);
 		}
 
-		Intent inten = new Intent(DictationWidget.TRANSCRIPTION_STILL_CONTACTING_INTENT);
+		Intent inten = new Intent(Constants.TRANSCRIPTION_STILL_CONTACTING_INTENT);
 		inten.setData(mUri);
 		inten.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(inten);
@@ -303,10 +302,10 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		 * Check if wifi is active, or if this file can be uploaded as per the users
 		 * preference settings
 		 */
-		SharedPreferences prefs = getSharedPreferences(PreferenceConstants.PREFERENCE_NAME, MODE_PRIVATE);
-		mAuBlogInstallId = prefs.getString(PreferenceConstants.AUBLOG_INSTALL_ID, "0");
-		mMaxFileUploadOverMobileNetworkSize = prefs.getInt(PreferenceConstants.PREFERENCE_MAX_UPLOAD_ON_MOBILE_NETWORK, 2000000);
-		Boolean wifiOnly = prefs.getBoolean(PreferenceConstants.PREFERENCE_UPLOAD_WAIT_FOR_WIFI, true);
+		SharedPreferences prefs = getSharedPreferences(Constants.PREFERENCE_NAME, MODE_PRIVATE);
+		mAuBlogInstallId = prefs.getString(Constants.INSTALL_ID, "0");
+		mMaxFileUploadOverMobileNetworkSize = prefs.getInt(Constants.PREFERENCE_MAX_UPLOAD_ON_MOBILE_NETWORK, 2000000);
+		Boolean wifiOnly = prefs.getBoolean(Constants.PREFERENCE_UPLOAD_WAIT_FOR_WIFI, true);
 		File audioFile = new File(mAudioFilePath);
 		//audioFile.length() < mMaxFileUploadOverMobileNetworkSize ||
 		ConnectivityManager conMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -334,7 +333,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				HttpClient httpClient = new DefaultHttpClient();
 				HttpContext localContext = new BasicHttpContext();
 				Long uniqueId = System.currentTimeMillis();
-				HttpPost httpPost = new HttpPost(NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_URL+NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_API_KEY+mAudioFilePath.replace(PreferenceConstants.OUTPUT_AUBLOG_DIRECTORY+"audio/","") );
+				HttpPost httpPost = new HttpPost(NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_URL+NonPublicConstants.NONPUBLIC_TRANSCRIPTION_WEBSERVICE_API_KEY+mAudioFilePath.replace(Constants.OUTPUT_DIRECTORY+"audio/","") );
 
 
 				MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -410,7 +409,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 				outSRT.flush();
 				outSRT.close();
 				if(mAudioFilePath.endsWith(".mp3")){
-					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"DictationWidget successfully sent to Transcription server.";
+					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Constants successfully sent to Transcription server.";
 				}else{
 					mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Recieved transcription response from Transcription server, saved as _server.srt in the AuBlog folder.";
 				}
@@ -440,19 +439,19 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			if (mShowNotification){
 				mNM.notify(NOTIFICATION, mNotification);
 			}
-			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"DictationWidget audio wasn't sent for transcription, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
+			mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+"Constants audio wasn't sent for transcription, either user has wifi only or the file is larger than the settings the user has chosen, or its larger than 10min.";
 			saveMetaDataToDatabase();
 			
 		}//end if for max file size for upload
 
 		if(mAudioFilePath.endsWith(".srt")){
-			Intent i = new Intent(DictationWidget.REFRESH_TRANSCRIPTION_INTENT);
+			Intent i = new Intent(Constants.REFRESH_TRANSCRIPTION_INTENT);
 			//i.setData(mUri);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
-			i.putExtra(DictationWidget.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
+			i.putExtra(Constants.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
 			if(mAskUserImport){
 				mTranscription = readAsTranscriptionString(); 
-				i.putExtra(DictationWidget.EXTRA_FRESH_TRANSCRIPTION_CONTENTS, mTranscription);
+				i.putExtra(Constants.EXTRA_FRESH_TRANSCRIPTION_CONTENTS, mTranscription);
 				mNotificationMessage = "Transcription results received.";
 				mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
 				if (mShowNotification){
@@ -485,12 +484,12 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			}*/			
 
 		}else{
-			Intent i = new Intent(DictationWidget.DICTATION_SENT_INTENT);
+			Intent i = new Intent(Constants.DICTATION_SENT_INTENT);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 			tracker.trackEvent(
 					mAuBlogInstallId,  // Category
-		            "DictationWidget Uploaded",  // Action
+		            "Constants Uploaded",  // Action
 		            "Client uploaded an mp3 to the server: "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
 		            (int)System.currentTimeMillis());       // Value
 			
@@ -542,7 +541,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 
 				// Tell the user we saved recording meta info to the database.
 				//Toast.makeText(this, "Audiofile info saved to DB.", Toast.LENGTH_SHORT).show();
-				//mNotification.setLatestEventInfo(this, "AuBlog DictationWidget", "Saved to DB", mContentIntent);
+				//mNotification.setLatestEventInfo(this, "AuBlog Constants", "Saved to DB", mContentIntent);
 				//mNM.notify(NOTIFICATION, mNotification);
 
 
