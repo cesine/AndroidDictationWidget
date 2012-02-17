@@ -58,7 +58,7 @@
 		<PreferenceScreen
 				android:key="controlConfigScreen"
                 android:title="@string/preference_configure_controls"
-                xmlns:replica="http://schemas.android.com/apk/res/ca.ilanguage.aublog">
+                xmlns:replica="http://schemas.android.com/apk/res/ca.ilanguage.dictation.widget">
 			<CheckBoxPreference
        			android:key="enableClickAttack"
                 android:title="@string/preference_enable_blogger_account"
@@ -142,7 +142,7 @@
                 android:defaultValue="true"
                 android:persistent="true"
                 />
-       <ca.ilanguage.aublog.preferences.IntegerListPreference
+       <ca.ilanguage.dictation.widget.preferences.IntegerListPreference
 		        android:key="maxUploadOnMobleNetwork"
 		        android:title="Max upload when not on Wifi"
 		        android:summary="You can configure AuBlog to send only small audio files for transcription."
@@ -150,7 +150,7 @@
 		        android:entryValues="@array/max_upload_on_moblie_network_values"
 		        android:defaultValue="2000000" />
 		        
-       <ca.ilanguage.aublog.preferences.YesNoDialogPreference
+       <ca.ilanguage.dictation.widget.preferences.YesNoDialogPreference
        			android:key="erasegame"
                 android:title="@string/preference_erase_save_game"
                 android:dialogMessage="@string/preference_erase_save_game_dialog" 
@@ -207,7 +207,7 @@
 	                 <!-- add share intent -->
 	                 <intent 
 	                 	android:action="android.intent.action.VIEW"
-                    	android:data="https://market.android.com/details?id=ca.ilanguage.aublog" />
+                    	android:data="https://market.android.com/details?id=ca.ilanguage.dictation.widget" />
                     
 	        </PreferenceScreen>
 	                
