@@ -1,4 +1,4 @@
-package ca.ilanguage.dictation.widget.ui;
+package ca.ilanguage.dictation.widget.activity;
 
 import android.app.Activity;
 

@@ -7,9 +7,10 @@ import java.io.IOException;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import ca.ilanguage.dictation.widget.R;
-import ca.ilanguage.dictation.widget.db.AuBlogHistoryDatabase.AuBlogHistory;
-import ca.ilanguage.dictation.widget.model.Dictation;
-import ca.ilanguage.dictation.widget.preferences.NonPublicConstants;
+import ca.ilanguage.dictation.widget.activity.NotifyingController;
+import ca.ilanguage.dictation.widget.model.DictationWidget;
+import ca.ilanguage.dictation.widget.model.NonPublicConstants;
+import ca.ilanguage.dictation.widget.model.TranscriptionHistoryDatabase.AuBlogHistory;
 import ca.ilanguage.dictation.widget.preferences.PreferenceConstants;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -124,9 +125,9 @@ public class DictationRecorderService extends Service {
 		if (audioFileUpdateReceiver == null){
 			audioFileUpdateReceiver = new RecordingReceiver();
 		}
-		IntentFilter intentDictRunning = new IntentFilter(Dictation.IS_DICTATION_STILL_RECORDING_INTENT);
+		IntentFilter intentDictRunning = new IntentFilter(DictationWidget.IS_DICTATION_STILL_RECORDING_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentDictRunning);
-		IntentFilter intentkill = new IntentFilter(Dictation.KILL_AUBLOG_INTENT);
+		IntentFilter intentkill = new IntentFilter(DictationWidget.KILL_AUBLOG_INTENT);
 		registerReceiver(audioFileUpdateReceiver, intentkill);
 
 		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -135,8 +136,8 @@ public class DictationRecorderService extends Service {
 		i.setData(mUri);
 		mContentIntent = PendingIntent.getActivity(this, 0, i, 0);
 		
-		mNotification = new Notification(mAuBlogIconId, "AuBlog Dictation in progress", System.currentTimeMillis());
-		mNotification.setLatestEventInfo(this, "AuBlog Dictation", "Recording...", mContentIntent);
+		mNotification = new Notification(mAuBlogIconId, "AuBlog DictationWidget in progress", System.currentTimeMillis());
+		mNotification.setLatestEventInfo(this, "AuBlog DictationWidget", "Recording...", mContentIntent);
 		mNotification.flags  |= Notification.FLAG_AUTO_CANCEL;
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		tracker = GoogleAnalyticsTracker.getInstance();
@@ -152,14 +153,14 @@ public class DictationRecorderService extends Service {
 		sendForTranscription();
 		saveMetaDataToDatabase();
 		mNM.cancel(NOTIFICATION);
-		Intent i = new Intent(Dictation.REFRESH_AUDIOFILE_INTENT);
+		Intent i = new Intent(DictationWidget.REFRESH_AUDIOFILE_INTENT);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
 		
 		/*pass on the kill aublog message to the transcription server*/
 		if (mKillAuBlog != null){
 			if(mKillAuBlog){
-				Intent intent = new Intent(Dictation.KILL_AUBLOG_INTENT);
+				Intent intent = new Intent(DictationWidget.KILL_AUBLOG_INTENT);
 				sendBroadcast(intent);
 			}
 		}
@@ -184,14 +185,14 @@ public class DictationRecorderService extends Service {
 		sendForTranscription();
 		saveMetaDataToDatabase();
 		mNM.cancel(NOTIFICATION);
-		Intent i = new Intent(Dictation.REFRESH_AUDIOFILE_INTENT);
+		Intent i = new Intent(DictationWidget.REFRESH_AUDIOFILE_INTENT);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
 		
 		/*pass on the kill aublog message to the transcription server*/
 		if (mKillAuBlog != null){
 			if(mKillAuBlog){
-				Intent intent = new Intent(Dictation.KILL_AUBLOG_INTENT);
+				Intent intent = new Intent(DictationWidget.KILL_AUBLOG_INTENT);
 				sendBroadcast(intent);
 			}
 		}
@@ -209,23 +210,23 @@ public class DictationRecorderService extends Service {
 	    	/*
 	    	 * If main menu asks if you're recording (it is trying to close aublog), reply that yes, you are still recording.
 	    	 */
-	    	if (intent.getAction().equals(Dictation.IS_DICTATION_STILL_RECORDING_INTENT)) {
-	    		Intent i = new Intent(Dictation.DICTATION_STILL_RECORDING_INTENT);
+	    	if (intent.getAction().equals(DictationWidget.IS_DICTATION_STILL_RECORDING_INTENT)) {
+	    		Intent i = new Intent(DictationWidget.DICTATION_STILL_RECORDING_INTENT);
 				i.setData(mUri);
 				i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 				sendBroadcast(i);
 				if (mKillAuBlog != null){
 					if(mKillAuBlog){
-						Intent inten = new Intent(Dictation.KILL_AUBLOG_INTENT);
+						Intent inten = new Intent(DictationWidget.KILL_AUBLOG_INTENT);
 						sendBroadcast(inten);
 					}
 				}
 	    	}
-	    	if (intent.getAction().equals(Dictation.KILL_AUBLOG_INTENT)) {
+	    	if (intent.getAction().equals(DictationWidget.KILL_AUBLOG_INTENT)) {
 	    		mKillAuBlog = true;
 	    		if (mKillAuBlog != null){
 	    			if(mKillAuBlog){
-	    				Intent inten = new Intent(Dictation.KILL_AUBLOG_INTENT);
+	    				Intent inten = new Intent(DictationWidget.KILL_AUBLOG_INTENT);
 	    				sendBroadcast(inten);
 	    			}
 	    		}
@@ -236,7 +237,7 @@ public class DictationRecorderService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Intent i = new Intent(Dictation.DICTATION_STILL_RECORDING_INTENT);
+		Intent i = new Intent(DictationWidget.DICTATION_STILL_RECORDING_INTENT);
 		i.setData(mUri);
 		i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(i);
@@ -387,7 +388,7 @@ public class DictationRecorderService extends Service {
 		        	
 		        	// Tell the user we saved recording meta info to the database.
 		            //Toast.makeText(this, "Audiofile info saved to DB.", Toast.LENGTH_SHORT).show();
-		            //mNotification.setLatestEventInfo(this, "AuBlog Dictation", "Saved to DB", mContentIntent);
+		            //mNotification.setLatestEventInfo(this, "AuBlog DictationWidget", "Saved to DB", mContentIntent);
 		    		
 		        	
 			} catch (IllegalArgumentException e) {
@@ -427,15 +428,15 @@ public class DictationRecorderService extends Service {
 				
 				tracker.trackEvent(
 						mAuBlogInstallId,  // Category
-			            "Dictation",  // Action
-			            "Dictation saved by service. : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+			            "DictationWidget",  // Action
+			            "DictationWidget saved by service. : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
 			            (int)System.currentTimeMillis());       // Value
 				
 			   	       
 				// Tell the user we saved recording.
 	            //Toast.makeText(this, "Recording saved to SDCard.", Toast.LENGTH_SHORT).show();
 	            //mContentIntent = open file browser? or open in music player playlist?
-			   	//mNotification.setLatestEventInfo(this, "AuBlog Dictation", "Saved in AuBlog folder", mContentIntent);
+			   	//mNotification.setLatestEventInfo(this, "AuBlog DictationWidget", "Saved in AuBlog folder", mContentIntent);
 			   	
 			   	appendToContent ="Attached a "+mTimeAudioWasRecorded/1000+" second Recording.\n";
 			   	mAudioResultsFileStatus=mAudioResultsFileStatus+":::"+appendToContent;
@@ -474,7 +475,7 @@ public class DictationRecorderService extends Service {
         //always promt user if they want to import the transcription on the first round of transcription sent to the server. 
         //even though the transcription will be minimal, new users will realize that they will be prompted when further results are ready.
         //can put a settings like 5 times, and the set it to false because the user has learned how to use the aublog. 
-        intent.putExtra(Dictation.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, true);
+        intent.putExtra(DictationWidget.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, true);
         startService(intent); 
 		
 		tracker.trackEvent(

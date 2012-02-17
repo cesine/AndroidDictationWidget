@@ -1,4 +1,4 @@
-package ca.ilanguage.dictation.widget.db;
+package ca.ilanguage.dictation.widget.provider;
 
 import java.util.HashMap;
 
@@ -16,8 +16,8 @@ import android.net.Uri;
 import android.provider.LiveFolders;
 import android.text.TextUtils;
 import android.util.Log;
-import ca.ilanguage.dictation.widget.db.AuBlogHistoryDatabase;
-import ca.ilanguage.dictation.widget.db.AuBlogHistoryDatabase.AuBlogHistory;
+import ca.ilanguage.dictation.widget.model.TranscriptionHistoryDatabase;
+import ca.ilanguage.dictation.widget.model.TranscriptionHistoryDatabase.AuBlogHistory;
 
 
 public class TranscriptionProvider extends ContentProvider {
@@ -25,14 +25,14 @@ public class TranscriptionProvider extends ContentProvider {
 //	public final Context mCtx;
 //	private DatabaseHelper mDbHelper;
 //	private SQLiteDatabase mDb;
-//	private AuBlogHistoryDatabase ???;  //the database has a null constructor so its essentially just a definition of constants.. with no fucntions anyway. 
+//	private TranscriptionHistoryDatabase ???;  //the database has a null constructor so its essentially just a definition of constants.. with no fucntions anyway. 
 	
     private static final String TAG = "TranscriptionProvider";
 
     private static final String DATABASE_NAME = "aubloghistory.db";
     private static final int DATABASE_VERSION = 5;
     private static final int DATABASE_CHANGED_COLUMN_NAMES = 3;
-    //private static final String  AUBLOG_HISTORY_TABLE_NAME= AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME;
+    //private static final String  AUBLOG_HISTORY_TABLE_NAME= TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME;
 
     private static HashMap<String, String> sAuBlogHistoryProjectionMap;
     private static HashMap<String, String> sLiveFolderProjectionMap;
@@ -95,7 +95,7 @@ public class TranscriptionProvider extends ContentProvider {
 //     * probably broken
 //     */
 //    public Cursor fetchPostdById(long rowId) throws SQLException {
-////		Cursor mCursor = mDb.query(true, AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, new String[]{
+////		Cursor mCursor = mDb.query(true, TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, new String[]{
 ////				AuBlogHistory._ID, AuBlogHistory.ENTRY_TITLE, AuBlogHistory.ENTRY_CONTENT}, AuBlogHistory._ID + "=" + rowId,
 ////				null, null, null, null, null);
 //    	Cursor cursor = query(AuBlogHistory.CONTENT_URI, new String[]{
@@ -111,7 +111,7 @@ public class TranscriptionProvider extends ContentProvider {
 //    	ContentValues args = new ContentValues();
 //		args.put(AuBlogHistory.ENTRY_TITLE, title);
 //		args.put(AuBlogHistory.ENTRY_CONTENT, content);
-////		return mDb.update(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, args, AuBlogHistory._ID + "=" + rowId, null) > 0;
+////		return mDb.update(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, args, AuBlogHistory._ID + "=" + rowId, null) > 0;
 //		return update(AuBlogHistory.CONTENT_URI.buildUpon().appendPath(rowId.toString()).build(), args, null, null) > 0;
 //    }
 //	public boolean deletePost(Long rowId) {
@@ -128,12 +128,12 @@ public class TranscriptionProvider extends ContentProvider {
         int count;
         switch (sUriMatcher.match(uri)) {
         case AUBLOGHISTORIES:
-            count = db.delete(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, where, whereArgs);
+            count = db.delete(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, where, whereArgs);
             break;
 
         case AUBLOGHISTORY_ID:
             String itemId = uri.getPathSegments().get(1);
-            count = db.delete(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory._ID + "=" + itemId
+            count = db.delete(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory._ID + "=" + itemId
                     + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
             break;
 
@@ -193,7 +193,7 @@ public class TranscriptionProvider extends ContentProvider {
             values.put(AuBlogHistory.PUBLISHED, "0");
         }       
         if (values.containsKey(AuBlogHistory.PARENT_ENTRY) == false) {
-            values.put(AuBlogHistory.PARENT_ENTRY, AuBlogHistoryDatabase.ROOT_ID_DEFAULT);
+            values.put(AuBlogHistory.PARENT_ENTRY, TranscriptionHistoryDatabase.ROOT_ID_DEFAULT);
         }  
         if (values.containsKey(AuBlogHistory.DELETED) == false) {
             values.put(AuBlogHistory.DELETED, "0");
@@ -243,7 +243,7 @@ public class TranscriptionProvider extends ContentProvider {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         // it seems suspicious to only be the content of PARENT_ENTRY, ah its the nullcolumnhack
         
-        long rowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+        long rowId = db.insert(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
         if (rowId > 0) {
             Uri resultUri = ContentUris.withAppendedId(AuBlogHistory.CONTENT_URI, rowId);
             getContext().getContentResolver().notifyChange(resultUri, null);
@@ -262,7 +262,7 @@ public class TranscriptionProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
+        qb.setTables(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
 
         switch (sUriMatcher.match(uri)) {
         case AUBLOGHISTORIES:
@@ -311,7 +311,7 @@ public class TranscriptionProvider extends ContentProvider {
         int count;
         switch (sUriMatcher.match(uri)) {
         case AUBLOGHISTORIES:
-            count = db.update(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, values, selection, selectionArgs);
+            count = db.update(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, values, selection, selectionArgs);
             break;
 
         case AUBLOGHISTORY_ID:
@@ -323,7 +323,7 @@ public class TranscriptionProvider extends ContentProvider {
             //update teh row using the values provided
             //this takes updates from the title editor
             //this takes updates from the audiobooks editor
-            count = db.update(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, values, AuBlogHistory._ID + "=" + audiobookId
+            count = db.update(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, values, AuBlogHistory._ID + "=" + audiobookId
                     + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
             break;
 
@@ -336,9 +336,9 @@ public class TranscriptionProvider extends ContentProvider {
 	}
 	static {
 	        sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-	        sUriMatcher.addURI(AuBlogHistoryDatabase.AUTHORITY, AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AUBLOGHISTORIES);
-	        sUriMatcher.addURI(AuBlogHistoryDatabase.AUTHORITY, AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"/#", AUBLOGHISTORY_ID);
-	        sUriMatcher.addURI(AuBlogHistoryDatabase.AUTHORITY, "live_folders/"+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, LIVE_FOLDER_AUBLOGHISTORYS);
+	        sUriMatcher.addURI(TranscriptionHistoryDatabase.AUTHORITY, TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AUBLOGHISTORIES);
+	        sUriMatcher.addURI(TranscriptionHistoryDatabase.AUTHORITY, TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"/#", AUBLOGHISTORY_ID);
+	        sUriMatcher.addURI(TranscriptionHistoryDatabase.AUTHORITY, "live_folders/"+TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, LIVE_FOLDER_AUBLOGHISTORYS);
 
 	        sAuBlogHistoryProjectionMap = new HashMap<String, String>();
 	        sAuBlogHistoryProjectionMap.put(AuBlogHistory._ID, AuBlogHistory._ID);
@@ -387,7 +387,7 @@ public class TranscriptionProvider extends ContentProvider {
         }
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME + " ("
+            db.execSQL("CREATE TABLE " + TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME + " ("
             		+ AuBlogHistory._ID+ " INTEGER PRIMARY KEY AUTOINCREMENT,"
             		+ AuBlogHistory.PUBLISHED + " INTEGER,"
             		+ AuBlogHistory.ENTRY_CONTENT + " TEXT,"
@@ -433,10 +433,10 @@ public class TranscriptionProvider extends ContentProvider {
             values.put(AuBlogHistory.TRANSCRIPTION_RESULT, "");
             values.put(AuBlogHistory.PUBLISHED_IN, "");
 			// it seems suspicious to only be the content of PARENT_ENTRY, ah its the nullcolumnhack
-			long saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			long saveRowId = db.insert(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
 			values.put(AuBlogHistory.ENTRY_TITLE, "Trash");//post 2 is the trash.
-			db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			db.insert(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			/*
 			 * Branch for sample Entry About Me
 			 * 			*
@@ -454,7 +454,7 @@ public class TranscriptionProvider extends ContentProvider {
 					"an expert in your blog's topic but your blog is also the place for people to find information " +
 					"about your topic on the web. From <a href='http://weblogs.about.com/od/partsofablog/qt/AboutPage.htm'>About.com</a>");
 			values.put(AuBlogHistory.ENTRY_LABELS, "about me");
-			saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			saveRowId = db.insert(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
 			values.put(AuBlogHistory.PARENT_ENTRY,saveRowId);
 			values.put(AuBlogHistory.ENTRY_TITLE, "About my blog");
@@ -470,7 +470,7 @@ public class TranscriptionProvider extends ContentProvider {
 					"Your contact information so interested readers can ask questions or reach out to you for other " +
 					"business opportunities (which happens often in the blogosphere)");
 			values.put(AuBlogHistory.ENTRY_LABELS, "about me");
-			Long terminalRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			Long terminalRowId = db.insert(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
 			/*
 			 * Branch for sample job entry,
@@ -481,13 +481,13 @@ public class TranscriptionProvider extends ContentProvider {
 			 * 			/ \
 			 * 		   *   *
 			 */
-			values.put(AuBlogHistory.PARENT_ENTRY,AuBlogHistoryDatabase.ROOT_ID_DEFAULT);
+			values.put(AuBlogHistory.PARENT_ENTRY,TranscriptionHistoryDatabase.ROOT_ID_DEFAULT);
 			values.put(AuBlogHistory.ENTRY_TITLE, "How to use the drafts tree");
 			values.put(AuBlogHistory.ENTRY_CONTENT, "The drafts tree lets you visualize/listen to blog entries, " +
 					"and re-draft or re-wind until you are ready to publish. Each time you hit the save button, " +
 					"a new node is created. ");
 			values.put(AuBlogHistory.ENTRY_LABELS, "howto");
-			saveRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			saveRowId = db.insert(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
 			values.put(AuBlogHistory.PARENT_ENTRY,saveRowId);
 			values.put(AuBlogHistory.ENTRY_TITLE, "Use via recording...");
@@ -496,13 +496,13 @@ public class TranscriptionProvider extends ContentProvider {
 					"Then you can edit it in text form and publish it. Alternatively, you can use AuBlog as a traditional blog " +
 					"client by just typing in the Edit Entry page.");
 			values.put(AuBlogHistory.ENTRY_LABELS, "howto, record");
-			terminalRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			terminalRowId = db.insert(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
 			values.put(AuBlogHistory.PARENT_ENTRY,saveRowId);
 			values.put(AuBlogHistory.ENTRY_TITLE, "Use via typing...");
 			values.put(AuBlogHistory.ENTRY_CONTENT, "You can also simply type your blog entry by clicking on the Edit button.");
 			values.put(AuBlogHistory.ENTRY_LABELS, "howto, type");
-			terminalRowId = db.insert(AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
+			terminalRowId = db.insert(TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME, AuBlogHistory.PARENT_ENTRY, values);
 			
         }
         @Override
@@ -516,16 +516,16 @@ public class TranscriptionProvider extends ContentProvider {
 			 * TABLE to rename the old table, then create the new table and then
 			 * populate the new table with the contents of the old table.
 			 */
-        	String copyTableToBackup = "ALTER TABLE "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+" RENAME TO "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME + "backup1;";
+        	String copyTableToBackup = "ALTER TABLE "+TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+" RENAME TO "+TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME + "backup1;";
         	db.execSQL(copyTableToBackup);
         	
         	Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
         			+ newVersion + ", will try to copy all old data");
-        	db.execSQL("DROP TABLE IF EXISTS "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
+        	db.execSQL("DROP TABLE IF EXISTS "+ TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
         	onCreate(db);
         	
         	//delete data
-        	String clearSampleData = "DELETE FROM "+AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+";";
+        	String clearSampleData = "DELETE FROM "+TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+";";
         	try{
         		db.execSQL(clearSampleData);
         	}catch (Exception e) {
@@ -538,7 +538,7 @@ public class TranscriptionProvider extends ContentProvider {
         	 */
         	if (oldVersion < DATABASE_CHANGED_COLUMN_NAMES){
         		performUpgrade = 
-        			"INSERT INTO "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME
+        			"INSERT INTO "+ TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME
         			+"("+AuBlogHistory._ID
         			+", "+AuBlogHistory.PUBLISHED
         			+", "+AuBlogHistory.ENTRY_CONTENT
@@ -565,13 +565,13 @@ public class TranscriptionProvider extends ContentProvider {
         			+", "+AuBlogHistory.TIME_CREATED
         			+", "+AuBlogHistory.TIME_EDITED
         			+" " +
-        			"FROM "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"backup1;";
+        			"FROM "+ TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"backup1;";
         	}else if (oldVersion == 3){
         		/*
         		 * Version 3 and above the columns are not renamed but just new columns are added
         		 */
         		performUpgrade = 
-        			"INSERT INTO "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME
+        			"INSERT INTO "+ TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME
         			+"("+AuBlogHistory._ID
         			+", "+AuBlogHistory.PUBLISHED
         			+", "+AuBlogHistory.ENTRY_CONTENT
@@ -600,7 +600,7 @@ public class TranscriptionProvider extends ContentProvider {
         			+", "+AuBlogHistory.TIME_CREATED
         			+", "+AuBlogHistory.TIME_EDITED
         			+" " +
-        			"FROM "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"backup1;";
+        			"FROM "+ TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME+"backup1;";
         	}/* else if (oldVersion  == 5){
         	//look at create table version of db 5 to copy over all the columns of 5 to the new db
         	        	
@@ -619,7 +619,7 @@ public class TranscriptionProvider extends ContentProvider {
          */
         public void wipeUserData(SQLiteDatabase db) {
         	Log.w(TAG, "Deleting database, and inserting original sample entries, which will destroy all old data");
-        	db.execSQL("DROP TABLE IF EXISTS "+ AuBlogHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
+        	db.execSQL("DROP TABLE IF EXISTS "+ TranscriptionHistoryDatabase.AUBLOG_HISTORY_TABLE_NAME);
         	onCreate(db);
         }
     }//end databasehelper

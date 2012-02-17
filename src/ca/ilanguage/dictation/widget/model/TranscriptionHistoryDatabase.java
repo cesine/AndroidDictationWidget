@@ -1,4 +1,4 @@
-package ca.ilanguage.dictation.widget.db;
+package ca.ilanguage.dictation.widget.model;
 
 import java.util.regex.Pattern;
 
@@ -8,7 +8,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 
-public class AuBlogHistoryDatabase {
+public class TranscriptionHistoryDatabase {
 	 /**
      * Special value for {@link SyncColumns#UPDATED} indicating that an entry
      * has never been updated, or doesn't exist yet.
@@ -165,7 +165,7 @@ public class AuBlogHistoryDatabase {
     	return sSanitizePattern.matcher(input.toLowerCase()).replaceAll("");
     }
     //null constructor, This class cannot be instantiated
-    private AuBlogHistoryDatabase(){
+    private TranscriptionHistoryDatabase(){
     	
     	
     	

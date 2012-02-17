@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ca.ilanguage.dictation.widget.service;
+package ca.ilanguage.dictation.widget.activity;
 
 // Need the following import to get access to the app resources, since this
 // class is in a sub-package.
@@ -33,9 +33,10 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 import ca.ilanguage.dictation.widget.R;
-import ca.ilanguage.dictation.widget.model.Dictation;
-import ca.ilanguage.dictation.widget.preferences.NonPublicConstants;
+import ca.ilanguage.dictation.widget.model.DictationWidget;
+import ca.ilanguage.dictation.widget.model.NonPublicConstants;
 import ca.ilanguage.dictation.widget.preferences.PreferenceConstants;
+import ca.ilanguage.dictation.widget.service.DictationRecorderService;
 
 
 /**
@@ -106,8 +107,8 @@ public class NotifyingController extends Activity {
         	stopService(intent);
     		tracker.trackEvent(
     				mAuBlogInstallId,  // Category
-    	            "Dictation stopped",  // Action
-    	            "User clicked Stop Dictation  in Notifying controller : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
+    	            "DictationWidget stopped",  // Action
+    	            "User clicked Stop DictationWidget  in Notifying controller : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
     	            (int)System.currentTimeMillis());       // Value
         }
     };
@@ -115,7 +116,7 @@ public class NotifyingController extends Activity {
     private OnClickListener mStopListener = new OnClickListener() {
         public void onClick(View v) {
 
-            Intent i = new Intent(Dictation.DICTATION_STILL_RECORDING_INTENT);
+            Intent i = new Intent(DictationWidget.DICTATION_STILL_RECORDING_INTENT);
             i.setData(mUri);
     		sendBroadcast(i);
         }

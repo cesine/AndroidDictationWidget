@@ -37,6 +37,7 @@ import android.preference.PreferenceScreen;
 import android.widget.Toast;
 
 import ca.ilanguage.dictation.widget.R;
+import ca.ilanguage.dictation.widget.model.NonPublicConstants;
 
 public class SetPreferencesActivity extends PreferenceActivity implements 
 		YesNoDialogPreference.YesNoDialogListener {

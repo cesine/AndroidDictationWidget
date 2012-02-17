@@ -15,7 +15,7 @@
         <service android:name=".service.DictationRecorderService" />
         <service android:name=".service.NotifyingTranscriptionIntentService" />
        
-        <activity android:name=".service.NotifyingController"
+        <activity android:name=".activity.NotifyingController"
                   android:label="@string/app_name">
         </activity>
     	<activity android:name=".ui.DictationWidgetHost"
@@ -29,7 +29,7 @@
 		<activity android:name=".preferences.SetPreferencesActivity"
 				   />
 	
-		<provider android:name=".db.TranscriptionProvider"
+		<provider android:name=".provider.TranscriptionProvider"
                   android:authorities="ca.ilanguage.dictation.widget.provider.TranscriptionProvider" />
 		
 		<uses-permission android:name="android.permission.VIBRATE"/>
