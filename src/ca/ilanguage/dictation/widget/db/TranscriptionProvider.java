@@ -20,14 +20,14 @@ import ca.ilanguage.dictation.widget.db.AuBlogHistoryDatabase;
 import ca.ilanguage.dictation.widget.db.AuBlogHistoryDatabase.AuBlogHistory;
 
 
-public class AuBlogHistoryProvider extends ContentProvider {
+public class TranscriptionProvider extends ContentProvider {
 	//procedure from DBTextAdapter
 //	public final Context mCtx;
 //	private DatabaseHelper mDbHelper;
 //	private SQLiteDatabase mDb;
 //	private AuBlogHistoryDatabase ???;  //the database has a null constructor so its essentially just a definition of constants.. with no fucntions anyway. 
 	
-    private static final String TAG = "AuBlogHistoryProvider";
+    private static final String TAG = "TranscriptionProvider";
 
     private static final String DATABASE_NAME = "aubloghistory.db";
     private static final int DATABASE_VERSION = 5;
@@ -82,10 +82,10 @@ public class AuBlogHistoryProvider extends ContentProvider {
 //     * to improve them use the providers own methods (which wrap the sql database methods) rather than the methods from the sql database...
 //     */
     //couldnt compile with this constructor
-//    public AuBlogHistoryProvider(Context context){
+//    public TranscriptionProvider(Context context){
 //    	this.mCtx=context;
 //    }
-//    public AuBlogHistoryProvider open() throws SQLException{
+//    public TranscriptionProvider open() throws SQLException{
 ////    	mDbHelper = new DatabaseHelper(mCtx);
 ////		mDb = mDbHelper.getWritableDatabase();
 //		return this;

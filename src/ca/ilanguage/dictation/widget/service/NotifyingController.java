@@ -32,10 +32,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
-import ca.ilanguage.aublog.R;
+import ca.ilanguage.dictation.widget.R;
+import ca.ilanguage.dictation.widget.model.Dictation;
 import ca.ilanguage.dictation.widget.preferences.NonPublicConstants;
 import ca.ilanguage.dictation.widget.preferences.PreferenceConstants;
-import ca.ilanguage.dictation.widget.ui.EditBlogEntryActivity;
 
 
 /**
@@ -115,7 +115,7 @@ public class NotifyingController extends Activity {
     private OnClickListener mStopListener = new OnClickListener() {
         public void onClick(View v) {
 
-            Intent i = new Intent(EditBlogEntryActivity.DICTATION_STILL_RECORDING_INTENT);
+            Intent i = new Intent(Dictation.DICTATION_STILL_RECORDING_INTENT);
             i.setData(mUri);
     		sendBroadcast(i);
         }

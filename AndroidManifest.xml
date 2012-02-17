@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="ca.ilanguage.aublog"
+      package="ca.ilanguage.dictation.widget"
       android:versionName="2.0" 
       android:versionCode="20"
       android:installLocation="preferExternal">
@@ -12,13 +12,13 @@
     	android:debuggable="false"
     	android:theme="@android:style/Theme.Black.NoTitleBar">
     	
-        <service android:name="ca.ilanguage.aublog.service.DictationRecorderService" />
-        <service android:name="ca.ilanguage.aublog.service.NotifyingTranscriptionIntentService" />
+        <service android:name=".service.DictationRecorderService" />
+        <service android:name=".service.NotifyingTranscriptionIntentService" />
        
-        <activity android:name="ca.ilanguage.aublog.service.NotifyingController"
+        <activity android:name=".service.NotifyingController"
                   android:label="@string/app_name">
         </activity>
-    	<activity android:name="ca.ilanguage.aublog.ui.DictationWidgetHost"
+    	<activity android:name=".ui.DictationWidgetHost"
                   android:label="@string/app_name" >
         	<intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,28 +26,27 @@
             </intent-filter>
         </activity>
         				
-		<activity android:name="ca.ilanguage.aublog.preferences.SetPreferencesActivity"
+		<activity android:name=".preferences.SetPreferencesActivity"
 				   />
 	
-		<provider android:name="ca.ilanguage.aublog.db.TranscriptionProvider"
-                  android:authorities="ca.ilanguage.aublog.provider.TranscriptionProvider" />
+		<provider android:name=".db.TranscriptionProvider"
+                  android:authorities="ca.ilanguage.dictation.widget.provider.TranscriptionProvider" />
 		
+		<uses-permission android:name="android.permission.VIBRATE"/>
+	    <uses-permission android:name="android.permission.INTERNET"/>
+		<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+		<uses-permission android:name="android.permission.RECORD_AUDIO" />
+		<uses-permission android:name="android.permission.BLUETOOTH" />
+		<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 		
+		<uses-permission android:name="android.permission.INTERNET" />
+		<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+		<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+		
+	    <supports-screens android:largeScreens="true"
+			android:smallScreens="true" 
+			android:anyDensity="true"
+			android:normalScreens="true"/>
 	</application>
-	<uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission xmlns:android="http://schemas.android.com/apk/res/android" 
-		android:name="android.permission.INTERNET"/>
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.RECORD_AUDIO" />
-	<uses-permission android:name="android.permission.BLUETOOTH" />
-	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 	
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
-	
-    <supports-screens android:largeScreens="true"
-		android:smallScreens="true" 
-		android:anyDensity="true"
-		android:normalScreens="true"/>
 </manifest>

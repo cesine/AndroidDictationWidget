@@ -22,12 +22,11 @@ import org.apache.http.protocol.HttpContext;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
-import ca.ilanguage.aublog.R;
+import ca.ilanguage.dictation.widget.R;
 import ca.ilanguage.dictation.widget.db.AuBlogHistoryDatabase.AuBlogHistory;
+import ca.ilanguage.dictation.widget.model.Dictation;
 import ca.ilanguage.dictation.widget.preferences.NonPublicConstants;
 import ca.ilanguage.dictation.widget.preferences.PreferenceConstants;
-import ca.ilanguage.dictation.widget.ui.EditBlogEntryActivity;
-import ca.ilanguage.dictation.widget.ui.MainMenuActivity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -136,9 +135,9 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		if(mKillAublogReceiver == null){
 			mKillAublogReceiver = new KillAuBlogReciever();
 		}
-		IntentFilter intentkill = new IntentFilter(MainMenuActivity.KILL_AUBLOG_INTENT);
+		IntentFilter intentkill = new IntentFilter(Dictation.KILL_AUBLOG_INTENT);
 		registerReceiver(mKillAublogReceiver, intentkill);
-		IntentFilter intentDictRunning = new IntentFilter(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT);
+		IntentFilter intentDictRunning = new IntentFilter(Dictation.IS_DICTATION_STILL_RECORDING_INTENT);
 		registerReceiver(mKillAublogReceiver, intentDictRunning);
 
 		tracker = GoogleAnalyticsTracker.getInstance();
@@ -158,14 +157,14 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			/*if main menu says to kill aublog, pass the message on to the transcription service*/
-			if (intent.getAction().equals(MainMenuActivity.KILL_AUBLOG_INTENT)) {
+			if (intent.getAction().equals(Dictation.KILL_AUBLOG_INTENT)) {
 				mKillAuBlog = true;
 			}
 			/*
 			 * If main menu asks if you're recording (it is trying to kill aublog), reply that yes, you are still working.
 			 */
-			if (intent.getAction().equals(MainMenuActivity.IS_DICTATION_STILL_RECORDING_INTENT)) {
-				Intent i = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
+			if (intent.getAction().equals(Dictation.IS_DICTATION_STILL_RECORDING_INTENT)) {
+				Intent i = new Intent(Dictation.TRANSCRIPTION_STILL_CONTACTING_INTENT);
 				i.setData(mUri);
 				i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 				sendBroadcast(i);
@@ -220,8 +219,8 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mUri = intent.getData();
 			mAudioFilePath = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_FULL_PATH);
 			mAudioResultsFileStatus = intent.getExtras().getString(DictationRecorderService.EXTRA_AUDIOFILE_STATUS);
-			mPostContents=intent.getExtras().getString(EditBlogEntryActivity.EXTRA_CURRENT_CONTENTS);
-			mAskUserImport=intent.getExtras().getBoolean(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
+			mPostContents=intent.getExtras().getString(Dictation.EXTRA_CURRENT_CONTENTS);
+			mAskUserImport=intent.getExtras().getBoolean(Dictation.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG);
 			if(mAskUserImport == true){
 				mTranscriptionStatus= "transcription fresh";
 			}else{
@@ -293,7 +292,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			mNM.notify(NOTIFICATION, mNotification);
 		}
 
-		Intent inten = new Intent(EditBlogEntryActivity.TRANSCRIPTION_STILL_CONTACTING_INTENT);
+		Intent inten = new Intent(Dictation.TRANSCRIPTION_STILL_CONTACTING_INTENT);
 		inten.setData(mUri);
 		inten.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 		sendBroadcast(inten);
@@ -447,13 +446,13 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 		}//end if for max file size for upload
 
 		if(mAudioFilePath.endsWith(".srt")){
-			Intent i = new Intent(EditBlogEntryActivity.REFRESH_TRANSCRIPTION_INTENT);
+			Intent i = new Intent(Dictation.REFRESH_TRANSCRIPTION_INTENT);
 			//i.setData(mUri);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
-			i.putExtra(EditBlogEntryActivity.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
+			i.putExtra(Dictation.EXTRA_PROMPT_USER_TO_IMPORT_TRANSCRIPTION_INTO_BLOG, mAskUserImport);
 			if(mAskUserImport){
 				mTranscription = readAsTranscriptionString(); 
-				i.putExtra(EditBlogEntryActivity.EXTRA_FRESH_TRANSCRIPTION_CONTENTS, mTranscription);
+				i.putExtra(Dictation.EXTRA_FRESH_TRANSCRIPTION_CONTENTS, mTranscription);
 				mNotificationMessage = "Transcription results received.";
 				mNotification.setLatestEventInfo(this, "AuBlog Transcription", mNotificationMessage, mContentIntent);
 				if (mShowNotification){
@@ -486,7 +485,7 @@ public class NotifyingTranscriptionIntentService extends IntentService {
 			}*/			
 
 		}else{
-			Intent i = new Intent(EditBlogEntryActivity.DICTATION_SENT_INTENT);
+			Intent i = new Intent(Dictation.DICTATION_SENT_INTENT);
 			i.putExtra(DictationRecorderService.EXTRA_AUDIOFILE_STATUS, mAudioResultsFileStatus);
 			sendBroadcast(i);
 			tracker.trackEvent(
