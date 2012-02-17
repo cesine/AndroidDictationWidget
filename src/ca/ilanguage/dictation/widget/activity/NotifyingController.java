@@ -19,8 +19,6 @@ package ca.ilanguage.dictation.widget.activity;
 // Need the following import to get access to the app resources, since this
 // class is in a sub-package.
 
-import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -52,7 +50,6 @@ Retry xxx audio file (add files to cue)
  */
 public class NotifyingController extends Activity {
 	private Uri mUri;
-	GoogleAnalyticsTracker tracker;
 	private String mAuBlogInstallId;
 	
 	
@@ -69,26 +66,13 @@ public class NotifyingController extends Activity {
         button.setVisibility(Button.INVISIBLE);
         button.setOnClickListener(mStopListener);
         
-        tracker = GoogleAnalyticsTracker.getInstance();
-
-	    // Start the tracker in manual dispatch mode...
-	    tracker.start(NonPublicConstants.NONPUBLIC_GOOGLE_ANALYTICS_UA_ACCOUNT_CODE, 20, this);
-	    SharedPreferences prefs = getSharedPreferences(Constants.PREFERENCE_NAME, MODE_PRIVATE);
-	    mAuBlogInstallId = prefs.getString(Constants.INSTALL_ID, "0");
-		
-	    tracker.trackEvent(
-				mAuBlogInstallId,  // Category
-	            "Notifications",  // Action
-	            "User found the notification controller by clicking on the recording notification. "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
-	            (int)System.currentTimeMillis());       // Value
-		
 
     }
 
     @Override
 	protected void onDestroy() {
     	String release = Build.VERSION.RELEASE;
-    	tracker.stop();
+    	
 		super.onDestroy();
 		/*
 		if(release.equals("2.2")){
@@ -104,11 +88,7 @@ public class NotifyingController extends Activity {
         public void onClick(View v) {
         	Intent intent = new Intent(NotifyingController.this, DictationRecorderService.class);
         	stopService(intent);
-    		tracker.trackEvent(
-    				mAuBlogInstallId,  // Category
-    	            "Constants stopped",  // Action
-    	            "User clicked Stop Constants  in Notifying controller : "+System.currentTimeMillis() +" : "+mAuBlogInstallId, // Label
-    	            (int)System.currentTimeMillis());       // Value
+    		
         }
     };
 
